@@ -1,0 +1,62 @@
+[project]
+name = "alpha"
+version = "0.1.0"
+description = "A Python library which contains standard building blocks that can be used in applications"
+readme = "README.md"
+authors = [
+    { name = "Bart Reijling", email = "bart@reijling.eu" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "attrs>=25.4.0",
+    "gunicorn>=23.0.0",
+    "jsonpatch>=1.33",
+    "numpy>=2.3.5",
+    "pandas>=2.3.3",
+    "pydantic>=2.12.5",
+    "pyjwt>=2.10.1",
+    "six>=1.17.0",
+    "sqlalchemy>=2.0.44",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.10,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "black>=25.11.0",
+    "coverage>=7.12.0",
+    "isort>=7.0.0",
+    "mypy>=1.18.2",
+    "pytest>=9.0.1",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.14.7",
+]
+
+[tool.pytest.ini_options]
+minversion = 7.0
+python_files = "test_*.py"
+addopts = "-v -p no:warnings --cov --cov-report=lcov:lcov.info --cov-report=term"
+testpaths = [
+    "tests"
+]
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "tests/*",
+    "__init__.py",
+    "_http_codes.py"
+]
+
+[tool.black]
+line-length = 79
+skip-string-normalization = true
+target-version = ['py310', 'py311', 'py312', 'py313']
+
+[tool.isort]
+py_version = 313
+profile = "black"
+line_length = 79
+force_grid_wrap = 0
