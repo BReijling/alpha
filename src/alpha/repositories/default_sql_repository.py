@@ -22,11 +22,9 @@ from alpha.domain.models.base_model import (
     DomainModel,
 )
 from alpha.encoder import JSONEncoder
-from alpha.infra.models import (
-    OrderBy,
-    QueryClause,
-    SearchFilter,
-)
+from alpha.infra.models.order_by import OrderBy
+from alpha.infra.models.search_filter import SearchFilter
+from alpha.infra.models.query_clause import QueryClause
 from alpha.infra.models.filter_operators import FilterOperator
 from alpha.infra.models.json_patch import JsonPatch
 from alpha.interfaces.updateable import Updateable

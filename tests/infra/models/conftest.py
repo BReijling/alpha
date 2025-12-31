@@ -7,6 +7,15 @@ from alpha.infra.models.query_clause import QueryClause
 
 
 @pytest.fixture
+def fake_query():
+    class FakeQuery:
+        def filter(self, *args, **kwargs):
+            return 'fake_query_filtered'
+
+    return FakeQuery()
+
+
+@pytest.fixture
 def patch_with_date() -> list[dict[str, Any]]:
     return [
         {"op": "replace", "path": "/", "value": "string"},

@@ -59,7 +59,9 @@ class IterableClassFactory:
         field_type_origin = get_origin(field.type)
         field_args = get_args(field.type)
 
-        values: Union[Iterable[Any], Any, None] = getattr(obj, field.name, None)
+        values: Union[Iterable[Any], Any, None] = getattr(
+            obj, field.name, None
+        )
 
         if not isinstance(values, Iterable):
             values = [values]
@@ -261,7 +263,7 @@ class GenericAliasClassFactory:
                 field=field,
                 factory_classes=factory_classes,
             )
-        if field_type == dict:
+        if field_type is dict:
             return factory_classes.class_factories["dict"].process(
                 obj=obj,
                 field=field,
@@ -326,7 +328,9 @@ class UnionClassFactory:
                     "ModelClassFactory instance is not present in "
                     "FactoryClasses instance"
                 )
-            return factory_classes.model_class_factory.process(obj=obj, cls=cls)
+            return factory_classes.model_class_factory.process(
+                obj=obj, cls=cls
+            )
         if type(value) in args:
             return value
         try:

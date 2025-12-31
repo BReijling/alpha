@@ -1,4 +1,4 @@
-from alpha.interfaces.identity_provider import IdentityProvider
+from lib.identity_provider import IdentityProvider
 from alpha.interfaces.token_factory import TokenFactory
 from alpha import exceptions
 
@@ -21,7 +21,9 @@ class AuthenticationService:
 
         user_id = getattr(user, self.user_id_attribute, None)
         if not user_id:
-            raise exceptions.InternalServerErrorException("User ID attribute missing")
+            raise exceptions.InternalServerErrorException(
+                "User ID attribute missing"
+            )
 
         return self.token_factory.create(user.id, user.to_dict())
 

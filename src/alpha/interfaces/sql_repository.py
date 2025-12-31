@@ -11,7 +11,7 @@ from sqlalchemy.orm import (
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
 from alpha.domain.models.base_model import BaseDomainModel, DomainModel
-from alpha.infra.models import SearchFilter
+from alpha.infra.models.search_filter import SearchFilter
 from alpha.infra.models.query_clause import QueryClause
 from alpha.interfaces.patchable import Patchable
 from alpha.interfaces.updateable import Updateable

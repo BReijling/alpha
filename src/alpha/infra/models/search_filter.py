@@ -6,7 +6,7 @@ from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.orm.query import Query
 from sqlalchemy.sql.expression import BinaryExpression, ColumnOperators
 
-from alpha.infra.models import QueryClause
+from alpha.infra.models.query_clause import QueryClause
 
 
 class Operator(Enum):
@@ -386,7 +386,9 @@ class InsensitiveStartsWithFilter(SearchFilter):
 
     def query_clause(self, query: Query[Any]):
         if self._instrumented_attr:
-            return query.filter(self._instrumented_attr.istartswith(self.value))
+            return query.filter(
+                self._instrumented_attr.istartswith(self.value)
+            )
         self._raise_instrumented_attr_exception()
 
 
@@ -405,7 +407,9 @@ class NotStartsWithFilter(SearchFilter):
 
     def query_clause(self, query: Query[Any]):
         if self._instrumented_attr:
-            return query.filter(~self._instrumented_attr.startswith(self.value))
+            return query.filter(
+                ~self._instrumented_attr.startswith(self.value)
+            )
         self._raise_instrumented_attr_exception()
 
 
@@ -424,7 +428,9 @@ class InsensitiveNotStartsWithFilter(SearchFilter):
 
     def query_clause(self, query: Query[Any]):
         if self._instrumented_attr:
-            return query.filter(~self._instrumented_attr.istartswith(self.value))
+            return query.filter(
+                ~self._instrumented_attr.istartswith(self.value)
+            )
         self._raise_instrumented_attr_exception()
 
 

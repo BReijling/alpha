@@ -54,7 +54,9 @@ class ResponseFactory:
         if cls_origin in [list, tuple, set]:
             if isinstance(response, Iterable):
                 arg = get_args(cls)[0]
-                return [self.process(response=obj, cls=arg) for obj in response]
+                return [
+                    self.process(response=obj, cls=arg) for obj in response
+                ]
             if cls_origin != get_origin(response):
                 raise exceptions.ClassMismatchException(
                     "The targeted object type is a list but the source object "
@@ -100,7 +102,9 @@ class ResponseFactory:
 
         return cls(**params)  # type: ignore
 
-    def _attr_factory(self, attr_name: str, attr_type: type, response: object) -> Any:
+    def _attr_factory(
+        self, attr_name: str, attr_type: type, response: object
+    ) -> Any:
         """Handles the attributes of an object by returning the response value
         in the correct form
 
@@ -125,8 +129,10 @@ class ResponseFactory:
             return response_value.name
 
         # These if statements are needed to achieve a certain behavior
-        if isinstance(attr_type, OpenAPIModel) or (get_origin(attr_type) == list):
-            if get_origin(attr_type) == list:
+        if isinstance(attr_type, OpenAPIModel) or (
+            get_origin(attr_type) is list
+        ):
+            if get_origin(attr_type) is list:
                 first_item = get_args(attr_type)[0]
                 if not isinstance(first_item, OpenAPIModel):
                     return response_value

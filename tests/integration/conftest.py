@@ -10,7 +10,7 @@ from alpha.infra.database.sql_alchemy_database import SqlAlchemyDatabase
 from alpha.infra.models.json_patch import JsonPatch
 from alpha.interfaces.sql_repository import SqlRepository
 from alpha.repositories.default_sql_repository import DefaultSqlRepository
-from alpha.repositories.models import RepositoryModel
+from alpha.repositories.models.repository_model import RepositoryModel
 from tests.fixtures._domain_models import Gender, TrackPoint
 from tests.fixtures.api_generate_models.json_patch import (
     JsonPatch as ApiJsonPatch,

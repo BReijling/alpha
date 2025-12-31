@@ -6,7 +6,7 @@ from sqlalchemy import BinaryExpression
 from sqlalchemy.orm import Query
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
-from alpha.infra.models import QueryClause
+from alpha.infra.models.query_clause import QueryClause
 
 
 class Order(Enum):

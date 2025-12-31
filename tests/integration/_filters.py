@@ -1,7 +1,8 @@
 import pytest
 
-from alpha.infra.models import SearchFilter, Operator, OrderBy, Order
 from alpha.infra.models.filter_operators import And, Or
+from alpha.infra.models.order_by import OrderBy, Order
+from alpha.infra.models.search_filter import SearchFilter, Operator
 
 from ._classes import Pet
 
@@ -73,17 +74,23 @@ def startswith_filter():
 
 @pytest.fixture
 def nstartswith_filter():
-    return SearchFilter(op=Operator.NSTARTSWITH, field="remarks", value="Jerry")
+    return SearchFilter(
+        op=Operator.NSTARTSWITH, field="remarks", value="Jerry"
+    )
 
 
 @pytest.fixture
 def istartswith_filter():
-    return SearchFilter(op=Operator.ISTARTSWITH, field="remarks", value="jerry")
+    return SearchFilter(
+        op=Operator.ISTARTSWITH, field="remarks", value="jerry"
+    )
 
 
 @pytest.fixture
 def nistartswith_filter():
-    return SearchFilter(op=Operator.NISTARTSWITH, field="remarks", value="jerry")
+    return SearchFilter(
+        op=Operator.NISTARTSWITH, field="remarks", value="jerry"
+    )
 
 
 @pytest.fixture

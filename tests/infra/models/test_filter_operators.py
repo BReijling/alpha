@@ -9,11 +9,15 @@ def test_filter_operator(filter_operator):
         filter_operator.filter_operator
 
 
-def test_and_operator(and_operator):
+def test_and_operator(and_operator, fake_query):
     assert isinstance(and_operator.search_filters, Iterable)
     assert and_operator.filter_operator == and_
 
+    assert and_operator.filter(query=fake_query) == 'fake_query_filtered'
 
-def test_or_operator(or_operator):
+
+def test_or_operator(or_operator, fake_query):
     assert isinstance(or_operator.search_filters, Iterable)
     assert or_operator.filter_operator == or_
+
+    assert or_operator.filter(query=fake_query) == 'fake_query_filtered'
