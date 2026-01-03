@@ -1,5 +1,6 @@
 from ldap3 import Server, Connection, Tls, ALL
 import ssl
+from typing import Any, cast
 
 
 class LDAPConnector:
@@ -43,18 +44,19 @@ class LDAPConnector:
                 version=ssl.PROTOCOL_TLSv1_2,
             )
 
-        self.server = Server(
+        self._server = Server(
             host=self.server_url,
             port=server_port,
             use_ssl=use_tls,
             tls=tls,
             get_info=ALL,
         )
+        self._connection: Connection | None = None
 
     def connect(self) -> None:
         """Method to establish a connection to the LDAP server."""
-        self.connection = Connection(
-            self.server,
+        self._connection = Connection(
+            self._server,
             user=self.bind_dn,
             password=self.bind_password,
             auto_bind=True,
@@ -62,4 +64,27 @@ class LDAPConnector:
 
     def disconnect(self) -> None:
         """Method to close the connection to the LDAP server."""
-        self.connection.unbind()
+        if self.is_connected():
+            cast(Any, self._connection).unbind()
+        self._connection = None
+
+    def is_connected(self) -> bool:
+        """Check if the connection to the LDAP server is active."""
+        return self._connection is not None and self._connection.bound
+
+    def get_connection(self) -> Connection:
+        """Get the current LDAP connection.
+
+        Returns
+        -------
+        Connection
+            The active LDAP connection.
+
+        Raises
+        ------
+        RuntimeError
+            If the connection is not established.
+        """
+        if not self._connection or not self.is_connected():
+            raise RuntimeError("LDAP connection is not established.")
+        return self._connection
