@@ -1,6 +1,6 @@
 """This module contains interfaces for various types of identity providers."""
 
-from typing import Protocol
+from typing import ClassVar, Protocol
 
 from alpha.providers.models.credentials import PasswordCredentials
 from alpha.providers.models.identity import Identity
@@ -122,4 +122,4 @@ class IdentityProvider(
     and user directory functionalities into a single interface.
     """
 
-    ...
+    protocol: ClassVar[str]

@@ -4,6 +4,8 @@ from alpha.providers.models.token import Token
 
 
 class KeycloakProvider:
+    protocol = "oauth2"
+
     def __init__(self) -> None:
         pass
 

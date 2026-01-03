@@ -3,6 +3,8 @@ from alpha.providers.models.identity import Identity
 
 
 class DatabaseProvider:
+    protocol = "database"
+
     def authenticate(self, credentials: PasswordCredentials) -> Identity: ...
 
     def get_user(self, subject: str) -> Identity: ...
