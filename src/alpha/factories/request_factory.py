@@ -33,7 +33,9 @@ class RequestFactory:
         func: Callable[[Any], Any],
         cast_args: bool = True,
         use_model_class_factory: bool = True,
-        model_class_factory: type[ModelClassFactoryInstance] = ModelClassFactory,
+        model_class_factory: type[
+            ModelClassFactoryInstance
+        ] = ModelClassFactory,
         generic_type_factory: type[TypeFactory] = GenericTypeFactory,
         enum_type_factory: type[TypeFactory] = EnumTypeFactory,
         json_patch_type_factory: type[TypeFactory] = JsonPatchTypeFactory,
@@ -132,7 +134,9 @@ class RequestFactory:
         union_types = getattr(typing, "_UnionGenericAlias")
 
         if sys.version_info.minor >= 10:
-            union_types = getattr(typing, "_UnionGenericAlias") | types.UnionType
+            union_types = (
+                getattr(typing, "_UnionGenericAlias") | types.UnionType
+            )
 
         if isinstance(cls, union_types):
             union_args = get_args(cls)
@@ -147,23 +151,34 @@ class RequestFactory:
                     "object is not"
                 )
             arg = get_args(cls)[0]
-            return [self._parse_args(key=key, value=item, cls=arg) for item in value]
+            return [
+                self._parse_args(key=key, value=item, cls=arg)
+                for item in value
+            ]
 
         if isinstance(cls, DataclassInstance):
             return self._to_dataclass(value=value, cls=cls)
 
         if isinstance(cls, type(Enum)):
-            return self.enum_type_factory().process(key=key, value=value, cls=cls)
+            return self.enum_type_factory().process(
+                key=key, value=value, cls=cls
+            )
 
         if cls == JsonPatch:
-            return self.json_patch_type_factory().process(key=key, value=value, cls=cls)
+            return self.json_patch_type_factory().process(
+                key=key, value=value, cls=cls
+            )
 
         if cls in TYPE_CONVERSION_MATRIX.keys() and self.cast_args:
-            return self.generic_type_factory().process(key=key, value=value, cls=cls)
+            return self.generic_type_factory().process(
+                key=key, value=value, cls=cls
+            )
 
         return value
 
-    def _to_dataclass(self, value: OpenAPIModel | Any, cls: DataclassInstance) -> Any:
+    def _to_dataclass(
+        self, value: OpenAPIModel | Any, cls: DataclassInstance
+    ) -> Any:
         """Handling the mapping from an OpenAPI Model instance to a dataclass
         The ModelClassFactory will be used if the cls does not have
         a 'from_dict' method

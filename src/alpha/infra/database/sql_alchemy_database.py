@@ -76,7 +76,9 @@ class SqlAlchemyDatabase:
             self._connection_string, pool_pre_ping=pool_pre_ping
         )
         self._session_factory = scoped_session(
-            sessionmaker(bind=self._engine, autocommit=False, expire_on_commit=False)
+            sessionmaker(
+                bind=self._engine, autocommit=False, expire_on_commit=False
+            )
         )
 
         if self._mapper:

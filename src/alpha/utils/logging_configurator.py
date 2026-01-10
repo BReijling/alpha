@@ -58,7 +58,9 @@ class LoggingConfigurator:
             handlers = []
 
         logging_level = (
-            getattr(logging, level.upper()) if isinstance(level, str) else level
+            getattr(logging, level.upper())
+            if isinstance(level, str)
+            else level
         )
 
         default_config: dict[str, Any] = {

@@ -20,7 +20,9 @@ class FilterOperator:
         """Instantiate the filter operator by storing
         the search filter objects
         """
-        self.search_filters: Iterable[SearchFilter | FilterOperator] = search_filters
+        self.search_filters: Iterable[SearchFilter | FilterOperator] = (
+            search_filters
+        )
 
     @property
     def filter_operator(

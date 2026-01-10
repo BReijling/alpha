@@ -1,5 +1,5 @@
 [project]
-name = "alpha"
+name = "alpha-python"
 version = "0.1.0"
 description = "Alpha is intended to be the first dependency you need to add to your Python application. It is a Python library which contains standard building blocks that can be used in applications that are used as APIs and/or make use of database interaction."
 readme = "README.md"
@@ -20,8 +20,8 @@ dependencies = [
 ]
 
 [build-system]
-requires = ["uv_build>=0.9.10,<0.10.0"]
-build-backend = "uv_build"
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
 
 [dependency-groups]
 dev = [

@@ -45,4 +45,6 @@ class DefaultFieldFactory:
                 f'The source object has no "{field.name}" attribute and no '
                 "default value is set"
             )
-        raise exceptions.DefaultFactoryException("Unknown default_factory exception")
+        raise exceptions.DefaultFactoryException(
+            "Unknown default_factory exception"
+        )
