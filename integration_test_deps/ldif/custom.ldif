@@ -1,0 +1,51 @@
+# Root structure
+dn: ou=users,dc=example,dc=org
+objectClass: organizationalUnit
+ou: users
+
+dn: ou=groups,dc=example,dc=org
+objectClass: organizationalUnit
+ou: groups
+
+
+# --- Users ---
+
+dn: uid=jdoe,ou=users,dc=example,dc=org
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: top
+cn: John Doe
+sn: Doe
+givenName: John
+uid: jdoe
+mail: jdoe@example.org
+uidNumber: 10001
+gidNumber: 10000
+homeDirectory: /home/jdoe
+loginShell: /bin/bash
+userPassword: {SSHA}9tC4Y7pEwN3UVCSFvuDSCatodJUqdBfE
+
+dn: uid=asmith,ou=users,dc=example,dc=org
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: top
+cn: Alice Smith
+sn: Smith
+givenName: Alice
+uid: asmith
+mail: asmith@example.org
+uidNumber: 10002
+gidNumber: 10000
+homeDirectory: /home/asmith
+loginShell: /bin/bash
+userPassword: {SSHA}9tC4Y7pEwN3UVCSFvuDSCatodJUqdBfE
+
+
+# --- Group ---
+
+dn: cn=developers,ou=groups,dc=example,dc=org
+objectClass: groupOfNames
+objectClass: top
+cn: developers
+member: uid=jdoe,ou=users,dc=example,dc=org
+member: uid=asmith,ou=users,dc=example,dc=org

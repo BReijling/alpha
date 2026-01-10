@@ -5,11 +5,14 @@ from typing import Any
 import pytest
 
 from alpha.adapters.sqla_unit_of_work import SqlAlchemyUnitOfWork
+from alpha.factories.jwt_factory import JWTFactory
 from alpha.factories.request_factory import RequestFactory
-from alpha.infra.database.sql_alchemy_database import SqlAlchemyDatabase
+from alpha.infra.connectors.ldap_connector import LDAPConnector
+from alpha.infra.databases.sql_alchemy import SqlAlchemyDatabase
 from alpha.infra.models.json_patch import JsonPatch
 from alpha.interfaces.sql_repository import SqlRepository
-from alpha.repositories.default_sql_repository import DefaultSqlRepository
+from alpha.providers.ldap_provider import LDAPProvider
+from alpha.repositories.sql_alchemy_repository import SqlAlchemyRepository
 from alpha.repositories.models.repository_model import RepositoryModel
 from tests.fixtures._domain_models import Gender, TrackPoint
 from tests.fixtures.api_generate_models.json_patch import (
@@ -68,59 +71,69 @@ from tests.integration._filters import (
     and_filter,
     or_filter,
 )
+from alpha.providers.models.credentials import PasswordCredentials
 
 
 @pytest.fixture
 def sqlite_database() -> SqlAlchemyDatabase:
-    return SqlAlchemyDatabase(
+    db = SqlAlchemyDatabase(
         conn_str="sqlite:///:memory:",
-        create_schema=False,
         db_type="sqlite",
+        create_schema=False,
+        create_tables=True,
         mapper=FakeMapper,
     )
+    yield db
+    db.drop_tables(FakeMapper.metadata)
 
 
 @pytest.fixture
 def mysql_database() -> SqlAlchemyDatabase:
-    return SqlAlchemyDatabase(
-        host="127.0.0.1",
-        port=3306,
-        username="root",
-        password="mysql",
-        db_name="pytest",
-        db_type="mysql",
+    db = SqlAlchemyDatabase(
+        host=os.getenv("TEST_MYSQL_HOST", "127.0.0.1"),
+        port=int(os.getenv("TEST_MYSQL_PORT", "3306")),
+        username=os.getenv("TEST_MYSQL_USERNAME", "root"),
+        password=os.getenv("TEST_MYSQL_PASSWORD", "mysql"),
+        db_name=os.getenv("TEST_MYSQL_DATABASE", "mysql"),
+        db_type="mysql+pymysql",
+        create_tables=True,
         mapper=FakeMapper,
     )
+    yield db
+    db.drop_tables(FakeMapper.metadata)
 
 
 @pytest.fixture
 def psql_database() -> SqlAlchemyDatabase:
-    return SqlAlchemyDatabase(
+    db = SqlAlchemyDatabase(
         host=os.getenv("TEST_PSQL_HOST", "127.0.0.1"),
         port=int(os.getenv("TEST_PSQL_PORT", "5432")),
         username=os.getenv("TEST_PSQL_USERNAME", "postgres"),
         password=os.getenv("TEST_PSQL_PASSWORD", "postgres"),
         db_name=os.getenv("TEST_PSQL_DATABASE", "postgres"),
         db_type="postgresql",
+        create_tables=True,
         mapper=FakeMapper,
     )
+    yield db
+    db.drop_tables(FakeMapper.metadata)
 
 
-# @pytest.fixture(
-#     params=["sqlite_database", "mysql_database", "psql_database"],
-#     ids=["sqlite", "mysql", "postgresql"],
-# )
 # @pytest.fixture(
 #     params=["sqlite_database", "psql_database"],
 #     ids=["sqlite", "postgresql"],
 # )
+# @pytest.fixture(
+#     params=[
+#         "sqlite_database",
+#     ],
+#     ids=[
+#         "sqlite",
+#     ],
+# )
 @pytest.fixture(
-    params=[
-        "sqlite_database",
-    ],
-    ids=[
-        "sqlite",
-    ],
+    params=["sqlite_database", "mysql_database", "psql_database"],
+    ids=["sqlite", "mysql", "postgresql"],
 )
 def uow(request) -> SqlAlchemyUnitOfWork:
     return SqlAlchemyUnitOfWork(
@@ -128,7 +141,7 @@ def uow(request) -> SqlAlchemyUnitOfWork:
         repos=[
             RepositoryModel(
                 name="pets",
-                repository=DefaultSqlRepository[Pet],
+                repository=SqlAlchemyRepository[Pet],
                 default_model=Pet,
                 interface=SqlRepository,
             )
@@ -313,3 +326,46 @@ def json_patch_func():
 @pytest.fixture
 def fake_service():
     return FakeService()
+
+
+# LDAP fixtures
+@pytest.fixture
+def jwt_factory():
+    return JWTFactory(secret="supersecret123", jwt_algorithm="HS256")
+
+
+@pytest.fixture
+def ldap_server() -> LDAPConnector:
+    return LDAPConnector(
+        server_url=os.getenv("TEST_LDAP_SERVER_URL", "ldap://localhost"),
+        server_port=int(os.getenv("TEST_LDAP_SERVER_PORT", "389")),
+        bind_dn=os.getenv(
+            "TEST_LDAP_SERVER_BIND_DN", "cn=admin,dc=example,dc=org"
+        ),
+        bind_password=os.getenv(
+            "TEST_LDAP_SERVER_BIND_PASSWORD", "test_password"
+        ),
+        use_tls=False,
+    )
+
+
+@pytest.fixture
+def ldap_provider(
+    ldap_server: LDAPConnector, jwt_factory: JWTFactory
+) -> LDAPProvider:
+    return LDAPProvider(
+        connector=ldap_server,
+        token_factory=jwt_factory,
+        search_filter_key="uid",
+        search_base="ou=users,dc=example,dc=org",
+    )
+
+
+@pytest.fixture
+def subject():
+    return 'jdoe'
+
+
+@pytest.fixture
+def credentials(subject):
+    return PasswordCredentials(username=subject, password='test123')

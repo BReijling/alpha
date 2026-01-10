@@ -1,21 +1,30 @@
-from typing import Protocol
+from datetime import datetime
+from typing import Protocol, runtime_checkable
 
 
+@runtime_checkable
 class TokenFactory(Protocol):
     """Token Factory interface for creating and validating authentication
     tokens.
     """
 
-    def create(self, user_id: str, payload: dict[str, str]) -> str:
-        """Create an authentication token for a user.
+    def create(
+        self,
+        subject: str,
+        payload: dict[str, str],
+        not_before: datetime | None = None,
+    ) -> str:
+        """Create an authentication token for a subject.
 
         Parameters
         ----------
-        user_id
-            The unique identifier for the user.
+        subject
+            The unique identifier for the subject.
         payload
             A dictionary containing payload data, such as an object containing
             user information.
+        not_before
+            An optional datetime indicating when the token becomes valid.
 
         Returns
         -------

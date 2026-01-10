@@ -50,6 +50,8 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+coverage/*
+lcov.info
 
 # Translations
 *.mo
@@ -209,3 +211,4 @@ __marimo__/
 # Custom additions below this line
 *.ipynb
 api/
+typings/

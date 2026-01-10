@@ -7,10 +7,10 @@ from sqlalchemy.orm import Session
 
 from alpha import exceptions
 from alpha.adapters.sqla_unit_of_work import SqlAlchemyUnitOfWork
-from alpha.infra.database.sql_alchemy_database import SqlAlchemyDatabase
+from alpha.infra.databases.sql_alchemy import SqlAlchemyDatabase
 from alpha.interfaces.sql_mapper import SqlMapper
 from alpha.interfaces.unit_of_work import UnitOfWork
-from alpha.repositories.default_sql_repository import DefaultSqlRepository
+from alpha.repositories.sql_alchemy_repository import SqlAlchemyRepository
 
 from ._classes import (
     Pet,
@@ -44,7 +44,7 @@ def test_sql_alchemy_unit_of_work(uow: UnitOfWork):
     #     assert isinstance(uow.session, Session)
 
     with uow:
-        assert isinstance(getattr(uow, "pets"), DefaultSqlRepository)
+        assert isinstance(getattr(uow, "pets"), SqlAlchemyRepository)
 
         assert isinstance(uow.session, Session)
 
@@ -52,7 +52,7 @@ def test_sql_alchemy_unit_of_work(uow: UnitOfWork):
         assert uow.commit() is None
 
 
-def test_default_sql_repository(uow, pets, pet):
+def test_sql_alchemy_repository(uow, pets, pet):
     # To make sure the table is empty
     # When using an used mysql/psql database container
     with uow:

@@ -32,6 +32,7 @@ from alpha.interfaces.factories import (
     TypeFactory,
 )
 from alpha.interfaces.openapi_model import OpenAPIModel
+from alpha.interfaces.pydantic_instance import PydanticInstance
 from alpha.utils.version_check import minor_version_gte
 
 
@@ -115,13 +116,13 @@ class ModelClassFactory:
         self.factory_classes = factory_classes
 
         if self.factory_classes.model_class_factory is None:
-            self.factory_classes.model_class_factory = self
+            self.factory_classes.model_class_factory = self  # type: ignore
 
     def process(
         self,
         obj: OpenAPIModel,
-        cls: DataclassInstance | AttrsInstance | Any,
-    ) -> DataclassInstance | AttrsInstance | None:
+        cls: DataclassInstance | AttrsInstance | PydanticInstance | Any,
+    ) -> DataclassInstance | AttrsInstance | PydanticInstance | None:
         """Creating a new cls instance from a OpenAPIModel object. This class
         uses a compatibele ClassFactory, from the self.typing_classes
         collection, per cls field to process each value.
@@ -131,16 +132,15 @@ class ModelClassFactory:
         obj
             OpenAPIModel object
         cls
-            A dataclass or attrs class to create a new instance
+            A dataclass, attrs, or pydantic class to create a new instance
 
         Returns
         -------
-            Dataclass or attrs instance
-
+            Dataclass, attrs, or pydantic instance
         Raises
         ------
         exceptions.ModelClassFactoryException
-            When cls is not a dataclass or attrs decorated class
+            When cls is not a dataclass, attrs, or pydantic decorated class
         KeyError
             When the class type is not present in self.typing_classes
         """

@@ -1,7 +1,7 @@
 from uuid import uuid4
 
 import pytest
-from alpha.infra.database.sql_alchemy_database import SqlAlchemyDatabase
+from alpha.infra.databases.sql_alchemy import SqlAlchemyDatabase
 from sqlalchemy import (
     Column,
     Integer,

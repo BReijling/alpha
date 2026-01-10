@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from enum import Enum, auto
 import json
 from typing import Any
@@ -6,8 +7,10 @@ from typing import Any
 import pytest
 from alpha.domain.models.base_model import BaseDomainModel
 from alpha.encoder import JSONEncoder
+from alpha.factories.jwt_factory import JWTFactory
 from alpha.factories.request_factory import RequestFactory
 from alpha.factories.response_factory import ResponseFactory
+from alpha.providers.models.identity import Identity
 from tests.fixtures._api_classes import ApiTrack
 from tests.fixtures.fake_factory_classes import FakeTypeFactory
 
@@ -78,3 +81,52 @@ def request_factory():
 @pytest.fixture
 def response_factory():
     return ResponseFactory()
+
+
+# JWT fixtures for token factory tests
+@pytest.fixture
+def jwt_secret():
+    return "supersecretkey"
+
+
+@pytest.fixture
+def jwt_issuer():
+    return "http://localhost"
+
+
+@pytest.fixture
+def jwt_lifetime_hours():
+    return 12
+
+
+@pytest.fixture
+def jwt_factory(
+    jwt_secret,
+    jwt_issuer,
+    jwt_lifetime_hours,
+) -> JWTFactory:
+    return JWTFactory(
+        secret=jwt_secret,
+        issuer=jwt_issuer,
+        lifetime_hours=jwt_lifetime_hours,
+        jwt_algorithm="HS256",
+    )
+
+
+@pytest.fixture
+def identity() -> Identity:
+    return Identity(
+        subject="user123",
+        username="testuser",
+        email="testuser@example.com",
+        display_name="Test User",
+        groups=["group1", "group2"],
+        permissions=["read", "write"],
+        claims={"role": "admin"},
+        issued_at=datetime.now(tz=timezone.utc),
+        expires_at=datetime(3000, 1, 1, tzinfo=timezone.utc),
+        role="SUPERUSER",
+        audience=None,
+        admin=False,
+        pretend_identity=None,
+    )

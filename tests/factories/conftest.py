@@ -1,10 +1,12 @@
 """_summary_"""
 
 from datetime import date, datetime
+from typing import Callable
 
 import pytest
 
 from alpha.factories.field_iterator import Field, FieldIterator
+from alpha.factories.jwt_factory import JWTFactory
 from alpha.infra.models.json_patch import JsonPatch
 from tests.fixtures._api_classes import (
     ApiTrack,
@@ -22,6 +24,7 @@ from tests.fixtures._domain_models import (
     Track,
     TrackPoint,
 )
+from tests.fixtures._pydantic_models import PydanticAddress
 from tests.fixtures.api_generate_models.json_patch import (
     JsonPatch as ApiJsonPatch,
 )
@@ -116,7 +119,9 @@ def track_points() -> list[TrackPoint]:
 
 @pytest.fixture
 def flat_track():
-    return FlatTrack(id=2, name="flat_track", latitude=2.0, longitude=2.0, altitude=2)
+    return FlatTrack(
+        id=2, name="flat_track", latitude=2.0, longitude=2.0, altitude=2
+    )
 
 
 @pytest.fixture
@@ -257,6 +262,11 @@ def field_iterator_attrs():
 
 
 @pytest.fixture
+def field_iterator_pydantic():
+    return FieldIterator(PydanticAddress)
+
+
+@pytest.fixture
 def fake_service():
     return FakeService()
 
@@ -274,3 +284,26 @@ def field_iterator_dataclass():
 @pytest.fixture
 def field_iterator_attrs():
     return FieldIterator(AttrsAddress)
+
+
+# JWT fixtures for token factory tests
+@pytest.fixture
+def jwt_payload():
+    return {
+        "sub": "user123",
+        "name": "John Doe",
+        "admin": True,
+    }
+
+
+@pytest.fixture
+def jwt_factory_factory() -> Callable[[str, str, int], JWTFactory]:
+    def factory(secret: str, issuer: str, lifetime_hours: int) -> JWTFactory:
+        return JWTFactory(
+            secret=secret,
+            issuer=issuer,
+            lifetime_hours=lifetime_hours,
+            jwt_algorithm="HS256",
+        )
+
+    return factory
