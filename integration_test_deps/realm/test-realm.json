@@ -1,0 +1,41 @@
+{
+  "realm": "test-realm",
+  "enabled": true,
+
+  "clients": [
+    {
+      "clientId": "test-client",
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "redirectUris": ["*"]
+    }
+  ],
+
+  "users": [
+    {
+      "username": "alice",
+      "enabled": true,
+      "email": "alice@example.com",
+      "firstName": "Alice",
+      "lastName": "Tester",
+      "groups": ["/users"],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "secret",
+          "temporary": false
+        }
+      ]
+    }
+  ],
+
+  "groups": [
+    {
+      "name": "admins"
+    },
+    {
+      "name": "users"
+    }
+  ]
+}

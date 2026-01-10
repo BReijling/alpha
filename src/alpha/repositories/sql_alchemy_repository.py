@@ -1,4 +1,4 @@
-"""Contains the DefaultSqlRepository implementation which provides
+"""Contains the SqlAlchemyRepository implementation which provides
 basic CRUD operations for domain models using SqlAlchemy."""
 
 import json
@@ -31,9 +31,9 @@ from alpha.interfaces.updateable import Updateable
 from alpha.utils.logging_level_checker import logging_level_checker as llc
 
 
-class DefaultSqlRepository(Generic[DomainModel]):
-    """SqlAlchemy default repository implementation. Provides basic
-    CRUD operations for domain models.
+class SqlAlchemyRepository(Generic[DomainModel]):
+    """SqlAlchemy repository implementation. Provides basic CRUD operations for
+    domain models.
 
     The repository uses a SqlAlchemy session to interact with the database. It
     requires a default domain model type to be specified which will be used
@@ -59,7 +59,7 @@ class DefaultSqlRepository(Generic[DomainModel]):
 
     Example:
     ```python
-    class CustomRepository(DefaultSqlRepository[MyDomainModel]):
+    class CustomRepository(SqlAlchemyRepository[MyDomainModel]):
         def custom_method(self, param: str) -> list[MyDomainModel]:
             # Custom query logic here
             pass

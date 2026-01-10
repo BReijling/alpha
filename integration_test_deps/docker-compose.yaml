@@ -1,0 +1,50 @@
+services:
+  ldap:
+    image: osixia/openldap:1.5.0
+    container_name: test-ldap
+    ports:
+      - "389:389"
+    environment:
+      LDAP_ORGANISATION: "Example Org"
+      LDAP_DOMAIN: "example.org"
+      LDAP_ADMIN_PASSWORD: test_password
+    volumes:
+      - ./ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom:ro
+    command: "--copy-service"
+
+  postgresql:
+    image: postgres:15
+    container_name: test-postgresql
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+
+  mysql:
+    image: mysql:8.0
+    container_name: test-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql
+      MYSQL_DATABASE: mysql
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0
+    command:
+      - start-dev
+      - --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "5080:8080"
+    volumes:
+      - ./realm:/opt/keycloak/data/import:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5080/health/ready"]
+      interval: 5s
+      timeout: 2s
+      retries: 20

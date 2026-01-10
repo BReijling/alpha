@@ -17,6 +17,50 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    services:
+      ldap:
+        image: osixia/openldap:1.5.0
+        ports:
+          - 389:389
+        env:
+          LDAP_ORGANISATION: "Example Org"
+          LDAP_DOMAIN: "example.org"
+          LDAP_ADMIN_PASSWORD: test_password
+        options: >-
+          --health-cmd="ldapsearch -x -H ldap://localhost -b dc=example,dc=org"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+          --command="--copy-service"
+          --volume ./integration_test_deps/ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom:ro
+
+      mysql:
+        image: mysql:8.0
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: mysql
+          MYSQL_DATABASE: mysql
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost" 
+          --health-interval=10s 
+          --health-timeout=5s 
+          --health-retries=5
+
+      postgresql:
+        image: postgres:15
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        options: >-
+          --health-cmd="pg_isready -U postgres" 
+          --health-interval=10s 
+          --health-timeout=5s 
+          --health-retries=5
+
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python 3.11

@@ -1,12 +1,14 @@
 """This module contains interfaces for various types of identity providers."""
 
-from typing import ClassVar, Protocol
+from pdb import run
+from typing import ClassVar, Protocol, runtime_checkable
 
 from alpha.providers.models.credentials import PasswordCredentials
 from alpha.providers.models.identity import Identity
 from alpha.providers.models.token import Token
 
 
+@runtime_checkable
 class PasswordAuthenticator(Protocol):
     """Password-based authenticator interface.
 
@@ -34,6 +36,7 @@ class PasswordAuthenticator(Protocol):
         ...
 
 
+@runtime_checkable
 class TokenValidator(Protocol):
     """Token validation interface
 
@@ -61,6 +64,7 @@ class TokenValidator(Protocol):
         ...
 
 
+@runtime_checkable
 class TokenIssuer(Protocol):
     """Token issuance interface.
 
@@ -87,6 +91,7 @@ class TokenIssuer(Protocol):
         ...
 
 
+@runtime_checkable
 class UserDirectory(Protocol):
     """User directory interface.
 
@@ -113,8 +118,50 @@ class UserDirectory(Protocol):
         ...
 
 
+@runtime_checkable
+class PasswordChanger(Protocol):
+    """Password change interface.
+
+    Intended for providers that support changing user passwords.
+    """
+
+    def change_password(
+        self,
+        subject: str,
+        new_password: str,
+    ) -> None:
+        """Method to change the password for a given user.
+
+        Parameters
+        ----------
+        subject
+            Unique identifier of the user whose password is to be changed.
+        new_password
+            The new password to set for the user.
+
+        Returns
+        -------
+            None
+        """
+        ...
+
+
+@runtime_checkable
+class TokenProvider(TokenValidator, TokenIssuer, Protocol):
+    """Token provider interface.
+
+    Intended for providers that handle token-related operations,
+    such as issuing and validating tokens.
+    """
+
+
+@runtime_checkable
 class IdentityProvider(
-    PasswordAuthenticator, TokenValidator, TokenIssuer, UserDirectory, Protocol
+    PasswordAuthenticator,
+    TokenProvider,
+    UserDirectory,
+    PasswordChanger,
+    Protocol,
 ):
     """Composite interface for identity providers.
 

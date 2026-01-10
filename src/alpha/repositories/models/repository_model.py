@@ -1,4 +1,4 @@
-"""_summary_"""
+"""RepositoryModel dataclass definition"""
 
 from dataclasses import dataclass
 
@@ -8,7 +8,7 @@ from alpha.interfaces.sql_repository import SqlRepository
 
 @dataclass
 class RepositoryModel:
-    """_summary_"""
+    """Model representing a repository configuration"""
 
     name: str
     repository: type[SqlRepository[BaseDomainModel]]

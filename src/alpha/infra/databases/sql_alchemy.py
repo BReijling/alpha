@@ -1,4 +1,4 @@
-"""_summary_"""
+"""SQL Alchemy Database Connector module"""
 
 import sqlalchemy as sa
 from sqlalchemy.engine import Engine
@@ -12,7 +12,7 @@ from alpha.interfaces.sql_mapper import SqlMapper
 
 
 class SqlAlchemyDatabase:
-    """_summary_"""
+    """SQL Alchemy Database Connector class"""
 
     def __init__(
         self,
@@ -26,35 +26,38 @@ class SqlAlchemyDatabase:
         schema_name: str = "public",
         create_schema: bool = True,
         create_tables: bool = True,
-        pool_pre_ping: bool = False,
+        pool_pre_ping: bool = True,
         mapper: SqlMapper | None = None,
     ) -> None:
-        """_summary_
+        """SQL Alchemy Database Connector initializer
 
         Parameters
         ----------
-        host : str, optional
-            _description_, by default ""
-        port : int | None, optional
-            _description_, by default None
-        username : str, optional
-            _description_, by default ""
-        password : str, optional
-            _description_, by default ""
-        db_name : str, optional
-            _description_, by default ""
-        db_type : str, optional
-            _description_, by default "postgresql"
-        conn_str : str | None, optional
-            _description_, by default None
-        schema_name : str, optional
-            _description_, by default "public"
-        create_schema : bool, optional
-            _description_, by default True
-        create_tables : bool, optional
-            _description_, by default True
-        mapper : interfaces.SqlMapper | None, optional
-            _description_, by default None
+        host, optional
+            Hostname of the database server, by default ""
+        port, optional
+            Port number of the database server, by default None
+        username, optional
+            Username for the database, by default ""
+        password, optional
+            Password for the database, by default ""
+        db_name, optional
+            Database name, by default ""
+        db_type, optional
+            Database type, by default "postgresql"
+        conn_str, optional
+            Connection string. Can be used instead of host, port, username,
+            password, and db_name, by default None
+        schema_name, optional
+            Schema name, by default "public"
+        create_schema, optional
+            Whether to create the schema if it does not exist, by default True
+        create_tables, optional
+            Whether to create tables if they do not exist, by default True
+        pool_pre_ping, optional
+            Whether to enable pool pre-ping, by default True
+        mapper, optional
+            SQL Mapper instance, by default None
         """
         self._host = host
         self._port = port
@@ -76,7 +79,9 @@ class SqlAlchemyDatabase:
             self._connection_string, pool_pre_ping=pool_pre_ping
         )
         self._session_factory = scoped_session(
-            sessionmaker(bind=self._engine, autocommit=False, expire_on_commit=False)
+            sessionmaker(
+                bind=self._engine, autocommit=False, expire_on_commit=False
+            )
         )
 
         if self._mapper:
@@ -89,62 +94,62 @@ class SqlAlchemyDatabase:
             self._create_schema(self._engine, self._schema_name)
 
     def get_session(self) -> Session:
-        """_summary_
+        """Get a new SQL Alchemy session
 
         Returns
         -------
         Session
-            _description_
+            SQL Alchemy session instance
         """
         return self._session_factory()
 
     def engine(self) -> Engine:
-        """_summary_
+        """Get the SQL Alchemy engine
 
         Returns
         -------
         Engine
-            _description_
+            SQL Alchemy engine instance
         """
         return self._engine
 
     def create_tables(
         self, metadata: sa.MetaData, tables: list[sa.Table] | None = None
     ) -> None:
-        """_summary_
+        """Create tables in the database
 
         Parameters
         ----------
         metadata : sa.MetaData
-            _description_
+            SQL Alchemy MetaData instance
         tables : list[sa.Table] | None, optional
-            _description_, by default None
+            List of tables to create, by default None
         """
         metadata.create_all(self._engine, tables=tables)
 
     def drop_tables(
         self, metadata: sa.MetaData, tables: list[sa.Table] | None = None
     ) -> None:
-        """_summary_
+        """Drop tables from the database
 
         Parameters
         ----------
         metadata : sa.MetaData
-            _description_
+            SQL Alchemy MetaData instance
         tables : list[sa.Table] | None, optional
-            _description_, by default None
+            List of tables to drop, by default None
         """
         metadata.drop_all(self._engine, tables=tables)
 
     def _create_schema(self, engine: Engine, schema_name: str) -> None:
-        """_summary_
+        """Create a schema in the database if it does not exist
 
         Parameters
         ----------
         engine : Engine
-            _description_
+            SQL Alchemy engine instance
         schema_name : str
-            _description_
+            Schema name to create
         """
         major, *_ = sa.__version__.split(".")
 

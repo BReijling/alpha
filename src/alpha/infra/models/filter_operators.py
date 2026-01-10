@@ -17,10 +17,12 @@ class FilterOperator:
     """
 
     def __init__(self, *search_filters: SearchFilter):
-        """Instantiate the filter operator by storing
-        the search filter objects
+        """Instantiate the filter operator by storing the search filter
+        objects
         """
-        self.search_filters: Iterable[SearchFilter | FilterOperator] = search_filters
+        self.search_filters: Iterable[SearchFilter | FilterOperator] = (
+            search_filters
+        )
 
     @property
     def filter_operator(
@@ -52,7 +54,7 @@ class FilterOperator:
 
         Returns
         -------
-            Query object
+            Query object with filters applied
         """
         filters = [f.filter_statement for f in self.search_filters]  # type: ignore
         return query.filter(self.filter_operator(*filters))  # type: ignore

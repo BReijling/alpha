@@ -1,5 +1,6 @@
 from dataclasses import _MISSING_TYPE
 
+from pydantic_core import PydanticUndefined
 import pytest
 from alpha.factories.field_iterator import Field, FieldIterator
 from tests.fixtures._attrs_models import AttrsAddressIncorrectType
@@ -36,3 +37,12 @@ def test_field_iterator_attrs(field_iterator_attrs):
     assert isinstance(field, Field)
     assert not isinstance(field.type, str)
     assert field.default_factory == None
+
+
+def test_field_iterator_pydantic(field_iterator_pydantic):
+    assert iter(field_iterator_pydantic)
+
+    field = next(field_iterator_pydantic)
+    assert isinstance(field, Field)
+    assert not isinstance(field.type, str)
+    assert field.default is PydanticUndefined

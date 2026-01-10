@@ -2,11 +2,16 @@
 
 import dataclasses
 import attrs
+from pydantic.fields import FieldInfo
 from typing import Any
+
+from pydantic_core import MISSING
 
 from alpha.interfaces.attrs_instance import AttrsInstance
 from alpha.interfaces.dataclass_instance import DataclassInstance
+from alpha.interfaces.pydantic_instance import PydanticInstance
 from alpha.utils.is_attrs import is_attrs
+from alpha.utils.is_pydantic import is_pydantic
 
 
 class Field:
@@ -117,11 +122,37 @@ class Field:
             default=obj.default,  # type: ignore
         )
 
+    @classmethod
+    def from_pydantic(cls, key: str, obj: FieldInfo) -> "Field":  # type: ignore
+        """Create a Field object from a pydantic Field
+
+        Parameters
+        ----------
+        obj
+            pydantic Field
+
+        Returns
+        -------
+            Field object
+        """
+        init = getattr(obj, "init", True)
+        type = getattr(obj, "annotation", None)
+        default = getattr(obj, "default", MISSING)
+
+        return cls(
+            init=init,
+            name=key,
+            type_=type,
+            default=default,
+        )
+
 
 class FieldIterator:
     """A collection of Field objects"""
 
-    def __init__(self, obj: DataclassInstance | AttrsInstance) -> None:
+    def __init__(
+        self, obj: DataclassInstance | AttrsInstance | PydanticInstance
+    ) -> None:
         """Initialize a FieldIterator by determining the class type of the
         obj argument
 
@@ -148,10 +179,15 @@ class FieldIterator:
                     Field.from_attrs(field)  # type: ignore
                     for field in attrs.fields(obj)  # type: ignore
                 ]
+            elif is_pydantic(obj):
+                self._fields = [
+                    Field.from_pydantic(key=name, obj=field)  # type: ignore
+                    for name, field in obj.model_fields.items()  # type: ignore
+                ]
             else:
                 raise TypeError(
-                    "Incorrect object type. Only a dataclass- or "
-                    "attrs class is supported"
+                    "Incorrect object type. Only a dataclass-, attrs- "
+                    "or pydantic class is supported"
                 )
         except NameError as exc:
             raise NameError(

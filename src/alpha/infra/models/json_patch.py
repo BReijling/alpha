@@ -10,9 +10,7 @@ class JsonPatch(jsonpatch.JsonPatch):
         self.update_dates()
 
     def update_dates(self) -> None:
-        """Post init to ensure that if a date can be formated to isoformat this
-        is done.
-        """
+        """Convert ISO format date strings to datetime objects in the patch"""
         for update in self:
             if isinstance(update['value'], str):
                 with suppress(ValueError):
