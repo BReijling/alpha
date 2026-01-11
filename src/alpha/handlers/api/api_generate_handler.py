@@ -159,7 +159,7 @@ class ApiGenerateHandler(BaseHandler):
         self._copy_templates()
 
         # Calling generate code shell script
-        subprocess.call(['bash', f'./gen-code.sh'])
+        subprocess.call(['bash', './gen-code.sh'])
 
         self._remove_templates()
 

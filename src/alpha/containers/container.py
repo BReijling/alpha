@@ -36,9 +36,9 @@ class Container(containers.DeclarativeContainer):
                 default=config.api_package_name,
                 name='--api-package',
                 help=(
-                    "Name of the API package to generate. Automatically"
-                    " determined or guessed. If incorrect,"
-                    " just use this argument."
+                    "Name of the API package to generate. Automatically "
+                    "determined or guessed. If incorrect, "
+                    "just use this argument."
                 ),
                 args={
                     'type': str,
@@ -49,9 +49,11 @@ class Container(containers.DeclarativeContainer):
                 Argument,
                 default=config.service_package_name,
                 name='--service-package',
-                help=f"""Name of the service package to use. Automatically
-                    determined or guessed. If incorrect,
-                    just use this argument.""",
+                help=(
+                    "Name of the service package to use. Automatically "
+                    "determined or guessed. If incorrect, "
+                    "just use this argument."
+                ),
                 args={
                     'type': str,
                     'nargs': '?',
@@ -61,10 +63,12 @@ class Container(containers.DeclarativeContainer):
                 Argument,
                 default=config.container_import,
                 name='--container-import',
-                help=f"""Name of the container to use. Automatically
-                    determined or guessed. If incorrect,
-                    just use this argument. When no container is used,
-                    use empty string for this variable""",
+                help=(
+                    "Name of the container to use. Automatically "
+                    "determined or guessed. If incorrect, "
+                    "just use this argument. When no container is used, "
+                    "use empty string for this variable"
+                ),
                 args={
                     'type': str,
                     'nargs': '?',
@@ -74,8 +78,10 @@ class Container(containers.DeclarativeContainer):
                 Argument,
                 default=config.init_container_from,
                 name='--init-container-from',
-                help=f"""Location of where the container initialize function
-                    should be imported from.""",
+                help=(
+                    "Location of where the container initialize function "
+                    "should be imported from."
+                ),
                 args={
                     'type': str,
                     'nargs': '?',
