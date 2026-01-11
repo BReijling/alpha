@@ -31,8 +31,8 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
-          --volume ./integration_test_deps/openldap-entrypoint.sh:/usr/local/bin/openldap-entrypoint.sh:ro
-          --volume ./integration_test_deps/ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom:ro
+          --volume $(pwd)/integration_test_deps/openldap-entrypoint.sh:/usr/local/bin/openldap-entrypoint.sh
+          --volume $(pwd)/integration_test_deps/ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom:ro
           --entrypoint /usr/local/bin/openldap-entrypoint.sh
 
       mysql:
