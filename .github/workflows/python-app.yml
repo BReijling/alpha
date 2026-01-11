@@ -31,7 +31,7 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
-          --command="--copy-service"
+          --entrypoint="/container/tool/run --copy-service"
           --volume ./integration_test_deps/ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom:ro
 
       mysql:
