@@ -36,7 +36,7 @@ class ApiRunHandler(BaseHandler):
         api_location = f'{cwd}/api'
 
         if not os.path.isdir(api_location):
-            print("First generate an api using 'dsc-cli api gen'")
+            print("First generate the API code using 'alpha api gen'")
             return
 
         path = os.path.dirname(os.path.realpath(__file__))
