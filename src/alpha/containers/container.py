@@ -4,7 +4,6 @@ from alpha.factories.jwt_factory import JWTFactory
 from alpha.infra.connectors.ldap_connector import LDAPConnector
 from alpha.interfaces.token_factory import TokenFactory
 from alpha.providers.ldap_provider import LDAPProvider
-from alpha.interfaces.providers import IdentityProvider
 from alpha.services.authentication_service import AuthenticationService
 
 

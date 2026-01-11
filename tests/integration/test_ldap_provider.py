@@ -1,7 +1,14 @@
+import os
+import pytest
+
 from alpha.providers.models.identity import Identity
 from alpha.providers.models.credentials import PasswordCredentials
 
 
+@pytest.mark.skipif(
+    os.getenv('GITHUB_ACTIONS') == 'true',
+    reason='Unable to run LDAP service in GitHub Actions',
+)
 def test_ldap_provider_authentication(ldap_provider, credentials):
     identity = ldap_provider.authenticate(credentials=credentials)
 
@@ -13,6 +20,10 @@ def test_ldap_provider_authentication(ldap_provider, credentials):
     assert identity.groups == []
 
 
+@pytest.mark.skipif(
+    os.getenv('GITHUB_ACTIONS') == 'true',
+    reason='Unable to run LDAP service in GitHub Actions',
+)
 def test_ldap_provider_get_user(ldap_provider, subject):
     identity = ldap_provider.get_user(subject=subject)
 

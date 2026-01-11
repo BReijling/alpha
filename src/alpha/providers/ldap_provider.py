@@ -100,22 +100,7 @@ class LDAPProvider(JWTProviderMixin):
         entry_dn = cast(str, entry.entry_dn)  # type: ignore
 
         # Try to bind with user credentials to verify password
-        try:
-            connection_cls = getattr(
-                self._connector, "connection_cls", Connection
-            )
-            connection_cls(
-                self._connector.get_server(),
-                user=entry_dn,
-                password=credentials.password,
-                client_strategy=self._connector._client_strategy,  # type: ignore
-                auto_bind=True,
-                receive_timeout=5,
-            )
-        except LDAPException as e:
-            raise exceptions.InvalidCredentialsException(
-                f"Credentials for \'{credentials.username}\' are invalid"
-            ) from e
+        self._verify_password(entry_dn=entry_dn, credentials=credentials)
 
         return self._convert_ldap_entry_to_identity(entry)
 
@@ -132,16 +117,21 @@ class LDAPProvider(JWTProviderMixin):
             Identity object
         """
         conn = self._connector.get_connection()
+
+        # Search for user entry
         entry = self._search_user(conn, subject)
+
         return self._convert_ldap_entry_to_identity(entry)
 
-    def change_password(self, subject: str, new_password: str) -> None:
+    def change_password(
+        self, credentials: PasswordCredentials, new_password: str
+    ) -> None:
         """Change the password of a user
 
         Parameters
         ----------
-        subject
-            Username of the user whose password is to be changed
+        credentials
+            PasswordCredentials object containing username and password
         new_password
             New password to set for the user
 
@@ -157,8 +147,13 @@ class LDAPProvider(JWTProviderMixin):
                 "Change password operation is not supported by this provider"
             )
         conn = self._connector.get_connection()
-        entry = self._search_user(conn, subject)
+
+        # Search for user entry
+        entry = self._search_user(conn, credentials.username)
         entry_dn = cast(str, entry.entry_dn)  # type: ignore
+
+        # Try to bind with user credentials to verify password
+        self._verify_password(entry_dn=entry_dn, credentials=credentials)
 
         try:
             conn.extend.microsoft.modify_password(  # type: ignore
@@ -166,7 +161,8 @@ class LDAPProvider(JWTProviderMixin):
             )
         except LDAPException as e:
             raise exceptions.IdentityError(
-                f"Failed to change password for user \'{subject}\': {str(e)}"
+                "Failed to change password for user "
+                f"\'{credentials.username}\': {str(e)}"
             ) from e
 
     def _search_user(self, conn: Connection, username: str) -> Entry:
@@ -200,6 +196,40 @@ class LDAPProvider(JWTProviderMixin):
             )
 
         return cast(Entry, conn.entries[0])  # type: ignore
+
+    def _verify_password(
+        self, entry_dn: str, credentials: PasswordCredentials
+    ) -> None:
+        """Verify the password for a given LDAP entry DN
+
+        Parameters
+        ----------
+        entry_dn
+            Distinguished Name of the LDAP entry
+        credentials
+            PasswordCredentials object containing username and password
+
+        Raises
+        ------
+        exceptions.InvalidCredentialsException
+            Raised when the provided credentials are invalid
+        """
+        try:
+            connection_cls = getattr(
+                self._connector, "connection_cls", Connection
+            )
+            connection_cls(
+                self._connector.get_server(),
+                user=entry_dn,
+                password=credentials.password,
+                client_strategy=self._connector._client_strategy,  # type: ignore
+                auto_bind=True,
+                receive_timeout=5,
+            )
+        except LDAPException as e:
+            raise exceptions.InvalidCredentialsException(
+                f"Credentials for \'{credentials.username}\' are invalid"
+            ) from e
 
     def _convert_ldap_entry_to_identity(self, entry: Entry) -> Identity:
         """Convert an LDAP entry to an Identity object
