@@ -20,7 +20,9 @@ class GenericTypeFactory:
     type 'type'
     """
 
-    def process(self, key: str, value: Any, cls: type, **kwargs: dict[str, Any]) -> Any:
+    def process(
+        self, key: str, value: Any, cls: type, **kwargs: dict[str, Any]
+    ) -> Any:
         """Processing generic object types
 
         Parameters
@@ -116,7 +118,9 @@ class EnumTypeFactory:
     type 'Enum'
     """
 
-    def process(self, key: str, value: Any, cls: Any, **kwargs: dict[str, Any]) -> Any:
+    def process(
+        self, key: str, value: Any, cls: Any, **kwargs: dict[str, Any]
+    ) -> Any:
         """Creates Enum objects from either a Enum name or value
 
         Parameters
@@ -158,7 +162,9 @@ class JsonPatchTypeFactory:
     type 'JsonPatch'
     """
 
-    def process(self, key: str, value: Any, cls: Any, **kwargs: dict[str, Any]) -> Any:
+    def process(
+        self, key: str, value: Any, cls: Any, **kwargs: dict[str, Any]
+    ) -> Any:
         """Processing JsonPatch object types
 
         Parameters
@@ -185,7 +191,9 @@ class JsonPatchTypeFactory:
         if not isinstance(value, Iterable):
             raise AttributeError(f"The {key} attribute has to be an iterable")
         if len(value) == 0:  # type: ignore
-            raise AttributeError(f"The {key} attribute cannot be an empty iterable")
+            raise AttributeError(
+                f"The {key} attribute cannot be an empty iterable"
+            )
         if isinstance(value[0], OpenAPIModel):  # type: ignore
             patches: list[OpenAPIModel] = value  # type: ignore
             return cls([patch.to_dict() for patch in patches])  # type: ignore

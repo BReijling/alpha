@@ -1,0 +1,331 @@
+import connexion
+import six
+import traceback
+import logging
+from typing import Dict
+from typing import Tuple
+from typing import Union
+from typing import List
+
+{{containerImport}}
+from alpha.factories.request_factory import RequestFactory
+from alpha.factories.response_factory import ResponseFactory
+from alpha.utils.response_object import create_response_object
+from alpha.utils.verify_identity import verify_identity
+from alpha.utils._http_codes import http_codes_{{#languageCode}}{{languageCode}}{{/languageCode}}{{^languageCode}}en{{/languageCode}} as http_codes
+from alpha.exceptions import (
+    BadRequestException,
+    UnauthorizedException,
+    ForbiddenException,
+    NotFoundException,
+    NotAcceptableException,
+    ConflictException,
+    PayloadTooLargeException,
+    UnprocessableContentException,
+    ServerErrorException
+)
+from dependency_injector.wiring import inject, Provide
+
+from {{packageName}} import util
+from {{packageName}} import models as api_models
+{{#imports}}{{import}}  # noqa: E501
+{{/imports}}
+
+{{#operations}}
+{{#operation}}
+@inject
+def {{operationId}}(
+    {{#allParams}}{{^isBodyParam}}{{paramName}}{{^required}}=None{{/required}},{{/isBodyParam}}{{/allParams}}
+    {{#authMethods}}{{#isBasicBearer}}token_factory=Provide[Container.token_factory],{{/isBasicBearer}}{{/authMethods}}
+    {{#vendorExtensions.x-alpha-service-name}}{{vendorExtensions.x-alpha-service-name}}=Provide[Container.{{vendorExtensions.x-alpha-service-name}}],{{/vendorExtensions.x-alpha-service-name}}
+) -> {{#returnType}}{{.}}{{/returnType}}{{^returnType}}None{{/returnType}}:  # noqa: E501
+    """{{summary}}{{^summary}}{{operationId}}{{/summary}}
+
+    {{notes}} # noqa: E501
+
+    {{#allParams}}
+    :param {{paramName}}: {{description}}
+        {{^isContainer}}
+            {{#isPrimitiveType}}
+    :type {{paramName}}: {{>param_type}}
+            {{/isPrimitiveType}}
+            {{#isUuid}}
+    :type {{paramName}}: {{>param_type}}
+            {{/isUuid}}
+            {{^isPrimitiveType}}
+                {{#isFile}}
+    :type {{paramName}}: werkzeug.datastructures.FileStorage
+                {{/isFile}}
+                {{^isFile}}
+                    {{^isUuid}}
+    :type {{paramName}}: dict | bytes
+                    {{/isUuid}}
+                {{/isFile}}
+            {{/isPrimitiveType}}
+        {{/isContainer}}
+        {{#isArray}}
+            {{#items}}
+                {{#isPrimitiveType}}
+    :type {{paramName}}: List[{{>param_type}}]
+                {{/isPrimitiveType}}
+                {{^isPrimitiveType}}
+    :type {{paramName}}: list | bytes
+                {{/isPrimitiveType}}
+            {{/items}}
+        {{/isArray}}
+        {{#isMap}}
+            {{#items}}
+                {{#isPrimitiveType}}
+    :type {{paramName}}: Dict[str, {{>param_type}}]
+                {{/isPrimitiveType}}
+                {{^isPrimitiveType}}
+    :type {{paramName}}: dict | bytes
+                {{/isPrimitiveType}}
+            {{/items}}
+        {{/isMap}}
+    {{/allParams}}
+
+    :rtype: Union[{{returnType}}{{^returnType}}None{{/returnType}}, Tuple[{{returnType}}{{^returnType}}None{{/returnType}}, int], Tuple[{{returnType}}{{^returnType}}None{{/returnType}}, int, Dict[str, str]]
+    """
+    {{#vendorExtensions.x-alpha-import}}
+    {{.}}
+    {{/vendorExtensions.x-alpha-import}}
+
+    {{#allParams}}
+        {{^isContainer}}
+            {{#isDate}}
+    {{paramName}} = util.deserialize_date({{paramName}})
+            {{/isDate}}
+            {{#isDateTime}}
+    {{paramName}} = util.deserialize_datetime({{paramName}})
+            {{/isDateTime}}
+            {{^isPrimitiveType}}
+                {{^isFile}}
+                    {{^isUuid}}
+    if connexion.request.is_json:
+        {{paramName}} = {{baseType}}{{^baseType}}{{#dataType}} {{.}}{{/dataType}}{{/baseType}}.from_dict(connexion.request.get_json())  # noqa: E501
+                    {{/isUuid}}
+                {{/isFile}}
+            {{/isPrimitiveType}}
+        {{/isContainer}}
+        {{#isArray}}
+            {{#items}}
+                {{#isDate}}
+    if connexion.request.is_json:
+        {{paramName}} = [util.deserialize_date(s) for s in connexion.request.get_json()]  # noqa: E501
+                {{/isDate}}
+                {{#isDateTime}}
+    if connexion.request.is_json:
+        {{paramName}} = [util.deserialize_datetime(s) for s in connexion.request.get_json()]  # noqa: E501
+                {{/isDateTime}}
+                {{#complexType}}
+    if connexion.request.is_json:
+        {{paramName}} = [{{complexType}}.from_dict(d) for d in connexion.request.get_json()]  # noqa: E501
+                {{/complexType}}
+            {{/items}}
+        {{/isArray}}
+        {{#isMap}}
+            {{#items}}
+                {{#isDate}}
+    if connexion.request.is_json:
+        {{paramName}} = {k: util.deserialize_date(v) for k, v in six.iteritems(connexion.request.get_json())}  # noqa: E501
+                {{/isDate}}
+                {{#isDateTime}}
+    if connexion.request.is_json:
+        {{paramName}} = {k: util.deserialize_datetime(v) for k, v in six.iteritems(connexion.request.get_json())}  # noqa: E501
+                {{/isDateTime}}
+                {{#complexType}}
+    if connexion.request.is_json:
+        {{paramName}} = {k: {{baseType}}.from_dict(v) for k, v in six.iteritems(connexion.request.get_json())}  # noqa: E501
+                {{/complexType}}
+            {{/items}}
+        {{/isMap}}
+        {{^isContainer}}
+            {{response}}
+        {{/isContainer}}
+    {{/allParams}}
+
+    {{#authMethods}}{{#isBasicBearer}}
+    if "Authorization" in connexion.request.headers:
+        token = connexion.request.headers["Authorization"].split(" ").pop()
+    else:
+        token = None
+    {{/isBasicBearer}}{{/authMethods}}
+    try:
+        # Objects used for authorization
+        roles=[{{#vendorExtensions.x-alpha-verify-roles}}"{{.}}",{{/vendorExtensions.x-alpha-verify-roles}}]
+        groups=[{{#vendorExtensions.x-alpha-verify-groups}}"{{.}}",{{/vendorExtensions.x-alpha-verify-groups}}],
+        permissions=[{{#vendorExtensions.x-alpha-verify-permissions}}"{{.}}",{{/vendorExtensions.x-alpha-verify-permissions}}],
+        {{#authMethods}}{{#isBasicBearer}}
+        # validate token
+        if token_factory.validate(token):
+            identity = token_factory.get_payload(token)
+            verify_identity(identity,
+                roles=roles,
+                groups=groups,
+                permissions=permissions,
+            )
+        {{/isBasicBearer}}{{/authMethods}}
+        # Call method or use variable
+        {{#vendorExtensions.x-alpha-request-factory}}
+            {{#vendorExtensions.x-alpha-service-name}}
+                {{#vendorExtensions.x-alpha-service-method}}
+        result = RequestFactory(
+            {{vendorExtensions.x-alpha-service-name}}.{{vendorExtensions.x-alpha-service-method}}
+        ).__call__(
+            {{#allParams}}{{paramName}}={{paramName}},{{/allParams}}
+            {{#vendorExtensions.x-alpha-service-additional-parameters}}{{.}}={{.}},
+            {{/vendorExtensions.x-alpha-service-additional-parameters}}
+        )
+                {{/vendorExtensions.x-alpha-service-method}}
+            {{/vendorExtensions.x-alpha-service-name}}
+            {{^vendorExtensions.x-alpha-service-name}}
+                {{#vendorExtensions.x-alpha-method}}
+        result = {{vendorExtensions.x-alpha-method}}
+                {{/vendorExtensions.x-alpha-method}}
+            {{/vendorExtensions.x-alpha-service-name}}
+        {{/vendorExtensions.x-alpha-request-factory}}
+        {{^vendorExtensions.x-alpha-request-factory}}
+            {{^vendorExtensions.x-alpha-service-name}}
+                {{^vendorExtensions.x-alpha-method}}
+        raise ServerErrorException('Missing x-alpha-service-name in API specification')
+                {{/vendorExtensions.x-alpha-method}}
+                {{^vendorExtensions.x-alpha-service-method}}
+                    {{^vendorExtensions.x-alpha-method}}
+        raise ServerErrorException('Missing x-alpha-service-method in API specification')
+                    {{/vendorExtensions.x-alpha-method}}
+                {{/vendorExtensions.x-alpha-service-method}}
+            {{/vendorExtensions.x-alpha-service-name}}
+            {{#vendorExtensions.x-alpha-service-name}}
+                {{#vendorExtensions.x-alpha-service-method}}
+        result = {{vendorExtensions.x-alpha-service-name}}.{{vendorExtensions.x-alpha-service-method}}(
+            {{#allParams}}{{paramName}}={{paramName}},{{/allParams}}
+            {{#vendorExtensions.x-alpha-service-additional-parameters}}{{.}}={{.}},
+            {{/vendorExtensions.x-alpha-service-additional-parameters}}
+        )
+                {{/vendorExtensions.x-alpha-service-method}}
+            {{/vendorExtensions.x-alpha-service-name}}
+            {{^vendorExtensions.x-alpha-service-name}}
+                {{#vendorExtensions.x-alpha-method}}
+        result = {{vendorExtensions.x-alpha-method}}
+                {{/vendorExtensions.x-alpha-method}}
+            {{/vendorExtensions.x-alpha-service-name}}
+        {{/vendorExtensions.x-alpha-request-factory}}
+    
+    {{#responses}}
+    {{#is2xx}}
+        {{#vendorExtensions.x-alpha-raw-response}}
+        return result
+        {{/vendorExtensions.x-alpha-raw-response}}
+        {{^vendorExtensions.x-alpha-raw-response}}
+        {{#returnType}}
+        {{#vendorExtensions.x-alpha-response-factory}}
+        result = ResponseFactory().process(
+            response=result,
+            cls={{vendorExtensions.x-alpha-response-factory}}
+        )
+        {{/vendorExtensions.x-alpha-response-factory}}
+        response_object, status_code = create_response_object(
+            http_codes=http_codes,
+            status_code={{code}},
+            status_message='{{message}}',
+            data=result,
+            {{#vendorExtensions.x-content-type}}data_type='{{vendorExtensions.x-content-type}}'{{/vendorExtensions.x-content-type}}
+        )
+        return response_object, status_code
+        {{/returnType}}
+        {{^returnType}}
+        return create_response_object(
+            http_codes=http_codes,
+            status_code=204,
+            status_message='{{message}}',
+        )
+        {{/returnType}}
+        {{/vendorExtensions.x-alpha-raw-response}}
+    {{/is2xx}}
+    
+    {{#is4xx}}
+        {{#vendorExtensions.x-alpha-exception}}
+    except {{vendorExtensions.x-alpha-exception}} as exc:
+        return create_response_object(
+            http_codes=http_codes,
+            status_code={{code}},
+            status_message=f'{exc}'
+        )
+        {{/vendorExtensions.x-alpha-exception}}
+    {{/is4xx}}
+    {{#is5xx}}
+        {{#vendorExtensions.x-alpha-exception}}
+    except {{vendorExtensions.x-alpha-exception}} as exc:
+        return create_response_object(
+            http_codes=http_codes,
+            status_code={{code}},
+            status_message=f'{exc}'
+        )
+        {{/vendorExtensions.x-alpha-exception}}
+    {{/is5xx}}
+    {{/responses}}
+    except BadRequestException as exc:
+        return create_response_object(
+            http_codes=http_codes,
+            status_code=400,
+            status_message=f'{exc}'
+        )
+    except UnauthorizedException as exc:
+        return create_response_object(
+            http_codes=http_codes,
+            status_code=401,
+            status_message=f'{exc}'
+        )
+    except ForbiddenException as exc:
+        return create_response_object(
+            http_codes=http_codes,
+            status_code=403,
+            status_message=f'{exc}'
+        )
+    except NotFoundException as exc:
+        return create_response_object(
+            http_codes=http_codes,
+            status_code=404,
+            status_message=f'{exc}'
+        )
+    except NotAcceptableException as exc:
+        return create_response_object(
+            http_codes=http_codes,
+            status_code=406,
+            status_message=f'{exc}'
+        )
+    except ConflictException as exc:
+        return create_response_object(
+            http_codes=http_codes,
+            status_code=409,
+            status_message=f'{exc}'
+        )
+    except PayloadTooLargeException as exc:
+        return create_response_object(
+            http_codes=http_codes,
+            status_code=413,
+            status_message=f'{exc}'
+        )
+    except UnprocessableContentException as exc:
+        return create_response_object(
+            http_codes=http_codes,
+            status_code=422,
+            status_message=f'{exc}'
+        )
+    except ServerErrorException as exc:
+        return create_response_object(
+            http_codes=http_codes,
+            status_code=500,
+            status_message=f'{exc}'
+        )
+    except Exception as exc:
+        traceback.print_exc()
+        return create_response_object(
+            http_codes=http_codes,
+            status_code=500,
+            status_message=f'{exc}'
+        )
+
+{{/operation}}
+{{/operations}}

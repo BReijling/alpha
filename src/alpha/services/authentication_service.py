@@ -130,9 +130,7 @@ class AuthenticationService:
             New password for the user.
         """
         if self._identity_provider.authenticate(credentials):
-            self._identity_provider.change_password(
-                credentials.username, new_password
-            )
+            self._identity_provider.change_password(credentials, new_password)
 
     def pretend_login(self, identity: Identity, pretend_subject: str) -> str:
         """Login as another user by pretending to be them.

@@ -1,8 +1,8 @@
 """This module contains interfaces for various types of identity providers."""
 
-from pdb import run
 from typing import ClassVar, Protocol, runtime_checkable
 
+from alpha.interfaces.token_factory import TokenFactory
 from alpha.providers.models.credentials import PasswordCredentials
 from alpha.providers.models.identity import Identity
 from alpha.providers.models.token import Token
@@ -127,15 +127,15 @@ class PasswordChanger(Protocol):
 
     def change_password(
         self,
-        subject: str,
+        credentials: PasswordCredentials,
         new_password: str,
     ) -> None:
         """Method to change the password for a given user.
 
         Parameters
         ----------
-        subject
-            Unique identifier of the user whose password is to be changed.
+        credentials
+            Object containing username and current password.
         new_password
             The new password to set for the user.
 
@@ -153,6 +153,8 @@ class TokenProvider(TokenValidator, TokenIssuer, Protocol):
     Intended for providers that handle token-related operations,
     such as issuing and validating tokens.
     """
+
+    _token_factory: ClassVar[TokenFactory | None]
 
 
 @runtime_checkable

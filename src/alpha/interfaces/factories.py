@@ -49,7 +49,9 @@ class TypeFactory(Protocol):
     A TypeFactory implementation only has a 'process' method.
     """
 
-    def process(self, key: str, value: Any, cls: Any, **kwargs: dict[str, Any]) -> Any:
+    def process(
+        self, key: str, value: Any, cls: Any, **kwargs: dict[str, Any]
+    ) -> Any:
         """This method handles the type operation
 
         Parameters
