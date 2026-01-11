@@ -1,0 +1,29 @@
+from connexion.apps.flask_app import FlaskJSONEncoder
+import six
+from typing import Any, Dict, List, Union
+from dataclasses import _MISSING_TYPE
+
+from enum import Enum
+from datetime import datetime, date
+
+from {{modelPackage}}.base_model import Model
+
+
+class JSONEncoder(FlaskJSONEncoder):
+    include_nulls = False
+
+    def default(self, o):
+        if hasattr(o, 'to_dict'):
+            return o.to_dict()
+        if isinstance(o, Model):
+            dikt = {}
+            for attr, _ in six.iteritems(o.openapi_types):
+                value = getattr(o, attr)
+                if value is None and not self.include_nulls:
+                    continue
+                attr = o.attribute_map[attr]
+                dikt[attr] = value
+            return dikt
+        elif isinstance(o, Enum):
+            return o.name
+        return FlaskJSONEncoder.default(self, o)

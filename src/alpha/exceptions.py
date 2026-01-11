@@ -175,3 +175,8 @@ class TokenPayloadException(Exception):
 
 class TokenCreationException(Exception):
     """Raised when there is an error during token creation."""
+
+
+# Cli Exceptions
+class InvalidArgumentsException(Exception):
+    """Raised when invalid arguments are provided to a CLI command."""

@@ -1,0 +1,18 @@
+ldap:
+  server_url: "ldap://localhost"
+  server_port: 389
+  use_tls: false
+  bind_dn: "cn=admin,dc=example,dc=org"
+  bind_password: "test_password"
+  search_filter_key: "uid"
+  search_base: "dc=example,dc=org"
+jwt:
+  secret: "supersecretkey123"
+  issuer: "http://localhost"
+  lifetime_hours: 12
+cors:
+  origins:
+    - "http://localhost:3000"
+    - "http://localhost"
+logging:
+  level: "INFO"
