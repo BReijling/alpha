@@ -1,0 +1,420 @@
+openapi: 3.0.0
+info:
+  title: "Test API"
+  version: "0.0.1"
+  contact:
+    name: Bart Reijling
+    email: bart@flpr.nl
+servers:
+  - url: http://localhost:8080/
+    description: Development
+tags:
+  - name: API Health
+    description: For health checking purposes
+  - name: User
+    description: User CRUD operations
+  - name: Authentication
+    description: User authentication
+paths:
+  /:
+    get:
+      description: API health check
+      operationId: health_check
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+      tags:
+        - API Health
+      x-alpha-service-name: api_service
+      x-alpha-service-method: hello
+  /users:
+    get:
+      description: Get users
+      operationId: get_users
+      responses:
+        '200':
+          description: OK
+          x-alpha-response-factory: list[api_models.User]
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersResponse'
+      tags: [User]
+      x-alpha-service-name: user_management_service
+      x-alpha-service-method: get_users
+      security:
+        - bearerAuth: []
+    post:
+      description: Add user
+      operationId: add_user
+      requestBody:
+        description: 'User object'
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserWithPassword"
+      responses:
+        '201':
+          description: Created
+          x-alpha-response-factory: api_models.User
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+      tags: [User]
+      x-alpha-service-name: user_management_service
+      x-alpha-service-method: add_user
+      x-alpha-request-factory: true
+      security:
+        - bearerAuth: []
+  /users/{user_id}:
+    get:
+      description: Get user
+      operationId: get_user
+      parameters:
+        - $ref: '#/components/parameters/user_id'
+      responses:
+        '200':
+          description: OK
+          x-alpha-response-factory: api_models.User
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+      tags: [User]
+      x-alpha-service-name: user_management_service
+      x-alpha-service-method: get_user
+      security:
+        - bearerAuth: []
+    put:
+      description: Update user
+      operationId: update_user
+      parameters:
+        - $ref: '#/components/parameters/user_id'
+      requestBody:
+        description: 'User object'
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        '200':
+          description: OK
+          x-alpha-response-factory: api_models.User
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+      tags: [User]
+      x-alpha-service-name: user_management_service
+      x-alpha-service-method: update_user
+      x-alpha-request-factory: true
+      security:
+        - bearerAuth: []
+    delete:
+      description: Delete user
+      operationId: delete_user
+      parameters:
+        - $ref: '#/components/parameters/user_id'
+      responses:
+        '204':
+          description: No content
+      tags: [User]
+      x-alpha-service-name: user_management_service
+      x-alpha-service-method: delete_user
+      x-alpha-request-factory: true
+      security:
+        - bearerAuth: []
+  /auth/login:
+    post:
+      description: Authenticate user and generate access token
+      operationId: login
+      requestBody:
+        description: Password credentials
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Credentials"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StringResponse'
+                description: Generated access token
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/X-RateLimit-Remaining'
+      tags: [Authentication]
+      x-alpha-service-name: authentication_service
+      x-alpha-service-method: login
+      x-alpha-request-factory: true
+  /auth/password:
+    patch:
+      description: Update user password
+      operationId: update_user_password
+      parameters:
+        - $ref: '#/components/parameters/new_password'
+      requestBody:
+        description: Password credentials
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Credentials"
+      responses:
+        '204':
+          description: Updated password
+      tags: [Authentication]
+      x-alpha-service-name: authentication_service
+      x-alpha-service-method: change_password
+      x-alpha-request-factory: true
+  /auth/verify:
+    get:
+      description: Verify user from access token
+      operationId: verify_user
+      responses:
+        '200':
+          description: OK
+          x-alpha-response-factory: api_models.Identity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityResponse'
+      tags: [Authentication]
+      x-alpha-method: identity
+      # x-alpha-request-factory: true
+      x-alpha-verify-roles: ["admin","user"] 
+      x-alpha-verify-permissions:
+        - READ
+        - WRITE
+      x-alpha-verify-groups:
+        - admins
+        - users
+      security:
+        - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  headers:
+    X-RateLimit-Limit:
+      description: Request limit per hour
+      schema:
+        type: integer
+      example: 100
+    X-RateLimit-Remaining:
+      schema:
+        type: integer
+      example: 94
+  parameters:
+    token:
+      name: token
+      in: query
+      schema:
+        type: string
+      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3RvZWdhbmcueXplcmhlY2submwiLCJpYXQiOjE3MDY0MzcyMzUsImV4cCI6MTcwODg1NjQzNSwic3ViIjoiZjg2ZTdjNzEtZTIwMC00OGRjLWE0OWMtMzZiOGIzNTM5MTlkIn0.o402vn6yZunbaory1Iu_QGCHUg5yp1aUo-q1z_Q0mRw
+    user_id:
+      name: user_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      example: acc1485b-2909-4535-8299-1bc6913d6f5b
+    id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      example: acc1485b-2909-4535-8299-1bc6913d6f5b
+    # username:
+    #   name: username
+    #   in: query
+    #   required: true
+    #   schema:
+    #     type: string
+    #   example: name@example.org
+    # password:
+    #   name: password
+    #   in: query
+    #   required: true
+    #   schema:
+    #     type: string
+    #     format: password
+    #   example: welkom123
+    new_password:
+      name: new_password
+      in: query
+      required: true
+      schema:
+        type: string
+        format: password
+      example: welkom123
+  schemas:
+    Identity:
+      type: object
+      properties:
+        subject:
+          type: string
+          example: abc123
+        username:
+          type: string
+          nullable: true
+          example: Gebruiker1
+        role:
+          type: string
+          nullable: true
+        email:
+          type: string
+          format: email
+          nullable: true
+          example: name@example.org
+        display_name:
+          type: string
+          nullable: true
+          example: John Doe
+        groups:
+          type: array
+          items:
+            type: string
+        permissions:
+          type: array
+          items:
+            type: string
+        claims:
+          type: object
+        issued_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          nullable: true
+          format: date-time
+        audience:
+          type: array
+          nullable: true
+          items:
+            type: string
+        admin:
+          type: boolean
+        pretend_identity:
+          type: object
+          nullable: true
+    Credentials:
+      type: object
+      properties:
+        username:
+          type: string
+          example: abc123
+        password:
+          type: string
+          format: password
+          example: welcome123
+    LifeCycleBase:
+      type: object
+      properties:
+        created_by:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        modified_by:
+          type: string
+          readOnly: true
+        modified_at:
+          type: string
+          format: date-time
+          readOnly: true
+    User:
+      allOf:
+        - $ref: '#/components/schemas/LifeCycleBase'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              example: acc1485b-2909-4535-8299-1bc6913d6f5b
+              readOnly: true
+            username:
+              type: string
+              example: Gebruiker1
+            role:
+              type: string
+    UserWithPassword:
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - type: object
+          properties:
+            password:
+              type: string
+              format: password
+              writeOnly: true
+    # Response schemas
+    Response:
+      type: object
+      properties:
+        detail:
+          type: string
+          example: OK
+        status:
+          type: integer
+          example: 200
+        title:
+          type: string
+          example: OK
+        type:
+          type: string
+          example: 'application/json'
+        data: {}
+    StringResponse:
+      allOf:
+        - $ref: '#/components/schemas/Response'
+        - type: object
+          properties:
+            data:
+              type: string
+    StringArrayResponse:
+      allOf:
+        - $ref: '#/components/schemas/Response'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                type: string
+    IdentityResponse:
+      allOf:
+        - $ref: '#/components/schemas/Response'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Identity'
+    UserResponse:
+      allOf:
+        - $ref: '#/components/schemas/Response'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/User'
+    UsersResponse:
+      allOf:
+        - $ref: '#/components/schemas/Response'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/User'
