@@ -9,7 +9,7 @@ resolution-markers = [
 
 [[package]]
 name = "alpha-python"
-version = "0.2.2"
+version = "0.2.3"
 source = { editable = "." }
 dependencies = [
     { name = "attrs" },
@@ -23,13 +23,12 @@ dependencies = [
     { name = "requests" },
     { name = "six" },
     { name = "sqlalchemy" },
-    { name = "tomli" },
 ]
 
 [package.optional-dependencies]
 api-generator = [
     { name = "jdk4py" },
-    { name = "openapi-generator-cli" },
+    { name = "openapi-generator-cli", marker = "python_full_version < '4'" },
 ]
 flask = [
     { name = "connexion", extra = ["swagger-ui"] },
@@ -83,7 +82,7 @@ requires-dist = [
     { name = "ldap3", marker = "extra == 'ldap'", specifier = ">=2.9.1" },
     { name = "markupsafe", marker = "extra == 'flask'", specifier = "<2.0.2" },
     { name = "numpy", specifier = ">=2.3.5" },
-    { name = "openapi-generator-cli", marker = "extra == 'api-generator'", specifier = "==7.14.0" },
+    { name = "openapi-generator-cli", marker = "python_full_version >= '3.11' and python_full_version < '4' and extra == 'api-generator'", specifier = "==7.14.0" },
     { name = "pandas", specifier = ">=2.3.3" },
     { name = "psycopg2-binary", marker = "extra == 'postgresql'", specifier = ">=2.9.11" },
     { name = "pydantic", specifier = ">=2.12.5" },
@@ -94,7 +93,6 @@ requires-dist = [
     { name = "six", specifier = ">=1.17.0" },
     { name = "sqlalchemy", specifier = ">=2.0.44" },
     { name = "swagger-ui-bundle", marker = "extra == 'flask'", specifier = ">=0.0.2" },
-    { name = "tomli", specifier = ">=2.3.0" },
 ]
 provides-extras = ["api-generator", "flask", "mysql", "postgresql", "ldap"]
 
