@@ -1,6 +1,6 @@
 [project]
 name = "alpha-python"
-version = "0.2.1"
+version = "0.2.2"
 description = "Alpha is intended to be the first dependency you need to add to your Python application. It is a Python library which contains standard building blocks that can be used in applications that are used as APIs and/or make use of database interaction."
 readme = "README.md"
 authors = [
@@ -60,7 +60,7 @@ dev = [
 
 [project.optional-dependencies]
 api-generator = [
-    "openapi-generator-cli==7.14.0",
+    "openapi-generator-cli==7.14.0 ; python_version >= '3.11' and python_version < '4.0'",
     "jdk4py"
 ]
 flask = [
