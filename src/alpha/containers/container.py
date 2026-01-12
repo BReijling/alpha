@@ -1,7 +1,7 @@
 from dependency_injector import containers, providers
 
-from alpha.handlers.api.api_generate_handler import ApiGenerateHandler
-from alpha.handlers.api.api_run_handler import ApiRunHandler
+from alpha.handlers.api_generate_handler import ApiGenerateHandler
+from alpha.handlers.api_run_handler import ApiRunHandler
 from alpha.handlers.models.command import Command
 from alpha.handlers.models.section import Section
 from alpha.handlers.models.argument import Argument
