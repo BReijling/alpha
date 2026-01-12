@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+import tomllib
 from dependency_injector.wiring import Provide, inject
 
 from alpha.containers.container import Container
@@ -131,10 +132,8 @@ def _guess_current_package_name() -> str:
 
     if os.path.isfile(pyproject_path):
         try:
-            import tomli
-
             with open(pyproject_path, 'rb') as f:
-                pyproject_data = tomli.load(f)
+                pyproject_data = tomllib.load(f)
                 return pyproject_data['project']['name'].replace('-', '_')
         except Exception:
             pass

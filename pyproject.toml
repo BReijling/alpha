@@ -19,7 +19,6 @@ dependencies = [
     "sqlalchemy>=2.0.44",
     "requests>=2.28.1",
     "dependency-injector (>=4.48.3,<5.0.0)",
-    "tomli>=2.3.0",
 ]
 
 [project.scripts]
@@ -61,7 +60,7 @@ dev = [
 
 [project.optional-dependencies]
 api-generator = [
-    "openapi-generator-cli==7.14.0",
+    "openapi-generator-cli==7.14.0 ; python_version >= '3.11' and python_version < '4.0'",
     "jdk4py"
 ]
 flask = [
