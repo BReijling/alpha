@@ -140,7 +140,7 @@ def _guess_current_package_name() -> str:
 
     # Fallback to use the current folder name
     print('Could not find pyproject.toml, guessing package name from folder')
-    return cwd.split('/')[-1]
+    return os.path.basename(cwd)
 
 
 def init() -> None:
