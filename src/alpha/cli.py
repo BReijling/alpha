@@ -105,29 +105,43 @@ def main(sections: list[Section] = Provide[Container.sections]) -> None:
     return
 
 
-def _guess_current_package_name() -> str | None:
-    """Guess the name of the package where you are generating the API for,
-    finding the first (and only) folder in the 'src'-folder.
+def _guess_current_package_name() -> str:
+    """Guess the name of the python package where you are generating the API
+    for. If a pyproject.toml file can be found the name is read from there. If
+    not, it looks for a subfolder which contains a python package.
 
     Returns
     -------
     str
-        _description_
+        The guessed package name.
     """
+
     cwd = os.getcwd()
-    package_location = f'{cwd}/src'
-    if not os.path.isdir(package_location):
-        return 'None'
-    package_names = [
-        name
-        for name in os.listdir(package_location)
-        if os.path.isdir(os.path.join(package_location, name))
-        and not name.startswith('.')
-        and not name.endswith('.egg-info')
-    ]
-    if len(package_names) == 0:
-        return None
-    return package_names[0]
+    pyproject_path = os.path.join(cwd, 'pyproject.toml')
+
+    # look for pyproject.toml file in subfolders
+    if not os.path.isfile(pyproject_path):
+        for entry in os.scandir(cwd):
+            if not entry.is_dir():
+                continue
+            possible_path = os.path.join(entry.path, 'pyproject.toml')
+            if os.path.isfile(possible_path):
+                pyproject_path = possible_path
+                break
+
+    if os.path.isfile(pyproject_path):
+        try:
+            import tomli
+
+            with open(pyproject_path, 'rb') as f:
+                pyproject_data = tomli.load(f)
+                return pyproject_data['project']['name'].replace('-', '_')
+        except Exception:
+            pass
+
+    # Fallback to use the current folder name
+    print('Could not find pyproject.toml, guessing package name from folder')
+    return cwd.split('/')[-1]
 
 
 def init() -> None:

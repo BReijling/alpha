@@ -9,7 +9,7 @@ resolution-markers = [
 
 [[package]]
 name = "alpha-python"
-version = "0.2.1"
+version = "0.2.2"
 source = { editable = "." }
 dependencies = [
     { name = "attrs" },
@@ -23,6 +23,7 @@ dependencies = [
     { name = "requests" },
     { name = "six" },
     { name = "sqlalchemy" },
+    { name = "tomli" },
 ]
 
 [package.optional-dependencies]
@@ -93,6 +94,7 @@ requires-dist = [
     { name = "six", specifier = ">=1.17.0" },
     { name = "sqlalchemy", specifier = ">=2.0.44" },
     { name = "swagger-ui-bundle", marker = "extra == 'flask'", specifier = ">=0.0.2" },
+    { name = "tomli", specifier = ">=2.3.0" },
 ]
 provides-extras = ["api-generator", "flask", "mysql", "postgresql", "ldap"]
 

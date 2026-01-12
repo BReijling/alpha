@@ -1,6 +1,6 @@
 [project]
 name = "alpha-python"
-version = "0.2.1"
+version = "0.2.2"
 description = "Alpha is intended to be the first dependency you need to add to your Python application. It is a Python library which contains standard building blocks that can be used in applications that are used as APIs and/or make use of database interaction."
 readme = "README.md"
 authors = [
@@ -19,6 +19,7 @@ dependencies = [
     "sqlalchemy>=2.0.44",
     "requests>=2.28.1",
     "dependency-injector (>=4.48.3,<5.0.0)",
+    "tomli>=2.3.0",
 ]
 
 [project.scripts]
