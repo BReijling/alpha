@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.4] - 2026-01-13
+
+### Fixed
+
+- Previously, the base image in the `Dockerfile.mustache` template was hardcoded, which made it impossible to use a base image other than the default base image `python:3.13`. Now, it is possible to pass a different base image as a build argument
+
 ## [0.2.3] - 2026-01-12
 
 ### Fixed
