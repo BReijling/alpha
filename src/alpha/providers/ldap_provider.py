@@ -10,14 +10,47 @@ from alpha.infra.connectors.ldap_connector import LDAPConnector
 from alpha.interfaces.token_factory import TokenFactory
 from alpha.mixins.jwt_provider import JWTProviderMixin
 from alpha.providers.models.credentials import PasswordCredentials
-from alpha.providers.models.identity import DEFAULT_LDAP_MAPPINGS, Identity
+from alpha.providers.models.identity import (
+    DEFAULT_LDAP_MAPPINGS,
+    DEFAULT_AD_MAPPINGS,
+    AD_SEARCH_ATTRIBUTES,
+    Identity,
+)
 from alpha import exceptions
 
 
 class LDAPProvider(JWTProviderMixin):
-    """LDAP Identity Provider"""
+    """LDAP Identity Provider
+
+    Parameters
+    ----------
+    connector
+        Connector to use for LDAP operations
+    search_filter_key, optional
+        Key to use for LDAP search filter, by default "uid"
+    search_base, optional
+        Base DN for LDAP search, by default "cn=users,dc=example,dc=com"
+    search_attributes, optional
+        Attributes to retrieve during LDAP search, by default
+        [ALL_ATTRIBUTES]
+    identity_mappings, optional
+        Mappings from LDAP attributes to Identity fields, by default
+        DEFAULT_LDAP_MAPPINGS
+    populate_groups, optional
+        Whether to populate groups in the Identity, by default True
+    populate_permissions, optional
+        Whether to populate permissions in the Identity, by default False
+    populate_claims, optional
+        Whether to populate claims in the Identity, by default True
+    auto_connect, optional
+        Whether to automatically connect using the connector, by default
+        True
+    change_password_supported, optional
+        Whether the provider supports changing passwords, by default False
+    """
 
     protocol = "ldap"
+    _token_factory: TokenFactory | None = None
 
     def __init__(
         self,
@@ -33,34 +66,7 @@ class LDAPProvider(JWTProviderMixin):
         auto_connect: bool = True,
         change_password_supported: bool = False,
     ) -> None:
-        """_summary_
-
-        Parameters
-        ----------
-        connector
-            Connector to use for LDAP operations
-        search_filter_key, optional
-            Key to use for LDAP search filter, by default "uid"
-        search_base, optional
-            Base DN for LDAP search, by default "cn=users,dc=example,dc=com"
-        search_attributes, optional
-            Attributes to retrieve during LDAP search, by default
-            [ALL_ATTRIBUTES]
-        identity_mappings, optional
-            Mappings from LDAP attributes to Identity fields, by default
-            DEFAULT_LDAP_MAPPINGS
-        populate_groups, optional
-            Whether to populate groups in the Identity, by default True
-        populate_permissions, optional
-            Whether to populate permissions in the Identity, by default False
-        populate_claims, optional
-            Whether to populate claims in the Identity, by default True
-        auto_connect, optional
-            Whether to automatically connect using the connector, by default
-            True
-        change_password_supported, optional
-            Whether the provider supports changing passwords, by default False
-        """
+        """Initialize LDAPProvider"""
         self._connector = connector
         self._token_factory = token_factory
         self._search_filter_key = search_filter_key
@@ -252,3 +258,39 @@ class LDAPProvider(JWTProviderMixin):
             populate_permissions=self._populate_permissions,
         )
         return identity
+
+
+class ADProvider(LDAPProvider):
+    """Active Directory Identity Provider
+
+    Inherits from LDAPProvider with default settings for Active Directory.
+    """
+
+    def __init__(
+        self,
+        connector: LDAPConnector,
+        token_factory: TokenFactory | None = None,
+        search_filter_key: str = "sAMAccountName",
+        search_base: str = "CN=users,DC=example,DC=com",
+        search_attributes: list[str] = AD_SEARCH_ATTRIBUTES,
+        identity_mappings: dict[str, str] = DEFAULT_AD_MAPPINGS,
+        populate_groups: bool = True,
+        populate_permissions: bool = False,
+        populate_claims: bool = True,
+        auto_connect: bool = True,
+        change_password_supported: bool = False,
+    ) -> None:
+        """Initialize ADProvider"""
+        super().__init__(
+            connector=connector,
+            token_factory=token_factory,
+            search_filter_key=search_filter_key,
+            search_base=search_base,
+            search_attributes=search_attributes,
+            identity_mappings=identity_mappings,
+            populate_groups=populate_groups,
+            populate_permissions=populate_permissions,
+            populate_claims=populate_claims,
+            auto_connect=auto_connect,
+            change_password_supported=change_password_supported,
+        )

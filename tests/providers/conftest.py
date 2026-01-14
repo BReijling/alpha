@@ -1,7 +1,8 @@
 import pytest
 
-from alpha.providers.ldap_provider import LDAPProvider
+from alpha.providers.ldap_provider import LDAPProvider, ADProvider
 from alpha.providers.models.credentials import PasswordCredentials
+from alpha.providers.models.identity import DEFAULT_LDAP_MAPPINGS
 
 
 class FakeLDAPEntry:
@@ -114,6 +115,21 @@ def ldap_provider(ldap_connector, search_base):
         search_filter_key="uid",
         search_base=search_base,
         search_attributes=["uid", "cn", "mail", "memberOf"],
+        auto_connect=True,
+        change_password_supported=True,
+    )
+    return provider
+
+
+@pytest.fixture
+def ad_provider(ldap_connector, search_base):
+
+    provider = ADProvider(
+        connector=ldap_connector,
+        search_filter_key="uid",
+        search_base=search_base,
+        search_attributes=["uid", "cn", "mail", "memberOf"],
+        identity_mappings=DEFAULT_LDAP_MAPPINGS,
         auto_connect=True,
         change_password_supported=True,
     )
