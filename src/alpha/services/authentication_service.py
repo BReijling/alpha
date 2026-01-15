@@ -13,7 +13,7 @@ from alpha import exceptions
 class AuthenticationService:
     """This class is responsible for handling authentication operations in an
     application. It provides methods for user authentication, token, issuance,
-    token validation, password change, pretending to login as another  user,
+    token validation, password change, pretending to login as another user,
     and merging user data with identity data.
 
     Parameters

@@ -264,6 +264,40 @@ class ADProvider(LDAPProvider):
     """Active Directory Identity Provider
 
     Inherits from LDAPProvider with default settings for Active Directory.
+
+    Parameters
+    ----------
+    connector
+        Connector to use for LDAP operations.
+    token_factory, optional
+        Factory used to create tokens, by default ``None``.
+    search_filter_key, optional
+        Key to use for Active Directory search filter, by default
+        ``"sAMAccountName"``.
+    search_base, optional
+        Base distinguished name (DN) for Active Directory searches, by default
+        ``"CN=users,DC=example,DC=com"``.
+    search_attributes, optional
+        Attributes to retrieve during Active Directory searches, by default
+        ``AD_SEARCH_ATTRIBUTES``.
+    identity_mappings, optional
+        Mapping of Active Directory attributes to :class:`Identity` fields, by
+        default ``DEFAULT_AD_MAPPINGS``.
+    populate_groups, optional
+        Whether to populate group memberships on the :class:`Identity`, by
+        default ``True``.
+    populate_permissions, optional
+        Whether to populate permissions on the :class:`Identity`, by default
+        ``False``.
+    populate_claims, optional
+        Whether to populate claims on the :class:`Identity`, by default
+        ``True``.
+    auto_connect, optional
+        Whether to automatically open the LDAP connection on first use, by
+        default ``True``.
+    change_password_supported, optional
+        Whether this provider supports changing passwords, by default
+        ``False``.
     """
 
     def __init__(

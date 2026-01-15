@@ -92,7 +92,6 @@ __all__ = [
     "UserDirectory",
     "PasswordChanger",
     "TokenIssuer",
-    "TokenValidator",
     "TokenFactory",
     "JWTProviderMixin",
     "Identity",
