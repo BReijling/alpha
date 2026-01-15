@@ -377,10 +377,13 @@ class Identity:
             A list of group names the user is a member of.
         """
         groups: list[str] = []
-        for group in entry.get("memberOf", []):
-            items = group.split(",")
-            for item in items:
-                if item.startswith("CN=") or item.startswith("cn="):
-                    groups.append(item[3:])
-                    break
+        for item in entry.get("memberOf", []):
+            group = (
+                item.replace('\\,', ';')
+                .split(',')[0]
+                .replace(';', ',')
+                .replace('CN=', '')
+                .replace('cn=', '')
+            )
+            groups.append(group)
         return groups

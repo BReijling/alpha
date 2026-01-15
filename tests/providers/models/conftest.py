@@ -26,8 +26,9 @@ def ad_dict() -> dict[str, Any]:
         "displayName": ["Display AD User"],
         "mail": ["ad_user@example.com"],
         "memberOf": [
-            "cn=group1,dc=example,dc=com",
-            "cn=group2,dc=example,dc=com",
+            "CN=group1,DC=example,DC=com",
+            "CN=group2,DC=example,DC=com",
+            "CN=group3\\, with\\, commas,DC=example,DC=com",
         ],
     }
 
