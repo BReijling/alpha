@@ -1,7 +1,7 @@
 from typing import Iterable
 
 import pytest
-from sqlalchemy.sql.expression import and_, or_
+from sqlalchemy.sql.expression import and_, or_, not_
 
 
 def test_filter_operator(filter_operator):

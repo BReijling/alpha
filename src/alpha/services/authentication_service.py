@@ -11,37 +11,40 @@ from alpha import exceptions
 
 
 class AuthenticationService:
-    """Service for handling authentication operations."""
+    """This class is responsible for handling authentication operations in an
+    application. It provides methods for user authentication, token, issuance,
+    token validation, password change, pretending to login as another user,
+    and merging user data with identity data.
+
+    Parameters
+    ----------
+    identity_provider
+        Identity provider to use for authentication.
+    identity_id_attribute, optional
+        Attribute name in the identity to use as the unique identifier, by
+        default "subject"
+    merge_with_database_users, optional
+        Whether to merge identity data with database user data, by default
+        False
+    user_id_attribute, optional
+        Attribute name in the user database to use as the unique
+        identifier, by default "username"
+    uow, optional
+        UnitOfWork instance for database operations, by default None
+    repository_name, optional
+        Name of the user repository in the UnitOfWork, by default "users"
+    """
 
     def __init__(
         self,
         identity_provider: IdentityProvider,
         identity_id_attribute: str = "subject",
         merge_with_database_users: bool = False,
-        user_id_attribute: str = "id",
+        user_id_attribute: str = "username",
         uow: UnitOfWork | None = None,
         repository_name: str = "users",
     ) -> None:
-        """Initialize the AuthenticationService.
-
-        Parameters
-        ----------
-        identity_provider
-            Identity provider to use for authentication.
-        identity_id_attribute, optional
-            Attribute name in the identity to use as the unique identifier, by
-            default "subject"
-        merge_with_database_users, optional
-            Whether to merge identity data with database user data, by default
-            False
-        user_id_attribute, optional
-            Attribute name in the user database to use as the unique
-            identifier, by default "id"
-        uow, optional
-            UnitOfWork instance for database operations, by default None
-        repository_name, optional
-            Name of the user repository in the UnitOfWork, by default "users"
-        """
+        """Initialize the AuthenticationService."""
         self._identity_provider = identity_provider
         self._identity_id_attribute = identity_id_attribute
         self._merge_with_database_users = merge_with_database_users
@@ -163,7 +166,7 @@ class AuthenticationService:
         self,
         identity: Identity,
     ) -> Identity:
-        """Merge User data into a Identity instance.
+        """Merge User data into an Identity instance.
 
         Parameters
         ----------
@@ -184,11 +187,13 @@ class AuthenticationService:
                 self.uow, self._repository_name
             )
             user = users.get_by_id(
-                identity.subject, id_attribute=self._user_id_attribute
+                value=identity.subject, attr=self._user_id_attribute
             )
-            if not user:
+            if user:
+                identity.update_from_user(user)
+            else:
+                # Create new user from identity if not found in database
                 user = User.from_identity(identity)
                 users.add(user)
-            identity.update_from_user(user)
-            self.uow.commit()
+                self.uow.commit()
         return identity
