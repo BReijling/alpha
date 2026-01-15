@@ -9,9 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `ADProvider` class for AD identity providers. The class inherits the `LDAPProvider` class and overrides the default parameter values.
+- `ADProvider` class for AD identity providers. The class extends the `LDAPProvider` class and overrides the default parameter values.
 - `AD_SEARCH_ATTRIBUTES` constant which are used by default by the ADProvider class.
-- `Not` filter operator as an addition to And & Or to be used in SearchFilter objects.
 - Imports of all classes and functions at root module level.
 
 ### Fixed

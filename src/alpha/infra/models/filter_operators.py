@@ -6,7 +6,7 @@
 from typing import Any, Callable, Iterable
 
 from sqlalchemy.orm import Query
-from sqlalchemy.sql.expression import ColumnElement, and_, or_, not_
+from sqlalchemy.sql.expression import ColumnElement, and_, or_
 
 from alpha.infra.models.search_filter import SearchFilter
 
@@ -96,22 +96,3 @@ class Or(FilterOperator):
             'or' filter operator
         """
         return or_
-
-
-class Not(FilterOperator):
-    """FilterOperator which can be used to explicitly specify a 'not'
-    statement to apply behavior of SearchFilter objects which is comparable
-    to NOT in SQL.
-    """
-
-    @property
-    def filter_operator(
-        self,
-    ) -> Callable[[ColumnElement[bool]], ColumnElement[bool]]:
-        """Returns the 'not' filter operator
-
-        Returns
-        -------
-            'not' filter operator
-        """
-        return not_
