@@ -154,8 +154,8 @@ def {{operationId}}(
     try:
         # Objects used for authorization
         roles=[{{#vendorExtensions.x-alpha-verify-roles}}"{{.}}",{{/vendorExtensions.x-alpha-verify-roles}}]
-        groups=[{{#vendorExtensions.x-alpha-verify-groups}}"{{.}}",{{/vendorExtensions.x-alpha-verify-groups}}],
-        permissions=[{{#vendorExtensions.x-alpha-verify-permissions}}"{{.}}",{{/vendorExtensions.x-alpha-verify-permissions}}],
+        groups=[{{#vendorExtensions.x-alpha-verify-groups}}"{{.}}",{{/vendorExtensions.x-alpha-verify-groups}}]
+        permissions=[{{#vendorExtensions.x-alpha-verify-permissions}}"{{.}}",{{/vendorExtensions.x-alpha-verify-permissions}}]
         {{#authMethods}}{{#isBasicBearer}}
         # validate token
         if token_factory.validate(token):
