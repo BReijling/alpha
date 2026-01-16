@@ -206,11 +206,16 @@ class LDAPProvider(JWTProviderMixin):
         exceptions.UserNotFoundException
             Raised when user is not found
         """
-        conn.search(  # type: ignore
-            search_base=self._search_base,
-            search_filter=f"({self._search_filter_key}={username})",
-            attributes=self._search_attributes,
-        )
+        try:
+            conn.search(  # type: ignore
+                search_base=self._search_base,
+                search_filter=f"({self._search_filter_key}={username})",
+                attributes=self._search_attributes,
+            )
+        except LDAPException as e:
+            raise exceptions.IdentityError(
+                f"Failed to search for user \'{username}\': {str(e)}"
+            ) from e
 
         if not conn.entries:  # type: ignore
             raise exceptions.UserNotFoundException(
