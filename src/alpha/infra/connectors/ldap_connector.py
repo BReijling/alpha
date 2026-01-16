@@ -60,7 +60,7 @@ class LDAPConnector:
         if use_tls:
             tls = Tls(
                 validate=ssl.CERT_REQUIRED,
-                version=ssl.PROTOCOL_TLSv1_2,
+                version=ssl.PROTOCOL_TLS_CLIENT,
             )
 
         self._server = Server(
