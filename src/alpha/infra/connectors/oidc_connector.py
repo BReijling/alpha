@@ -11,7 +11,7 @@ from requests.auth import HTTPBasicAuth
 from alpha import exceptions
 
 
-class OAuth2Connector:
+class OIDCConnector:
     """OAuth2 / OIDC connector for token and user operations."""
 
     def __init__(

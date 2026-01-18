@@ -10,7 +10,7 @@ from alpha.providers.models.token import Token
 
 # Providers
 from alpha.providers.ldap_provider import LDAPProvider, ADProvider
-from alpha.providers.oauth_provider import OAuth2Provider, KeyCloakProvider
+from alpha.providers.oidc_provider import OIDCProvider, KeyCloakProvider
 
 __all__ = [
     "Identity",
@@ -21,6 +21,6 @@ __all__ = [
     "Token",
     "LDAPProvider",
     "ADProvider",
-    "OAuth2Provider",
+    "OIDCProvider",
     "KeyCloakProvider",
 ]

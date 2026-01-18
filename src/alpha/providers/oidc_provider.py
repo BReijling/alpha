@@ -1,4 +1,4 @@
-"""OAuth2 / OIDC identity providers."""
+"""OIDC identity providers."""
 
 from __future__ import annotations
 
@@ -6,14 +6,14 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Mapping, Sequence, cast
 
 from alpha import exceptions
-from alpha.infra.connectors.oauth2_connector import OAuth2Connector
+from alpha.infra.connectors.oidc_connector import OIDCConnector
 from alpha.interfaces.token_factory import TokenFactory
 from alpha.mixins.jwt_provider import JWTProviderMixin
 from alpha.providers.models.credentials import PasswordCredentials
 from alpha.providers.models.identity import Identity
 from alpha.providers.models.token import Token
 
-DEFAULT_OAUTH2_MAPPINGS: dict[str, str | Sequence[str]] = {
+DEFAULT_OIDC_MAPPINGS: dict[str, str | Sequence[str]] = {
     "subject": "sub",
     "username": "preferred_username",
     "email": "email",
@@ -36,17 +36,17 @@ DEFAULT_KEYCLOAK_MAPPINGS: dict[str, str | Sequence[str]] = {
 }
 
 
-class OAuth2Provider(JWTProviderMixin):
-    """OAuth2 / OIDC identity provider.
+class OIDCProvider(JWTProviderMixin):
+    """OIDC identity provider.
 
     Parameters
     ----------
     connector
-            Connector to use for OAuth2 operations.
+            Connector to use for OIDC operations.
     token_factory, optional
             Factory used to issue/validate local tokens.
     claim_mappings, optional
-            Mapping of OAuth2/OIDC claims to Identity fields.
+            Mapping of OIDC claims to Identity fields.
     populate_groups, optional
             Whether to populate group memberships on the Identity.
     populate_permissions, optional
@@ -57,23 +57,23 @@ class OAuth2Provider(JWTProviderMixin):
             Whether this provider supports changing passwords.
     """
 
-    protocol = "oauth2"
+    protocol = "oidc"
     _token_factory: TokenFactory | None = None
 
     def __init__(
         self,
-        connector: OAuth2Connector,
+        connector: OIDCConnector,
         token_factory: TokenFactory | None = None,
         claim_mappings: Mapping[str, str | Sequence[str]] | None = None,
         populate_groups: bool = True,
         populate_permissions: bool = True,
-        populate_claims: bool = True,
+        populate_claims: bool = False,
         change_password_supported: bool = False,
     ) -> None:
         self._connector = connector
         self._token_factory = token_factory
         self._claim_mappings = (
-            dict(claim_mappings) if claim_mappings else DEFAULT_OAUTH2_MAPPINGS
+            dict(claim_mappings) if claim_mappings else DEFAULT_OIDC_MAPPINGS
         )
         self._populate_groups = populate_groups
         self._populate_permissions = populate_permissions
@@ -81,7 +81,7 @@ class OAuth2Provider(JWTProviderMixin):
         self._change_password_supported = change_password_supported
 
     def authenticate(self, credentials: PasswordCredentials) -> Identity:
-        """Authenticate a user using OAuth2 password flow."""
+        """Authenticate a user using OIDC password flow."""
         token_data = self._connector.request_password_token(
             username=credentials.username,
             password=credentials.password,
@@ -90,7 +90,7 @@ class OAuth2Provider(JWTProviderMixin):
         access_token = token_data.get("access_token")
         if not access_token:
             raise exceptions.InvalidCredentialsException(
-                "OAuth2 token response did not include access_token"
+                "OIDC token response did not include access_token"
             )
 
         claims = {}
@@ -119,7 +119,7 @@ class OAuth2Provider(JWTProviderMixin):
                 "Change password operation is not supported by this provider"
             )
         raise exceptions.NotSupportedException(
-            "Change password is not implemented for OAuth2 providers"
+            "Change password is not implemented for OIDC providers"
         )
 
     def validate(self, token: Token) -> Identity:
@@ -144,7 +144,7 @@ class OAuth2Provider(JWTProviderMixin):
         subject = self._get_claim(claims, "subject")
         if not subject:
             raise exceptions.IdentityError(
-                "OAuth2 claims did not include a subject"
+                "OIDC claims did not include a subject"
             )
 
         username = self._get_claim(claims, "username")
@@ -259,10 +259,10 @@ class OAuth2Provider(JWTProviderMixin):
         return None
 
 
-class KeyCloakProvider(OAuth2Provider):
-    """Keycloak identity provider based on OAuth2/OIDC."""
+class KeyCloakProvider(OIDCProvider):
+    """Keycloak identity provider based on OIDC."""
 
-    protocol = "oauth2"
+    protocol = "oidc"
 
     def __init__(
         self,
@@ -278,7 +278,7 @@ class KeyCloakProvider(OAuth2Provider):
         claim_mappings: Mapping[str, str | Sequence[str]] | None = None,
         populate_groups: bool = True,
         populate_permissions: bool = True,
-        populate_claims: bool = True,
+        populate_claims: bool = False,
         change_password_supported: bool = False,
         verify_tls: bool = True,
         timeout_seconds: int = 10,
@@ -297,7 +297,7 @@ class KeyCloakProvider(OAuth2Provider):
             f"{base_url}/admin/realms/{realm}/users" "?username={subject}"
         )
 
-        connector = OAuth2Connector(
+        connector = OIDCConnector(
             token_url=token_url,
             userinfo_url=userinfo_url,
             introspection_url=introspection_url,

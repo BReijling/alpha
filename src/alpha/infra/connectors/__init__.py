@@ -1,7 +1,7 @@
 from alpha.infra.connectors.ldap_connector import LDAPConnector
-from alpha.infra.connectors.oauth2_connector import OAuth2Connector
+from alpha.infra.connectors.oidc_connector import OIDCConnector
 
 __all__ = [
     "LDAPConnector",
-    "OAuth2Connector",
+    "OIDCConnector",
 ]
