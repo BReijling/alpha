@@ -36,3 +36,23 @@ def test_ldap_provider_get_user(ldap_provider):
     assert identity.username == "ldap_user"
     assert identity.email == "ldap_user@example.com"
     assert identity.display_name == "LDAP User"
+
+
+def test_ad_provider_authenticate(ad_provider, credentials):
+    identity = ad_provider.authenticate(credentials)
+
+    assert isinstance(identity, Identity)
+    assert identity.subject == "ldap_user"
+    assert identity.username == "ldap_user"
+    assert identity.email == "ldap_user@example.com"
+    assert identity.display_name == "LDAP User"
+
+
+def test_ad_provider_get_user(ad_provider):
+    identity = ad_provider.get_user("ldap_user")
+
+    assert isinstance(identity, Identity)
+    assert identity.subject == "ldap_user"
+    assert identity.username == "ldap_user"
+    assert identity.email == "ldap_user@example.com"
+    assert identity.display_name == "LDAP User"

@@ -37,9 +37,7 @@ class QueryClause:
 
     def _raise_instrumented_attr_exception(self):
         raise exceptions.InstrumentedAttributeMissing(
-            """
-            The 'field' attribute needs to be of an \
-sqlalchemy.orm.InstrumentedAttribute type, or specify the mapped domain model \
-by adding the _domain_model attribute
-            """
+            "The \'field\' attribute needs to be of an "
+            "sqlalchemy.orm.InstrumentedAttribute type, or specify the mapped "
+            "domain model by adding the _domain_model attribute"
         )

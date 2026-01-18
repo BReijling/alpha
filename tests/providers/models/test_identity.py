@@ -52,7 +52,7 @@ def test_identity_from_ad_dict(ad_dict):
     assert identity.username == "ad_user"
     assert identity.email == "ad_user@example.com"
     assert identity.display_name == "Display AD User"
-    assert identity.groups == ["group1", "group2"]
+    assert identity.groups == ["group1", "group2", "group3, with, commas"]
     assert identity.permissions == []
     assert identity.claims != {}
     assert isinstance(identity.issued_at, datetime)

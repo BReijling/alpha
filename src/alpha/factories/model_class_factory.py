@@ -33,7 +33,7 @@ from alpha.interfaces.factories import (
 )
 from alpha.interfaces.openapi_model import OpenAPIModel
 from alpha.interfaces.pydantic_instance import PydanticInstance
-from alpha.utils.version_check import minor_version_gte
+from alpha.utils.version_checker import minor_version_gte
 
 
 CLASS_FACTORIES: dict[str, ClassFactory] = {
@@ -173,4 +173,4 @@ class ModelClassFactory:
                     f"{field.type.__class__=}; "
                 ) from exc
             params[field.name] = value
-        return cls(**params)
+        return cls(**params)  # type: ignore

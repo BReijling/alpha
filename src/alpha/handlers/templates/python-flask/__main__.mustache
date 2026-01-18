@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+
+import argparse
+import logging
+import os
+import socket
+
+import connexion
+{{#featureCORS}}
+from flask_cors import CORS
+{{/featureCORS}}
+from flask_compress import Compress
+from requests import Response
+
+from alpha.utils.logging_configurator import LoggingConfigurator
+from alpha.encoder import JSONEncoder
+{{#initContainerFunction}}from {{^initContainerFrom}}{{servicePackage}}{{/initContainerFrom}}{{#initContainerFrom}}{{initContainerFrom}}{{/initContainerFrom}} import {{initContainerFunction}}{{/initContainerFunction}}
+
+from {{packageName}} import controllers
+
+port={{serverPort}}
+
+if os.getenv('FLASK_ENV') != 'production':
+    parser = argparse.ArgumentParser(
+        description='Port for server to start on.'
+    )
+    parser.add_argument(
+        '--port',
+        type=int,
+        required=False,
+        default={{serverPort}}
+    )
+    args = parser.parse_args()
+    port = args.port
+
+app = connexion.App(__name__, specification_dir='./openapi/')
+app.app.json_encoder = JSONEncoder
+app.add_api('openapi.yaml',
+            arguments={'title': '{{appName}}'},
+            pythonic_params=True)
+
+compress = Compress()
+compress.init_app(app.app)
+
+{{#initContainerFunction}}
+container = init_container()
+container.wire(packages=[controllers])
+
+{{^disableLoggingConfigurator}}
+LoggingConfigurator(
+    config=container.config.logging.config(),
+    fmt=container.config.logging.format(),
+    handlers=container.config.logging.handlers(),
+    level=container.config.logging.level(),
+    stream=container.config.logging.stream(),
+)
+{{/disableLoggingConfigurator}}
+{{#featureCORS}}
+# add CORS support
+cors_origins = container.config.cors.origins()
+logging.info(f'Enabling CORS for origins: {cors_origins}')
+CORS(app.app, origins=cors_origins)
+{{/featureCORS}}
+
+app.container = container
+{{/initContainerFunction}}
+
+
+@app.app.after_request
+def add_headers(response: Response):
+    response.headers["Cache-Control"] = "no-store"
+    # response.headers["Content-Security-Policy"] = "default-src 'self'"
+    response.headers["Strict-Transport-Security"] = (
+        "max-age=31536000; includeSubDomains"
+    )
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    return response
+
+
+logging.info(f'Started {{servicePackage}} API on \'{socket.gethostname()}\'')
+
+if __name__ == '__main__':
+    app.run(port=port)

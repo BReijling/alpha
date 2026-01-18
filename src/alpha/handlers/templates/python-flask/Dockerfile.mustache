@@ -1,0 +1,23 @@
+ARG BASE_IMAGE=python:3.13
+
+FROM ${BASE_IMAGE}
+
+ARG PIP_EXTRA_INDEX_URL
+ARG PIP_RETRIES
+ARG PIP_ROOT_USER_ACTION=ignore
+
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+COPY *.whl /usr/src/app/
+COPY requirements.txt /usr/src/app/
+
+RUN pip install *.whl
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . /usr/src/app
+
+EXPOSE {{serverPort}}
+
+CMD ["gunicorn", "--bind", ":{{serverPort}}", "--workers", "4", "--logger-class", "alpha.utils.logging_configurator.GunicornLogger", "{{packageName}}.__main__:app"]
+

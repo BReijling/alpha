@@ -26,6 +26,46 @@ DEFAULT_AD_MAPPINGS = {
     "permissions": "permissions",
 }
 
+AD_SEARCH_ATTRIBUTES = [
+    'cn',
+    'generationQualifier',
+    'name',
+    'postalAddress',
+    'lastLogonTimestamp',
+    'mobile',
+    'postalCode',
+    'countryCode',
+    'company',
+    'displayName',
+    'o',
+    'st',
+    'ou',
+    'givenName',
+    'msExchUserCulture',
+    'l',
+    'initials',
+    'msTSLicenseVersion',
+    'memberOf',
+    'whenChanged',
+    'mailNickname',
+    'sn',
+    'street',
+    'accountExpires',
+    'uSNChanged',
+    'distinguishedName',
+    'whenCreated',
+    'sAMAccountName',
+    'c',
+    'employeeID',
+    'streetAddress',
+    'description',
+    'mail',
+    'title',
+    'department',
+    'co',
+    'personalTitle',
+]
+
 
 @dataclass
 class Identity:
@@ -199,8 +239,10 @@ class Identity:
             User object to update from.
         """
         self.username = user.username
-        self.email = user.email
-        self.display_name = user.display_name
+        if not self.email:
+            self.email = user.email
+        if not self.display_name:
+            self.display_name = user.display_name
         for permission in user.permissions or []:
             if permission not in self.permissions:
                 self.permissions.append(permission)  # type: ignore
@@ -335,10 +377,13 @@ class Identity:
             A list of group names the user is a member of.
         """
         groups: list[str] = []
-        for group in entry.get("memberOf", []):
-            items = group.split(",")
-            for item in items:
-                if item.startswith("CN=") or item.startswith("cn="):
-                    groups.append(item[3:])
-                    break
+        for item in entry.get("memberOf", []):
+            group = (
+                item.replace('\\,', ';')
+                .split(',')[0]
+                .replace(';', ',')
+                .replace('CN=', '')
+                .replace('cn=', '')
+            )
+            groups.append(group)
         return groups
