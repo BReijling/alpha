@@ -6,7 +6,9 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Mapping, Sequence, cast
 
 from alpha import exceptions
-from alpha.infra.connectors.oidc_connector import OIDCConnector
+from alpha.infra.connectors.oidc_connector import (
+    OIDCConnector,
+)
 from alpha.interfaces.token_factory import TokenFactory
 from alpha.mixins.jwt_provider import JWTProviderMixin
 from alpha.providers.models.credentials import PasswordCredentials
@@ -42,19 +44,19 @@ class OIDCProvider(JWTProviderMixin):
     Parameters
     ----------
     connector
-            Connector to use for OIDC operations.
+        Connector to use for OIDC operations.
     token_factory, optional
-            Factory used to issue/validate local tokens.
+        Factory used to issue/validate local tokens.
     claim_mappings, optional
-            Mapping of OIDC claims to Identity fields.
+        Mapping of OIDC claims to Identity fields.
     populate_groups, optional
-            Whether to populate group memberships on the Identity.
+        Whether to populate group memberships on the Identity.
     populate_permissions, optional
-            Whether to populate permissions on the Identity.
+        Whether to populate permissions on the Identity.
     populate_claims, optional
-            Whether to include raw claims on the Identity.
+        Whether to include raw claims on the Identity.
     change_password_supported, optional
-            Whether this provider supports changing passwords.
+        Whether this provider supports changing passwords.
     """
 
     protocol = "oidc"
@@ -66,7 +68,7 @@ class OIDCProvider(JWTProviderMixin):
         token_factory: TokenFactory | None = None,
         claim_mappings: Mapping[str, str | Sequence[str]] | None = None,
         populate_groups: bool = True,
-        populate_permissions: bool = True,
+        populate_permissions: bool = False,
         populate_claims: bool = False,
         change_password_supported: bool = False,
     ) -> None:
@@ -81,7 +83,18 @@ class OIDCProvider(JWTProviderMixin):
         self._change_password_supported = change_password_supported
 
     def authenticate(self, credentials: PasswordCredentials) -> Identity:
-        """Authenticate a user using OIDC password flow."""
+        """Authenticate a user using OIDC password flow.
+
+        Parameters
+        ----------
+        credentials
+            User credentials.
+
+        Returns
+        -------
+        Identity
+            Authenticated user identity.
+        """
         token_data = self._connector.request_password_token(
             username=credentials.username,
             password=credentials.password,
@@ -101,7 +114,17 @@ class OIDCProvider(JWTProviderMixin):
         return self._convert_claims_to_identity(merged_claims)
 
     def get_user(self, subject: str) -> Identity:
-        """Retrieve a user by subject using an admin lookup."""
+        """Retrieve a user by subject using an admin lookup.
+        Parameters
+        ----------
+        subject
+            User subject identifier.
+
+        Returns
+        -------
+        Identity
+            Retrieved user identity.
+        """
         if not self._connector.user_lookup_url_template:
             raise exceptions.NotSupportedException(
                 "User lookup is not configured for this provider"
@@ -113,7 +136,15 @@ class OIDCProvider(JWTProviderMixin):
     def change_password(
         self, credentials: PasswordCredentials, new_password: str
     ) -> None:
-        """Change user password (if supported)."""
+        """Change user password (if supported).
+
+        Parameters
+        ----------
+        credentials
+            Current user credentials.
+        new_password
+            New password to set.
+        """
         if not self._change_password_supported:
             raise exceptions.NotSupportedException(
                 "Change password operation is not supported by this provider"
@@ -123,7 +154,18 @@ class OIDCProvider(JWTProviderMixin):
         )
 
     def validate(self, token: Token) -> Identity:
-        """Validate a token using token factory or introspection."""
+        """Validate a token using token factory or introspection.
+
+        Parameters
+        ----------
+        token
+            Token to validate.
+
+        Returns
+        -------
+        Identity
+            Validated user identity.
+        """
         if self._token_factory:
             return super().validate(token)
 
@@ -141,6 +183,22 @@ class OIDCProvider(JWTProviderMixin):
     def _convert_claims_to_identity(
         self, claims: Mapping[str, Any]
     ) -> Identity:
+        """Convert OIDC claims to an Identity.
+
+        Parameters
+        ----------
+        claims
+            OIDC claims to convert.
+
+        Returns
+        -------
+            Converted Identity object.
+
+        Raises
+        ------
+        exceptions.IdentityError
+            Raised if the claims do not include a required subject.
+        """
         subject = self._get_claim(claims, "subject")
         if not subject:
             raise exceptions.IdentityError(
@@ -152,7 +210,6 @@ class OIDCProvider(JWTProviderMixin):
             username = subject
 
         issued_at = datetime.now(tz=timezone.utc)
-        expires_at = self._get_expires_at(claims, issued_at)
 
         groups = (
             self._extract_sequence(self._get_claim(claims, "groups"))
@@ -177,7 +234,6 @@ class OIDCProvider(JWTProviderMixin):
             permissions=permissions,
             claims=dict(claims) if self._populate_claims else {},
             issued_at=issued_at,
-            expires_at=expires_at,
             audience=audience,
             role=self._get_claim(claims, "role"),
             admin=bool(self._get_claim(claims, "admin", False)),
@@ -190,6 +246,20 @@ class OIDCProvider(JWTProviderMixin):
         field: str,
         default: Any | None = None,
     ) -> Any:
+        """Get a claim value by field name, using mappings if configured.
+
+        Parameters
+        ----------
+        claims
+            OIDC claims to retrieve the value from.
+        field
+            Name of the claim field to retrieve.
+        default, optional
+            Default value to return if the claim is not found, by default None.
+        Returns
+        -------
+            Value of the claim field, or the default if not found.
+        """
         mapping = self._claim_mappings.get(field)
         if mapping is None:
             return claims.get(field, default)
@@ -202,12 +272,36 @@ class OIDCProvider(JWTProviderMixin):
 
     @staticmethod
     def _ensure_sequence(value: str | Sequence[str]) -> Sequence[str]:
+        """Ensure the value is a sequence of strings.
+
+        Parameters
+        ----------
+        value
+            Value to ensure as a sequence of strings.
+
+        Returns
+        -------
+            Sequence of strings.
+        """
         if isinstance(value, str):
             return [value]
         return value
 
     @staticmethod
     def _get_claim_by_path(claims: Mapping[str, Any], path: str) -> Any:
+        """Get a claim value by a dot-separated path.
+
+        Parameters
+        ----------
+        claims
+            OIDC claims to retrieve the value from.
+        path
+            Dot-separated path to the claim value.
+
+        Returns
+        -------
+            Value of the claim at the specified path, or None if not found.
+        """
         current: Any = claims
         for segment in path.split("."):
             if not isinstance(current, Mapping):
@@ -217,6 +311,17 @@ class OIDCProvider(JWTProviderMixin):
 
     @staticmethod
     def _extract_sequence(value: Any) -> list[str]:
+        """Extract a sequence of strings from the given value.
+
+        Parameters
+        ----------
+        value
+            Value to extract the sequence from.
+
+        Returns
+        -------
+            Sequence of strings.
+        """
         if value is None:
             return []
         if isinstance(value, str):
@@ -226,6 +331,17 @@ class OIDCProvider(JWTProviderMixin):
         return [str(value)]
 
     def _extract_permissions(self, claims: Mapping[str, Any]) -> list[str]:
+        """Extract permissions from the given claims.
+
+        Parameters
+        ----------
+        claims
+            OIDC claims to retrieve the permissions from.
+
+        Returns
+        -------
+            Sequence of strings.
+        """
         raw = self._get_claim(claims, "permissions")
         if raw is None:
             raw = claims.get("scope")
@@ -237,6 +353,17 @@ class OIDCProvider(JWTProviderMixin):
 
     @staticmethod
     def _extract_audience(claims: Mapping[str, Any]) -> list[str] | None:
+        """Extract audience from the given claims.
+
+        Parameters
+        ----------
+        claims
+            OIDC claims to retrieve the audience from.
+
+        Returns
+        -------
+            Sequence of strings, or None if not found.
+        """
         aud = claims.get("aud")
         if aud is None:
             return None
@@ -246,71 +373,40 @@ class OIDCProvider(JWTProviderMixin):
             return [str(item) for item in cast(Sequence[Any], aud)]
         return [str(aud)]
 
-    @staticmethod
-    def _get_expires_at(
-        claims: Mapping[str, Any], issued_at: datetime
-    ) -> datetime | None:
-        expires_in = claims.get("expires_in")
-        if isinstance(expires_in, (int, float)):
-            return issued_at + timedelta(seconds=float(expires_in))
-        exp = claims.get("exp")
-        if isinstance(exp, (int, float)):
-            return datetime.fromtimestamp(float(exp), tz=timezone.utc)
-        return None
-
 
 class KeyCloakProvider(OIDCProvider):
-    """Keycloak identity provider based on OIDC."""
+    """Keycloak identity provider based on OIDC.
+
+    Parameters
+    ----------
+    connector
+            Connector to use for OIDC operations.
+    token_factory, optional
+            Factory used to issue/validate local tokens.
+    claim_mappings, optional
+            Mapping of OIDC claims to Identity fields.
+    populate_groups, optional
+            Whether to populate group memberships on the Identity.
+    populate_permissions, optional
+            Whether to populate permissions on the Identity.
+    populate_claims, optional
+            Whether to include raw claims on the Identity.
+    change_password_supported, optional
+            Whether this provider supports changing passwords.
+    """
 
     protocol = "oidc"
 
     def __init__(
         self,
-        base_url: str,
-        realm: str,
-        client_id: str,
-        client_secret: str,
+        connector: OIDCConnector,
         token_factory: TokenFactory | None = None,
-        scope: str | None = None,
-        admin_client_id: str | None = None,
-        admin_client_secret: str | None = None,
-        admin_scope: str | None = None,
         claim_mappings: Mapping[str, str | Sequence[str]] | None = None,
         populate_groups: bool = True,
-        populate_permissions: bool = True,
+        populate_permissions: bool = False,
         populate_claims: bool = False,
         change_password_supported: bool = False,
-        verify_tls: bool = True,
-        timeout_seconds: int = 10,
     ) -> None:
-        token_url = (
-            f"{base_url}/realms/{realm}" "/protocol/openid-connect/token"
-        )
-        userinfo_url = (
-            f"{base_url}/realms/{realm}" "/protocol/openid-connect/userinfo"
-        )
-        introspection_url = (
-            f"{base_url}/realms/{realm}"
-            "/protocol/openid-connect/token/introspect"
-        )
-        user_lookup_url_template = (
-            f"{base_url}/admin/realms/{realm}/users" "?username={subject}"
-        )
-
-        connector = OIDCConnector(
-            token_url=token_url,
-            userinfo_url=userinfo_url,
-            introspection_url=introspection_url,
-            client_id=client_id,
-            client_secret=client_secret,
-            scope=scope,
-            verify_tls=verify_tls,
-            timeout_seconds=timeout_seconds,
-            user_lookup_url_template=user_lookup_url_template,
-            admin_client_id=admin_client_id,
-            admin_client_secret=admin_client_secret,
-            admin_scope=admin_scope,
-        )
 
         super().__init__(
             connector=connector,

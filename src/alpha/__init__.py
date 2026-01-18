@@ -6,7 +6,10 @@ from alpha.domain.models.user import User
 from alpha.domain.models.base_model import BaseDomainModel, DomainModel
 from alpha.domain.models.life_cycle_base import LifeCycleBase
 from alpha.infra.connectors.ldap_connector import LDAPConnector
-from alpha.infra.connectors.oidc_connector import OIDCConnector
+from alpha.infra.connectors.oidc_connector import (
+    OIDCConnector,
+    KeyCloakOIDCConnector,
+)
 from alpha.infra.databases.sql_alchemy import SqlAlchemyDatabase
 from alpha.infra.models.filter_operators import And, Or
 from alpha.infra.models.json_patch import JsonPatch
@@ -70,6 +73,7 @@ __all__ = [
     "User",
     "LDAPConnector",
     "OIDCConnector",
+    "KeyCloakOIDCConnector",
     "SqlAlchemyDatabase",
     "And",
     "Or",
