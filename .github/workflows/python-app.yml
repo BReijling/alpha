@@ -18,22 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      # ldap:
-      #   image: osixia/openldap:1.5.0
-      #   ports:
-      #     - 389:389
-      #   env:
-      #     LDAP_ORGANISATION: "Example Org"
-      #     LDAP_DOMAIN: "example.org"
-      #     LDAP_ADMIN_PASSWORD: test_password
-      #   options: >-
-      #     --health-cmd="ldapsearch -x -H ldap://localhost -b dc=example,dc=org"
-      #     --health-interval=10s
-      #     --health-timeout=5s
-      #     --health-retries=5
-      #     --volume ./integration_test_deps/openldap-entrypoint.sh:/tmp/custom-openldap-entrypoint.sh:ro
-      #     --volume ./integration_test_deps/ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom:ro
-      #     --entrypoint /tmp/custom-openldap-entrypoint.sh
+
 
       mysql:
         image: mysql:8.0

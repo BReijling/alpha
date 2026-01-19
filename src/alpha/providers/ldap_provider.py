@@ -47,6 +47,9 @@ class LDAPProvider(JWTProviderMixin):
         True
     change_password_supported, optional
         Whether the provider supports changing passwords, by default False
+    additional_connector_params, optional
+        Additional parameters to pass to the LDAP connection, by default
+        {"receive_timeout": 5}
     """
 
     protocol = "ldap"
@@ -65,6 +68,7 @@ class LDAPProvider(JWTProviderMixin):
         populate_claims: bool = True,
         auto_connect: bool = True,
         change_password_supported: bool = False,
+        additional_connector_params: dict[str, Any] | None = None,
     ) -> None:
         """Initialize LDAPProvider"""
         self._connector = connector
@@ -78,7 +82,9 @@ class LDAPProvider(JWTProviderMixin):
         self._populate_claims = populate_claims
         self._auto_connect = auto_connect
         self._change_password_supported = change_password_supported
-
+        self._additional_connector_params = additional_connector_params or {
+            'receive_timeout': 5
+        }
         if self._auto_connect and not self._connector.is_connected():
             self._connector.connect()
 
@@ -106,7 +112,12 @@ class LDAPProvider(JWTProviderMixin):
         entry_dn = cast(str, entry.entry_dn)  # type: ignore
 
         # Try to bind with user credentials to verify password
-        self._verify_password(entry_dn=entry_dn, credentials=credentials)
+        if not self._verify_password(
+            entry_dn=entry_dn, credentials=credentials
+        ):
+            raise exceptions.InvalidCredentialsException(
+                f"Credentials for \'{credentials.username}\' are invalid"
+            )
 
         return self._convert_ldap_entry_to_identity(entry)
 
@@ -159,7 +170,12 @@ class LDAPProvider(JWTProviderMixin):
         entry_dn = cast(str, entry.entry_dn)  # type: ignore
 
         # Try to bind with user credentials to verify password
-        self._verify_password(entry_dn=entry_dn, credentials=credentials)
+        if not self._verify_password(
+            entry_dn=entry_dn, credentials=credentials
+        ):
+            raise exceptions.InvalidCredentialsException(
+                f"Credentials for \'{credentials.username}\' are invalid"
+            )
 
         try:
             conn.extend.microsoft.modify_password(  # type: ignore
@@ -190,11 +206,16 @@ class LDAPProvider(JWTProviderMixin):
         exceptions.UserNotFoundException
             Raised when user is not found
         """
-        conn.search(  # type: ignore
-            search_base=self._search_base,
-            search_filter=f"({self._search_filter_key}={username})",
-            attributes=self._search_attributes,
-        )
+        try:
+            conn.search(  # type: ignore
+                search_base=self._search_base,
+                search_filter=f"({self._search_filter_key}={username})",
+                attributes=self._search_attributes,
+            )
+        except LDAPException as e:
+            raise exceptions.IdentityError(
+                f"Failed to search for user \'{username}\': {str(e)}"
+            ) from e
 
         if not conn.entries:  # type: ignore
             raise exceptions.UserNotFoundException(
@@ -205,7 +226,7 @@ class LDAPProvider(JWTProviderMixin):
 
     def _verify_password(
         self, entry_dn: str, credentials: PasswordCredentials
-    ) -> None:
+    ) -> bool:
         """Verify the password for a given LDAP entry DN
 
         Parameters
@@ -214,6 +235,11 @@ class LDAPProvider(JWTProviderMixin):
             Distinguished Name of the LDAP entry
         credentials
             PasswordCredentials object containing username and password
+
+        Returns
+        -------
+        bool
+            True if password verification succeeded, False otherwise
 
         Raises
         ------
@@ -224,14 +250,20 @@ class LDAPProvider(JWTProviderMixin):
             connection_cls = getattr(
                 self._connector, "connection_cls", Connection
             )
-            connection_cls(
+            # With auto_bind=True, bind happens during __init__
+            # If authentication fails, an exception is raised immediately
+            conn = connection_cls(
                 self._connector.get_server(),
                 user=entry_dn,
                 password=credentials.password,
                 client_strategy=self._connector._client_strategy,  # type: ignore
                 auto_bind=True,
-                receive_timeout=5,
+                **self._additional_connector_params,
             )
+            # If we reach here, authentication succeeded
+            # Close the connection to prevent resource leak
+            conn.unbind()
+            return True
         except LDAPException as e:
             raise exceptions.InvalidCredentialsException(
                 f"Credentials for \'{credentials.username}\' are invalid"
