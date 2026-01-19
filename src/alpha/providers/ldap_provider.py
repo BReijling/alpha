@@ -250,6 +250,8 @@ class LDAPProvider(JWTProviderMixin):
             connection_cls = getattr(
                 self._connector, "connection_cls", Connection
             )
+            # With auto_bind=True, bind happens during __init__
+            # If authentication fails, an exception is raised immediately
             conn = connection_cls(
                 self._connector.get_server(),
                 user=entry_dn,
@@ -258,12 +260,10 @@ class LDAPProvider(JWTProviderMixin):
                 auto_bind=True,
                 **self._additional_connector_params,
             )
-            try:
-                if conn:
-                    return True
-                return False
-            finally:
-                conn.unbind()
+            # If we reach here, authentication succeeded
+            # Close the connection to prevent resource leak
+            conn.unbind()
+            return True
         except LDAPException as e:
             raise exceptions.InvalidCredentialsException(
                 f"Credentials for \'{credentials.username}\' are invalid"
