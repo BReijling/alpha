@@ -68,9 +68,7 @@ class LDAPProvider(JWTProviderMixin):
         populate_claims: bool = True,
         auto_connect: bool = True,
         change_password_supported: bool = False,
-        additional_connector_params: dict[str, Any] | None = {
-            'receive_timeout': 5
-        },
+        additional_connector_params: dict[str, Any] | None = None,
     ) -> None:
         """Initialize LDAPProvider"""
         self._connector = connector
@@ -84,7 +82,9 @@ class LDAPProvider(JWTProviderMixin):
         self._populate_claims = populate_claims
         self._auto_connect = auto_connect
         self._change_password_supported = change_password_supported
-        self._additional_connector_params = additional_connector_params or {}
+        self._additional_connector_params = additional_connector_params or {
+            'receive_timeout': 5
+        }
         if self._auto_connect and not self._connector.is_connected():
             self._connector.connect()
 
@@ -236,6 +236,11 @@ class LDAPProvider(JWTProviderMixin):
         credentials
             PasswordCredentials object containing username and password
 
+        Returns
+        -------
+        bool
+            True if password verification succeeded, False otherwise
+
         Raises
         ------
         exceptions.InvalidCredentialsException
@@ -245,16 +250,20 @@ class LDAPProvider(JWTProviderMixin):
             connection_cls = getattr(
                 self._connector, "connection_cls", Connection
             )
-            if connection_cls(
+            # With auto_bind=True, bind happens during __init__
+            # If authentication fails, an exception is raised immediately
+            conn = connection_cls(
                 self._connector.get_server(),
                 user=entry_dn,
                 password=credentials.password,
                 client_strategy=self._connector._client_strategy,  # type: ignore
                 auto_bind=True,
                 **self._additional_connector_params,
-            ):
-                return True
-            return False
+            )
+            # If we reach here, authentication succeeded
+            # Close the connection to prevent resource leak
+            conn.unbind()
+            return True
         except LDAPException as e:
             raise exceptions.InvalidCredentialsException(
                 f"Credentials for \'{credentials.username}\' are invalid"
