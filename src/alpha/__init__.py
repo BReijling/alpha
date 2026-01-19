@@ -6,6 +6,10 @@ from alpha.domain.models.user import User
 from alpha.domain.models.base_model import BaseDomainModel, DomainModel
 from alpha.domain.models.life_cycle_base import LifeCycleBase
 from alpha.infra.connectors.ldap_connector import LDAPConnector
+from alpha.infra.connectors.oidc_connector import (
+    OIDCConnector,
+    KeyCloakOIDCConnector,
+)
 from alpha.infra.databases.sql_alchemy import SqlAlchemyDatabase
 from alpha.infra.models.filter_operators import And, Or
 from alpha.infra.models.json_patch import JsonPatch
@@ -40,6 +44,7 @@ from alpha.providers.models.identity import (
 from alpha.providers.models.credentials import PasswordCredentials
 from alpha.providers.models.token import Token
 from alpha.providers.ldap_provider import LDAPProvider, ADProvider
+from alpha.providers.oidc_provider import OIDCProvider, KeyCloakProvider
 from alpha.repositories.models.repository_model import RepositoryModel
 from alpha.repositories.sql_alchemy_repository import SqlAlchemyRepository
 from alpha.services.authentication_service import AuthenticationService
@@ -67,6 +72,8 @@ __all__ = [
     "LifeCycleBase",
     "User",
     "LDAPConnector",
+    "OIDCConnector",
+    "KeyCloakOIDCConnector",
     "SqlAlchemyDatabase",
     "And",
     "Or",
@@ -101,6 +108,8 @@ __all__ = [
     "Token",
     "LDAPProvider",
     "ADProvider",
+    "OIDCProvider",
+    "KeyCloakProvider",
     "RepositoryModel",
     "SqlAlchemyRepository",
     "AuthenticationService",

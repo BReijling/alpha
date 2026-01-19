@@ -5,10 +5,14 @@
   "clients": [
     {
       "clientId": "test-client",
-      "publicClient": true,
+      "publicClient": false,
       "directAccessGrantsEnabled": true,
       "standardFlowEnabled": true,
-      "redirectUris": ["*"]
+      "serviceAccountsEnabled": true,
+      "redirectUris": ["*"],
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "supersecret"
     }
   ],
 
