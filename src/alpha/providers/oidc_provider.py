@@ -146,13 +146,11 @@ class OIDCProvider(JWTProviderMixin):
             New password to set.
         """
         if not self._change_password_supported:
-            raise exceptions.NotSupportedException(
-                "Change password operation is not supported by this provider"
-            )
-        raise exceptions.NotSupportedException(
-            "Change password is not implemented for OIDC providers"
-        )
+            message = "Change password operation is not supported by this provider"
+        else:
+            message = "Change password is not implemented for OIDC providers"
 
+        raise exceptions.NotSupportedException(message)
     def validate(self, token: Token) -> Identity:
         """Validate a token using token factory or introspection.
 

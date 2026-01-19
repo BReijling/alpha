@@ -1,8 +1,6 @@
-import token
 import pytest
 
 from ldap3 import MOCK_SYNC
-from alpha.domain.models import user
 from alpha.infra.connectors.ldap_connector import LDAPConnector
 from alpha.infra.connectors.oidc_connector import OIDCConnector
 
@@ -36,7 +34,7 @@ def oidc_connector():
 
 
 @pytest.fixture
-def fake_reponse():
+def fake_response():
     class FakeResponse:
         def __init__(self, status_code: int, json_data: dict):
             self.status_code = status_code

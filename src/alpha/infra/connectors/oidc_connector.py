@@ -85,6 +85,17 @@ class OIDCConnector:
 
         self._session = requests.Session()
 
+    def close(self) -> None:
+        """Close the underlying HTTP session to release resources."""
+        self._session.close()
+
+    def __enter__(self) -> "OIDCConnector":
+        """Enter the runtime context related to this object."""
+        return self
+
+    def __exit__(self, exc_type, exc, tb) -> None:
+        """Exit the runtime context and close the HTTP session."""
+        self.close()
     @property
     def userinfo_url(self) -> str | None:
         """Return the configured userinfo endpoint URL.
@@ -392,6 +403,7 @@ class OIDCConnector:
             if error:
                 return str(error)
         except ValueError:
+            # If the response body is not valid JSON, fall back to a generic message.
             pass
         return f"OAuth2 request failed with status {response.status_code}"
 

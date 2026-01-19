@@ -46,8 +46,8 @@ def test_oidc_provider_validate(oidc_provider, token):
     assert isinstance(result, Identity)
     assert result.subject == "oidc_user"
     assert result.username == "oidc_user"
-    assert result.email == None
-    assert result.display_name == None
+    assert result.email is None
+    assert result.display_name is None
 
 
 def test_oidc_provider_get_claims(oidc_provider):

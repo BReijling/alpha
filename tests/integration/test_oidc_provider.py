@@ -4,8 +4,8 @@ from alpha.providers.models.identity import Identity
 
 
 @pytest.mark.skipif(
-    os.getenv('GITHUB_ACTIONS') == 'true',
-    reason='Unable to run KeyCloak service in GitHub Actions',
+    os.getenv("GITHUB_ACTIONS") == "true",
+    reason="Unable to run KeyCloak service in GitHub Actions",
 )
 def test_keycloak_provider_authenticate(
     keycloak_provider, keycloak_credentials
