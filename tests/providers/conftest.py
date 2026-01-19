@@ -35,6 +35,10 @@ class FakeLDAPConnection:
         # Simulate a successful bind operation
         return True
 
+    def unbind(self):
+        # Simulate an unbind operation
+        return True
+
     def search(self, search_base, search_filter, *args, **kwargs):
         # Simulate a search operation returning a mock entry
         if "ldap_user" in search_filter:

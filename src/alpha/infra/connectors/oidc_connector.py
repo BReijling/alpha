@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from typing import Any, Mapping, cast
-from urllib.parse import urljoin
+from urllib.parse import quote, urljoin
 
 import requests
 from requests.auth import HTTPBasicAuth
@@ -252,7 +252,8 @@ class OIDCConnector:
                 "Unable to obtain admin access token"
             )
 
-        url = self._user_lookup_url_template.format(subject=subject)
+        # URL-encode the subject to prevent format string injection
+        url = self._user_lookup_url_template.format(subject=quote(subject, safe=''))
         response: Any = self._request_json(
             "GET",
             url,
