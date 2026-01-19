@@ -115,6 +115,7 @@ class OIDCProvider(JWTProviderMixin):
 
     def get_user(self, subject: str) -> Identity:
         """Retrieve a user by subject using an admin lookup.
+
         Parameters
         ----------
         subject

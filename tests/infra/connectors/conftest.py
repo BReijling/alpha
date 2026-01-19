@@ -36,7 +36,7 @@ def oidc_connector():
 
 
 @pytest.fixture
-def fake_reponse():
+def fake_response():
     class FakeResponse:
         def __init__(self, status_code: int, json_data: dict):
             self.status_code = status_code

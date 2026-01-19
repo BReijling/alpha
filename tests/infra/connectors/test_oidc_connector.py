@@ -20,11 +20,11 @@ def test_oidc_connector(oidc_connector):
     assert oidc_connector.user_lookup_url_template == "test/users/{user_id}"
 
 
-def test_oidc_connector_extract_error_message(fake_reponse):
+def test_oidc_connector_extract_error_message(fake_response):
 
     assert (
         OIDCConnector._extract_error_message(
-            fake_reponse(
+            fake_response(
                 400,
                 {
                     "error": "invalid_request",
@@ -36,7 +36,7 @@ def test_oidc_connector_extract_error_message(fake_reponse):
     )
     assert (
         OIDCConnector._extract_error_message(
-            fake_reponse(
+            fake_response(
                 400,
                 {
                     "error": "invalid_request",
@@ -47,7 +47,7 @@ def test_oidc_connector_extract_error_message(fake_reponse):
     )
     assert (
         OIDCConnector._extract_error_message(
-            fake_reponse(
+            fake_response(
                 400,
                 {},
             )

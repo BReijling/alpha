@@ -241,7 +241,7 @@ class OIDCConnector:
                 "Unable to obtain admin access token"
             )
 
-        url = self._user_lookup_url_template.format(subject=subject)
+        url = self._user_lookup_url_template.replace("{subject}", subject)
         response: Any = self._request_json(
             "GET",
             url,
