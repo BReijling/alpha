@@ -187,7 +187,8 @@ class AuthenticationService:
                 self.uow, self._repository_name
             )
             user = users.get_by_id(
-                value=identity.subject, attr=self._user_id_attribute
+                value=getattr(identity, self._user_id_attribute),
+                attr=self._user_id_attribute,
             )
             if user:
                 identity.update_from_user(user)
