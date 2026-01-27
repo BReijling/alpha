@@ -5,8 +5,6 @@ import subprocess
 import time
 from typing import Any, Optional
 
-# import yaml
-
 from alpha.handlers.base_handler import BaseHandler
 from alpha.exceptions import InvalidArgumentsException
 
