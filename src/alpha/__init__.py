@@ -5,7 +5,6 @@ from alpha.factories.model_class_factory import ModelClassFactory
 from alpha.domain.models.user import User
 from alpha.domain.models.base_model import BaseDomainModel, DomainModel
 from alpha.domain.models.life_cycle_base import LifeCycleBase
-from alpha.infra.connectors.ldap_connector import LDAPConnector
 from alpha.infra.connectors.oidc_connector import (
     OIDCConnector,
     KeyCloakOIDCConnector,
@@ -43,7 +42,6 @@ from alpha.providers.models.identity import (
 )
 from alpha.providers.models.credentials import PasswordCredentials
 from alpha.providers.models.token import Token
-from alpha.providers.ldap_provider import LDAPProvider, ADProvider
 from alpha.providers.oidc_provider import OIDCProvider, KeyCloakProvider
 from alpha.repositories.models.repository_model import RepositoryModel
 from alpha.repositories.sql_alchemy_repository import SqlAlchemyRepository
@@ -58,9 +56,15 @@ from alpha.utils.logging_level_checker import logging_level_checker
 from alpha.utils.response_object import create_response_object
 from alpha.utils.verify_identity import verify_identity
 from alpha.utils.version_checker import minor_version_gte
-
-
 from alpha.encoder import JSONEncoder
+
+# Optional LDAP support - only import if ldap3 is available
+try:
+    from alpha.infra.connectors.ldap_connector import LDAPConnector  # noqa: F401
+    from alpha.providers.ldap_provider import LDAPProvider, ADProvider  # noqa: F401
+    _LDAP_AVAILABLE = True
+except ImportError:
+    _LDAP_AVAILABLE = False # type: ignore
 
 __all__ = [
     "SqlAlchemyUnitOfWork",
@@ -71,7 +75,6 @@ __all__ = [
     "DomainModel",
     "LifeCycleBase",
     "User",
-    "LDAPConnector",
     "OIDCConnector",
     "KeyCloakOIDCConnector",
     "SqlAlchemyDatabase",
@@ -106,8 +109,6 @@ __all__ = [
     "AD_SEARCH_ATTRIBUTES",
     "PasswordCredentials",
     "Token",
-    "LDAPProvider",
-    "ADProvider",
     "OIDCProvider",
     "KeyCloakProvider",
     "RepositoryModel",
@@ -123,3 +124,12 @@ __all__ = [
     "minor_version_gte",
     "JSONEncoder",
 ]
+
+
+# Conditionally add LDAP-related exports if available
+if _LDAP_AVAILABLE:
+    __all__.extend([
+        "LDAPConnector",
+        "LDAPProvider",
+        "ADProvider",
+    ])
