@@ -134,14 +134,22 @@ def _guess_current_package_name() -> str:
         try:
             with open(pyproject_path, 'rb') as f:
                 pyproject_data = tomllib.load(f)
-                return pyproject_data['project']['name'].replace('-', '_')
+                try:
+                    if 'project' in pyproject_data:
+                        name = pyproject_data['project']['name']
+                    elif 'tool' in pyproject_data and 'poetry' in pyproject_data['tool']:
+                        name = pyproject_data['tool']['poetry']['name']
+                    return name.replace('-', '_')
+                except KeyError:
+                    print('Could not find project name in pyproject.toml')
         except Exception:
             pass
+    else:
+        print('Could not find pyproject.toml')
 
     # Fallback to use the current folder name
-    print('Could not find pyproject.toml, guessing package name from folder')
+    print('Guessing package name from folder')
     return os.path.basename(cwd)
-
 
 def init() -> None:
     """Init the container and wire it to the main function."""
