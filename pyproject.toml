@@ -18,7 +18,7 @@ dependencies = [
     "six>=1.17.0",
     "sqlalchemy>=2.0.44",
     "requests>=2.28.1",
-    "dependency-injector (>=4.48.3,<5.0.0)",
+    "dependency-injector[yaml]>=4.48.3,<5.0.0",
 ]
 
 [project.scripts]
