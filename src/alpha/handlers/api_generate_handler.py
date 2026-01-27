@@ -17,6 +17,19 @@ class ApiGenerateHandler(BaseHandler):
     """
 
     def __init__(self) -> None:
+        try:
+            import openapi_generator_cli  # type: ignore # noqa: F401
+        except ImportError:
+            print(
+                "OpenAPI Generator CLI is not installed. Please install "
+                "the required packages first. \nThis can be done by installing "
+                "the \'api-generator\' extra: \n"
+                "- pip install alpha-python[api-generator]\n"
+                "- poetry add alpha-python --extras api-generator\n"
+                "- uv add alpha-python --extra api-generator"
+            )
+            exit(1)
+        
         self.spec_file = None
         self.api_package = None
         self.service_package = None
@@ -172,29 +185,6 @@ class ApiGenerateHandler(BaseHandler):
             subprocess.call(['python3', post_process_file])
         else:
             print(f'No post process file ({self.post_process_file}) found')
-
-    # def _generate_configuration(self) -> None:
-    #     """Generate permission.yaml file for the /configuration endpoint."""
-
-    #     PERMISSION_FILE = (
-    #         f'{self.cwd}/api/{self.api_package}/config/permissions.yaml'
-    #     )
-    #     os.makedirs(os.path.dirname(PERMISSION_FILE), exist_ok=True)
-
-    #     permissions = {}
-    #     with open(str(self.spec_file), 'r') as stream:
-    #         try:
-    #             data = yaml.safe_load(stream)
-    #             parser = YamlParser()
-    #             permissions = {  # type: ignore
-    #                 'version': data['info']['version'],
-    #                 'endpoints': parser.parse_endpoints(data),
-    #             }
-    #         except yaml.YAMLError as exc:
-    #             print(exc)
-
-    #     with open(PERMISSION_FILE, 'w+') as file:
-    #         yaml.dump(data=permissions, stream=file)
 
     def _copy_templates(self) -> None:
         """Copy mustache templates to the templates folder in the working
