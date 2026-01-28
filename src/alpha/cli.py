@@ -134,12 +134,14 @@ def _guess_current_package_name() -> str:
         try:
             with open(pyproject_path, 'rb') as f:
                 pyproject_data = tomllib.load(f)
+                name = None
                 try:
                     if 'project' in pyproject_data:
                         name = pyproject_data['project']['name']
                     elif 'tool' in pyproject_data and 'poetry' in pyproject_data['tool']:
                         name = pyproject_data['tool']['poetry']['name']
-                    return name.replace('-', '_')
+                    if name is not None:
+                        return name.replace('-', '_')
                 except KeyError:
                     print('Could not find project name in pyproject.toml')
         except Exception:
