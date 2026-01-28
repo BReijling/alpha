@@ -23,8 +23,8 @@ class ApiGenerateHandler(BaseHandler):
                 "the required packages first. \nThis can be done by installing "
                 "the \'api-generator\' extra: \n"
                 "- pip install alpha-python[api-generator]\n"
-                "- poetry add alpha-python --extras api-generator\n"
-                "- uv add alpha-python --extra api-generator"
+                "- poetry add --dev alpha-python --extras api-generator\n"
+                "- uv add --dev alpha-python --extra api-generator"
             )
             exit(1)
         
