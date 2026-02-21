@@ -7,13 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added PasswordFactory class which can be used for password hashing. It contains methods for hashing and verification of a password. By default it uses the argon2.PasswordHasher class with a salt length of 16, but this can by overruled during initialization.
+
 ### Fixed
 
 - Added FLASK_ENV=production to Dockerfile mustache template so the API runs in the proper mode.
 
 ### Changed
 
-- Loosened up the version dependency of the dependency-injector library and excluded version 4.48.3 because of a PydanticImportError. https://github.com/ets-labs/python-dependency-injector/issues/942
+- Loosened up the version dependency of the dependency-injector library and excluded version 4.48.3 because of a PydanticImportError. https://github.com/ets-labs/python-dependency-injector/issues/942.
 
 ## [0.3.3] - 2026-01-28
 

@@ -7,6 +7,7 @@ import pytest
 
 from alpha.factories.field_iterator import Field, FieldIterator
 from alpha.factories.jwt_factory import JWTFactory
+from alpha.factories.password_factory import PasswordFactory
 from alpha.infra.models.json_patch import JsonPatch
 from tests.fixtures._api_classes import (
     ApiTrack,
@@ -307,3 +308,8 @@ def jwt_factory_factory() -> Callable[[str, str, int], JWTFactory]:
         )
 
     return factory
+
+
+@pytest.fixture
+def password_factory():
+    return PasswordFactory()
