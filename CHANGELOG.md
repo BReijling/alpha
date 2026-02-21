@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Added FLASK_ENV=production to Dockerfile mustache template so the API runs in the propper mode.
+- Added FLASK_ENV=production to Dockerfile mustache template so the API runs in the proper mode.
 
 ### Changed
 
