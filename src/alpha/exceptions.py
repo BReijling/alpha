@@ -177,6 +177,22 @@ class TokenCreationException(Exception):
     """Raised when there is an error during token creation."""
 
 
+# User exceptions
+class UnknownUserException(BadRequestException): ...
+
+
+class EmptyValueException(BadRequestException): ...
+
+
+class UnknownTokenException(UnauthorizedException): ...
+
+
+class WrongPasswordException(BadRequestException): ...
+
+
+class MissingPasswordException(InternalServerErrorException): ...
+
+
 # Cli Exceptions
 class InvalidArgumentsException(Exception):
     """Raised when invalid arguments are provided to a CLI command."""
