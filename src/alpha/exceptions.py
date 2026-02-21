@@ -178,19 +178,24 @@ class TokenCreationException(Exception):
 
 
 # User exceptions
-class UnknownUserException(BadRequestException): ...
+class UnknownUserException(BadRequestException):
+    """Raised when a referenced user cannot be found."""
 
 
-class EmptyValueException(BadRequestException): ...
+class EmptyValueException(BadRequestException):
+    """Raised when a required value is empty."""
 
 
-class UnknownTokenException(UnauthorizedException): ...
+class UnknownTokenException(UnauthorizedException):
+    """Raised when a token is not recognized."""
 
 
-class WrongPasswordException(BadRequestException): ...
+class WrongPasswordException(BadRequestException):
+    """Raised when an incorrect password is provided."""
 
 
-class MissingPasswordException(InternalServerErrorException): ...
+class MissingPasswordException(InternalServerErrorException):
+    """Raised when a required password is missing from the request or configuration."""
 
 
 # Cli Exceptions
