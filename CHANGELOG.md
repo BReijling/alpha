@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Added FLASK_ENV=production to Dockerfile mustache template so the API runs in the proper mode.
+
+### Changed
+
+- Loosened up the version dependency of the dependency-injector library and excluded version 4.48.3 because of a PydanticImportError. https://github.com/ets-labs/python-dependency-injector/issues/942
+
 ## [0.3.3] - 2026-01-28
 
 ### Added

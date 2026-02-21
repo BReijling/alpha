@@ -19,5 +19,7 @@ COPY . /usr/src/app
 
 EXPOSE {{serverPort}}
 
+ENV FLASK_ENV=production
+
 CMD ["gunicorn", "--bind", ":{{serverPort}}", "--workers", "4", "--logger-class", "alpha.utils.logging_configurator.GunicornLogger", "{{packageName}}.__main__:app"]
 

@@ -15,4 +15,12 @@ def is_pydantic(obj: Any) -> bool:
         Returns True if obj is a pydantic class or instance
     """
     cls = obj if isinstance(obj, type) else type(obj)
-    return hasattr(cls, '__pydantic_fields__')
+
+    for base_class in getattr(cls, "__mro__", ()):  # pragma: no branch
+        try:
+            if "__pydantic_fields__" in vars(base_class):
+                return True
+        except TypeError:
+            continue
+
+    return False
