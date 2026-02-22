@@ -27,43 +27,43 @@ DEFAULT_AD_MAPPINGS = {
 }
 
 AD_SEARCH_ATTRIBUTES = [
-    'cn',
-    'generationQualifier',
-    'name',
-    'postalAddress',
-    'lastLogonTimestamp',
-    'mobile',
-    'postalCode',
-    'countryCode',
-    'company',
-    'displayName',
-    'o',
-    'st',
-    'ou',
-    'givenName',
-    'msExchUserCulture',
-    'l',
-    'initials',
-    'msTSLicenseVersion',
-    'memberOf',
-    'whenChanged',
-    'mailNickname',
-    'sn',
-    'street',
-    'accountExpires',
-    'uSNChanged',
-    'distinguishedName',
-    'whenCreated',
-    'sAMAccountName',
-    'c',
-    'employeeID',
-    'streetAddress',
-    'description',
-    'mail',
-    'title',
-    'department',
-    'co',
-    'personalTitle',
+    "cn",
+    "generationQualifier",
+    "name",
+    "postalAddress",
+    "lastLogonTimestamp",
+    "mobile",
+    "postalCode",
+    "countryCode",
+    "company",
+    "displayName",
+    "o",
+    "st",
+    "ou",
+    "givenName",
+    "msExchUserCulture",
+    "l",
+    "initials",
+    "msTSLicenseVersion",
+    "memberOf",
+    "whenChanged",
+    "mailNickname",
+    "sn",
+    "street",
+    "accountExpires",
+    "uSNChanged",
+    "distinguishedName",
+    "whenCreated",
+    "sAMAccountName",
+    "c",
+    "employeeID",
+    "streetAddress",
+    "description",
+    "mail",
+    "title",
+    "department",
+    "co",
+    "personalTitle",
 ]
 
 
@@ -230,6 +230,32 @@ class Identity:
             ),
         )
 
+    @classmethod
+    def from_user(cls, user: User) -> "Identity":
+        """Instantiate an Identity from a User instance.
+
+        Parameters
+        ----------
+        user
+            User object to create the Identity from.
+
+        Returns
+        -------
+            An Identity instance populated with data from the User object.
+        """
+        return cls(
+            subject=str(user.id),
+            username=user.username,
+            email=user.email,
+            display_name=user.display_name,
+            groups=user.groups or [],
+            permissions=user.permissions or [],
+            claims={},
+            issued_at=datetime.now(tz=timezone.utc),
+            role=user.role,
+            admin=user.admin,
+        )
+
     def update_from_user(self, user: User) -> None:
         """Update the Identity instance with data from a User instance.
 
@@ -379,11 +405,11 @@ class Identity:
         groups: list[str] = []
         for item in entry.get("memberOf", []):
             group = (
-                item.replace('\\,', ';')
-                .split(',')[0]
-                .replace(';', ',')
-                .replace('CN=', '')
-                .replace('cn=', '')
+                item.replace("\\,", ";")
+                .split(",")[0]
+                .replace(";", ",")
+                .replace("CN=", "")
+                .replace("cn=", "")
             )
             groups.append(group)
         return groups

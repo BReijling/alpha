@@ -2,6 +2,8 @@ from typing import Any
 import pytest
 
 from alpha.infra.connectors.oidc_connector import OIDCConnector
+from alpha.interfaces.unit_of_work import UnitOfWork
+from alpha.providers.database_provider import DatabaseProvider
 from alpha.providers.ldap_provider import LDAPProvider, ADProvider
 from alpha.providers.models.credentials import PasswordCredentials
 from alpha.providers.models.token import Token
@@ -176,7 +178,6 @@ def fake_ldap_connector(search_base):
 
 @pytest.fixture
 def ldap_provider(fake_ldap_connector, search_base):
-
     provider = LDAPProvider(
         connector=fake_ldap_connector,
         search_filter_key="uid",
@@ -190,7 +191,6 @@ def ldap_provider(fake_ldap_connector, search_base):
 
 @pytest.fixture
 def ad_provider(fake_ldap_connector, search_base):
-
     provider = ADProvider(
         connector=fake_ldap_connector,
         search_filter_key="uid",
@@ -205,7 +205,6 @@ def ad_provider(fake_ldap_connector, search_base):
 
 @pytest.fixture
 def ldap_provider_no_auto_connect(fake_ldap_connector, search_base):
-
     provider = LDAPProvider(
         connector=fake_ldap_connector,
         search_filter_key="uid",
@@ -235,8 +234,34 @@ def oidc_provider(fake_oidc_connector: OIDCConnector):
 
 
 @pytest.fixture
+def database_provider(fake_uow: UnitOfWork):
+    return DatabaseProvider(
+        uow=fake_uow, users_repository_name="database_provider"
+    )
+
+
+@pytest.fixture
+def database_provider_empty_password(fake_uow: UnitOfWork):
+    return DatabaseProvider(
+        uow=fake_uow, users_repository_name="database_provider_empty_password"
+    )
+
+
+@pytest.fixture
+def database_provider_no_user(fake_uow: UnitOfWork):
+    return DatabaseProvider(
+        uow=fake_uow, users_repository_name="database_provider_no_user"
+    )
+
+
+@pytest.fixture
 def credentials():
     return PasswordCredentials(username="test_user", password="test_password")
+
+
+@pytest.fixture
+def wrong_credentials():
+    return PasswordCredentials(username="test_user", password="wrong_password")
 
 
 @pytest.fixture

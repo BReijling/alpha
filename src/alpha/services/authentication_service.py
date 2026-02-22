@@ -31,7 +31,7 @@ class AuthenticationService:
         identifier, by default "username"
     uow, optional
         UnitOfWork instance for database operations, by default None
-    repository_name, optional
+    users_repository_name, optional
         Name of the user repository in the UnitOfWork, by default "users"
     """
 
@@ -42,7 +42,7 @@ class AuthenticationService:
         merge_with_database_users: bool = False,
         user_id_attribute: str = "username",
         uow: UnitOfWork | None = None,
-        repository_name: str = "users",
+        users_repository_name: str = "users",
     ) -> None:
         """Initialize the AuthenticationService."""
         self._identity_provider = identity_provider
@@ -50,7 +50,7 @@ class AuthenticationService:
         self._merge_with_database_users = merge_with_database_users
         self._user_id_attribute = user_id_attribute
         self.uow = uow
-        self._repository_name = repository_name
+        self._users_repository_name = users_repository_name
 
     def login(self, credentials: PasswordCredentials) -> str:
         """Authenticate a user by their credentials.
@@ -184,7 +184,7 @@ class AuthenticationService:
 
         with self.uow:
             users: SqlRepository[User] = getattr(
-                self.uow, self._repository_name
+                self.uow, self._users_repository_name
             )
             user = users.get_by_id(
                 value=getattr(identity, self._user_id_attribute),
