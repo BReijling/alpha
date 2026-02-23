@@ -147,9 +147,11 @@ class DatabaseProvider(JWTProviderMixin):
 
         if not user:
             msg = f"User '{username}' does not exist"
-            # self.logger(msg=msg, level=LogLevel.DEBUG)
             logging.debug(msg)
-            self.uow.commit()
+            # Disable lines below for future implementation of logging and
+            # unit of work commit
+            # self.logger(msg=msg, level=LogLevel.DEBUG)
+            # self.uow.commit()
             raise exceptions.UserNotFoundException(msg)
 
         return user
@@ -191,18 +193,22 @@ class DatabaseProvider(JWTProviderMixin):
                     f"'{getattr(user, self._user_name_attribute)}' is "
                     "incorrect"
                 )
-                # self.logger(msg=msg, level=LogLevel.DEBUG)
                 logging.debug(msg)
-                self.uow.commit()
+                # Disable lines below for future implementation of logging and
+                # unit of work commit
+                # self.logger(msg=msg, level=LogLevel.DEBUG)
+                # self.uow.commit()
                 raise exceptions.InvalidCredentialsException(msg)
         except exceptions.MissingPasswordException as exc:
             msg = (
                 f"No password value to compare for "
                 f"'{getattr(user, self._user_name_attribute)}'"
             )
-            # self.logger(msg=msg, level=LogLevel.ERROR)
             logging.error(msg)
-            self.uow.commit()
+            # Disable lines below for future implementation of logging and
+            # unit of work commit
+            # self.logger(msg=msg, level=LogLevel.ERROR)
+            # self.uow.commit()
             raise exceptions.MissingPasswordException(msg) from exc
 
         return user
@@ -218,7 +224,7 @@ class DatabaseProvider(JWTProviderMixin):
         Parameters
         ----------
         user
-            Identity instance representing the user
+            User instance representing the user to update the password for
         new_password
             The new password to set for the user
         user_repository
