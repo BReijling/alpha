@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added PasswordFactory class which can be used for password hashing. It contains methods for hashing and verification of a password. By default it uses the argon2.PasswordHasher class with a salt length of 16, but this can by overruled during initialization.
+- Added DatabaseProvider class which is an implementation of IdentityProvider. This provider uses a database to store user information and credentials, and provides methods for authenticating users, retrieving user information, and changing passwords.
 
 ### Fixed
 

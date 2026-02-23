@@ -155,9 +155,12 @@ class DatabaseProvider(JWTProviderMixin):
         )
 
         if not user:
-            msg = f"User '{username}' does not exist"
+            msg = (
+                f"User with '{attribute_name or self._user_name_attribute}'="
+                f"'{username}' does not exist"
+            )
             logging.debug(msg)
-            # Disable lines below for future implementation of logging and
+            # Disabled lines below for future implementation of logging and
             # unit of work commit
             # self.logger(msg=msg, level=LogLevel.DEBUG)
             # self.uow.commit()
@@ -203,7 +206,7 @@ class DatabaseProvider(JWTProviderMixin):
                     "incorrect"
                 )
                 logging.debug(msg)
-                # Disable lines below for future implementation of logging and
+                # Disabled lines below for future implementation of logging and
                 # unit of work commit
                 # self.logger(msg=msg, level=LogLevel.DEBUG)
                 # self.uow.commit()
@@ -214,7 +217,7 @@ class DatabaseProvider(JWTProviderMixin):
                 f"'{getattr(user, self._user_name_attribute)}'"
             )
             logging.error(msg)
-            # Disable lines below for future implementation of logging and
+            # Disabled lines below for future implementation of logging and
             # unit of work commit
             # self.logger(msg=msg, level=LogLevel.ERROR)
             # self.uow.commit()
