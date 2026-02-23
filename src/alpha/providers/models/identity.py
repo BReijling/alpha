@@ -270,11 +270,11 @@ class Identity:
         if not self.display_name:
             self.display_name = user.display_name
         for permission in user.permissions or []:
-            if permission not in self.permissions:
-                self.permissions.append(permission)  # type: ignore
+            self.permissions = self._append_on_sequence(
+                self.permissions, permission
+            )
         for group in user.groups or []:
-            if group not in self.groups:
-                self.groups.append(group)  # type: ignore
+            self.groups = self._append_on_sequence(self.groups, group)
         self.role = user.role
         self.admin = user.admin
 
@@ -413,3 +413,25 @@ class Identity:
             )
             groups.append(group)
         return groups
+
+    def _append_on_sequence(
+        self, sequence: Sequence[str], item: str
+    ) -> Sequence[str]:
+        """Helper method to append an item to a sequence if it's not already
+        present.
+
+        Parameters
+        ----------
+        sequence
+            The original sequence to append to.
+        item
+            The item to append if not already in the sequence.
+
+        Returns
+        -------
+            A new sequence with the item appended if it was not already
+            present.
+        """
+        if item not in sequence:
+            return list(sequence) + [item]
+        return sequence
