@@ -19,6 +19,9 @@ class FakeDatabaseProviderUserRepository:
     def __init__(self, users: list[User] | None = None):
         self.users = users
 
+    def get_by_id(self, *args, **kwargs) -> User:
+        return self.users[0]
+
     def get_one_or_none(self, *args, **kwargs) -> User:
         return self.users[0]
 

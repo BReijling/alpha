@@ -90,7 +90,9 @@ class DatabaseProvider(JWTProviderMixin):
             users: SqlRepository[User] = getattr(
                 self.uow, self._users_repository_name
             )
-            user = self._get_user(username=subject, user_repository=users)
+            user = self._get_user(
+                username=subject, user_repository=users, attribute_name="id"
+            )
 
             return Identity.from_user(user)
 
@@ -120,7 +122,10 @@ class DatabaseProvider(JWTProviderMixin):
             self.uow.commit()
 
     def _get_user(
-        self, username: str, user_repository: SqlRepository[User]
+        self,
+        username: str,
+        user_repository: SqlRepository[User],
+        attribute_name: str | None = None,
     ) -> User:
         """Retrieve a user by their username.
 
@@ -130,6 +135,10 @@ class DatabaseProvider(JWTProviderMixin):
             The username of the user
         user_repository
             The repository to query for the user
+        attribute_name
+            The attribute name to use for querying the user, by default None.
+            If None, the provider's configured user_name_attribute will be
+            used.
 
         Returns
         -------
@@ -141,7 +150,7 @@ class DatabaseProvider(JWTProviderMixin):
             If the user does not exist
         """
         user = user_repository.get_one_or_none(
-            attr=self._user_name_attribute,
+            attr=attribute_name or self._user_name_attribute,
             value=username,
         )
 
