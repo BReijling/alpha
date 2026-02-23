@@ -13,6 +13,7 @@ from alpha.factories.response_factory import ResponseFactory
 from alpha.providers.models.identity import Identity
 from tests.fixtures._api_classes import ApiTrack
 from tests.fixtures.fake_factory_classes import FakeTypeFactory
+from tests.fixtures.fake_uow_repositories import FakeUnitOfWork
 
 
 class PetType(Enum):
@@ -130,3 +131,8 @@ def identity() -> Identity:
         admin=False,
         pretend_identity=None,
     )
+
+
+@pytest.fixture
+def fake_uow():
+    return FakeUnitOfWork()
