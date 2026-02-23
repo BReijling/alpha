@@ -116,9 +116,7 @@ class DatabaseProvider(JWTProviderMixin):
                 credentials=credentials, user_repository=users
             )
 
-            self._update_user_password(
-                user, new_password, user_repository=users
-            )
+            self._update_user_password(user, new_password)
             self.uow.commit()
 
     def _get_user(
@@ -229,7 +227,6 @@ class DatabaseProvider(JWTProviderMixin):
         self,
         user: User,
         new_password: str,
-        user_repository: SqlRepository[User],
     ) -> None:
         """Change the password for a user.
 
@@ -242,9 +239,4 @@ class DatabaseProvider(JWTProviderMixin):
         user_repository
             The repository to query for the user
         """
-        user = self._get_user(
-            username=getattr(user, self._user_name_attribute),
-            user_repository=user_repository,
-        )
-
         user.password = self._password_factory.hash_password(new_password)
