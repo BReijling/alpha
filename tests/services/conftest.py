@@ -24,7 +24,7 @@ def static_user_credentials(fake_static_user: User):
 
 
 @pytest.fixture
-def fake_user_credentials(fake_static_user: User):
+def fake_user_credentials():
     return PasswordCredentials(
         username="fake_user",
         password="fake_password",
