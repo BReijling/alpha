@@ -1,7 +1,6 @@
 import pytest
 from alpha import exceptions
 from alpha.providers.models.identity import Identity
-from tests.services.conftest import authentication_service
 
 
 def test_authentication_service_init(authentication_service, fake_static_user):
