@@ -2,6 +2,7 @@ from typing import Any
 import pytest
 
 from alpha.providers.models.credentials import PasswordCredentials
+from alpha.providers.models.identity import Identity
 from alpha.providers.models.token import Token
 
 
@@ -37,6 +38,46 @@ def ad_dict() -> dict[str, Any]:
 def password_credentials() -> PasswordCredentials:
     return PasswordCredentials(
         username="testuser", password="securepassword123"
+    )
+
+
+@pytest.fixture
+def identity_admin1() -> Identity:
+    return Identity.from_dict(
+        {
+            "subject": "admin_user1",
+            "admin": True,
+        }
+    )
+
+
+@pytest.fixture
+def identity_admin2() -> Identity:
+    return Identity.from_dict(
+        {
+            "subject": "admin_user2",
+            "role": "ADMIN",
+        }
+    )
+
+
+@pytest.fixture
+def identity_admin3() -> Identity:
+    return Identity.from_dict(
+        {
+            "subject": "admin_user3",
+            "permissions": ["ADMIN"],
+        }
+    )
+
+
+@pytest.fixture
+def identity_no_admin() -> Identity:
+    return Identity.from_dict(
+        {
+            "subject": "no_admin_user",
+            "permissions": ["read", "write"],
+        }
     )
 
 
