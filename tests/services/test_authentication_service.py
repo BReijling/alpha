@@ -60,15 +60,6 @@ def test_authentication_service_pretend_login(
     authentication_service, identity
 ):
     pretend_subject = "fake_subject"
-    # authentication_service._identity_provider._identity = Identity.from_dict(
-    #     {
-    #         "subject": pretend_subject,
-    #         "groups": ["group3", "group4"],
-    #         "permissions": ["modify", "delete"],
-    #         "role": "TESTER",
-    #         "admin": True,
-    #     }
-    # )
 
     with pytest.raises(exceptions.UnauthorizedException):
         authentication_service.pretend_login(
