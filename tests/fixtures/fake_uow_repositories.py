@@ -32,33 +32,9 @@ class FakeDatabaseProviderUserRepositoryNoUser:
 
 
 class FakeUnitOfWork:
-    def __init__(self):
-        self.authentication_service = FakeAuthenticationServiceUserRepository()
-        self.database_provider = FakeDatabaseProviderUserRepository(
-            [
-                User(
-                    id=1,
-                    username="test_user",
-                    password=PasswordFactory().hash_password("test_password"),
-                    email="test_user@example.com",
-                )
-            ]
-        )
-        self.database_provider_empty_password = (
-            FakeDatabaseProviderUserRepository(
-                [
-                    User(
-                        id=1,
-                        username="test_user",
-                        password=None,
-                        email="test_user@example.com",
-                    )
-                ]
-            )
-        )
-        self.database_provider_no_user = (
-            FakeDatabaseProviderUserRepositoryNoUser()
-        )
+    def __init__(self, **kwargs) -> None:
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
     def __enter__(self):
         return self

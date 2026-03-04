@@ -25,6 +25,15 @@ def test_identity(identity):
     assert identity.pretend_identity is None
 
 
+def test_identity_has_admin_privileges(
+    identity_admin1, identity_admin2, identity_admin3, identity_no_admin
+):
+    assert identity_admin1.has_admin_privileges is True
+    assert identity_admin2.has_admin_privileges is True
+    assert identity_admin3.has_admin_privileges is True
+    assert identity_no_admin.has_admin_privileges is False
+
+
 def test_identity_from_ldap_dict(ldap_dict):
     identity = Identity.from_ldap_dict(
         ldap_dict, mappings=DEFAULT_LDAP_MAPPINGS

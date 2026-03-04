@@ -131,6 +131,22 @@ class Identity:
     admin: bool = False
     pretend_identity: Self | None = None
 
+    @property
+    def has_admin_privileges(self) -> bool:
+        """Check if the identity has administrative privileges.
+
+        Returns
+        -------
+            True if the identity is an admin, False otherwise.
+        """
+        if self.admin is True:
+            return True
+        if self.role and self.role.lower() == "admin":
+            return True
+        if "admin" in (p.lower() for p in self.permissions):
+            return True
+        return False
+
     @classmethod
     def from_ldap_dict(
         cls,
