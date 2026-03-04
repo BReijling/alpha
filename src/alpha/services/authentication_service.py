@@ -179,6 +179,8 @@ class AuthenticationService:
 
         Raises
         ------
+        exceptions.UnauthorizedException
+            If the caller does not have admin privileges.
         exceptions.NotFoundException
             If the user to pretend to be is not found.
         """
