@@ -7,8 +7,10 @@ class FakeIdentityProvider:
 
     def __init__(
         self,
-        identity: Identity = Identity.from_dict({"subject": "fake_subject"}),
+        identity: Identity | None = None,
     ) -> None:
+        if identity is None:
+            identity = Identity.from_dict({"subject": "fake_subject"})
         self._identity = identity
         self._new_password = None
 
