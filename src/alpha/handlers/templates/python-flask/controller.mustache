@@ -231,6 +231,7 @@ def {{operationId}}(
             status_message='{{message}}',
             data=result,
             {{#vendorExtensions.x-content-type}}data_type='{{vendorExtensions.x-content-type}}'{{/vendorExtensions.x-content-type}}
+            {{#vendorExtensions.x-alpha-cookie-support}}response_type='flask'{{/vendorExtensions.x-alpha-cookie-support}}
         )
         return response_object, status_code
         {{/returnType}}
