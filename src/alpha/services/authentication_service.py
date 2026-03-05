@@ -8,6 +8,7 @@ from alpha.providers.models.token import Token
 from alpha.providers.models.credentials import PasswordCredentials
 from alpha.interfaces.providers import IdentityProvider
 from alpha import exceptions
+from alpha.services.models.cookie import Cookie
 
 
 class AuthenticationService:
@@ -21,6 +22,16 @@ class AuthenticationService:
         self,
         identity_provider: IdentityProvider,
         identity_id_attribute: str = "subject",
+        use_cookies: bool = False,
+        cookie_auth_token_name: str = "auth_token",
+        cookie_refresh_token_name: str = "refresh_token",
+        cookie_auth_token_max_age: int = 900,
+        cookie_refresh_token_max_age: int = 3600 * 24 * 7,
+        cookie_path: str = "/",
+        cookie_domain: str | None = None,
+        cookie_secure: bool = True,
+        cookie_httponly: bool = True,
+        cookie_samesite: str = "Lax",
         merge_with_database_users: bool = False,
         user_id_attribute: str = "username",
         uow: UnitOfWork | None = None,
@@ -36,9 +47,38 @@ class AuthenticationService:
         identity_id_attribute, optional
             Attribute name in the identity to use as the unique identifier, by
             default "subject"
+        use_cookies, optional
+            Whether to use cookies for authentication, by default False
+        cookie_auth_token_name, optional
+            Name of the cookie to store the access token,
+            by default "auth_token"
+        cookie_refresh_token_name, optional
+            Name of the cookie to store the refresh token,
+            by default "refresh_token"
+        cookie_auth_token_max_age, optional
+            Maximum age of the access token cookie in seconds,
+            by default 900
+        cookie_refresh_token_max_age, optional
+            Maximum age of the refresh token cookie in seconds,
+            by default 3600 * 24 * 7
+        cookie_path, optional
+            Path for which the authentication cookies are valid,
+            by default "/"
+        cookie_domain, optional
+            Domain for which the authentication cookies are valid,
+            by default None
+        cookie_secure, optional
+            Whether the authentication cookies should be secure,
+            by default True
+        cookie_httponly, optional
+            Whether the authentication cookies should be HTTP-only,
+            by default True
+        cookie_samesite, optional
+            The SameSite attribute for the authentication cookies,
+            by default "Lax"
         merge_with_database_users, optional
-            Whether to merge identity data with database user data, by default
-            False
+            Whether to merge identity data with database user data,
+            by default False
         user_id_attribute, optional
             Attribute name in the user database to use as the unique
             identifier, by default "username"
@@ -55,13 +95,23 @@ class AuthenticationService:
         """
         self._identity_provider = identity_provider
         self._identity_id_attribute = identity_id_attribute
+        self._use_cookies = use_cookies
+        self._cookie_auth_token_name = cookie_auth_token_name
+        self._cookie_refresh_token_name = cookie_refresh_token_name
+        self._cookie_auth_token_max_age = cookie_auth_token_max_age
+        self._cookie_refresh_token_max_age = cookie_refresh_token_max_age
+        self._cookie_path = cookie_path
+        self._cookie_domain = cookie_domain
+        self._cookie_secure = cookie_secure
+        self._cookie_httponly = cookie_httponly
+        self._cookie_samesite = cookie_samesite
         self._merge_with_database_users = merge_with_database_users
         self._user_id_attribute = user_id_attribute
         self.uow = uow
         self._users_repository_name = users_repository_name
         self._static_user = static_user
 
-    def login(self, credentials: PasswordCredentials) -> str:
+    def login(self, credentials: PasswordCredentials) -> str | Cookie:
         """Authenticate a user by their credentials.
 
         Parameters
@@ -86,9 +136,12 @@ class AuthenticationService:
                 identity = self._merge_identity_with_user(identity)
 
         token = self._identity_provider.issue_token(identity)
+        if self._use_cookies:
+            return self._create_auth_cookie(token)
+
         return token.value
 
-    def logout(self, token: str) -> str:
+    def logout(self, token: str) -> str | Cookie:
         """Logout a user by invalidating their token.
 
         Parameters
@@ -107,6 +160,8 @@ class AuthenticationService:
         """
         if not self._identity_provider.validate(Token(value=token)):
             raise exceptions.UnauthorizedException("Invalid token")
+        if self._use_cookies:
+            return self._create_logout_cookie()
         return "Logout successful"
 
     def verify(self, token: str) -> Identity:
@@ -232,3 +287,40 @@ class AuthenticationService:
                 users.add(user)
                 self.uow.commit()
         return identity
+
+    def _create_auth_cookie(self, token: Token) -> Cookie:
+        """Create an authentication cookie for a token.
+
+        Parameters
+        ----------
+        token
+            Token to create the authentication cookie for.
+
+        Returns
+        -------
+            Cookie object representing the authentication cookie.
+        """
+        return Cookie(
+            key=self._cookie_auth_token_name,
+            value=token.value,
+            max_age=self._cookie_auth_token_max_age,
+            path=self._cookie_path,
+            domain=self._cookie_domain,
+            secure=self._cookie_secure,
+            httponly=self._cookie_httponly,
+            samesite=self._cookie_samesite,
+        )
+
+    def _create_logout_cookie(self) -> Cookie:
+        """Create a cookie to clear the authentication cookie on logout.
+
+        Returns
+        -------
+            Cookie object representing the logout cookie.
+        """
+        return Cookie(
+            key=self._cookie_auth_token_name,
+            operation="delete",
+            path=self._cookie_path,
+            domain=self._cookie_domain,
+        )

@@ -46,3 +46,16 @@ def authentication_service(
         users_repository_name="authentication_service",
         static_user=fake_static_user,
     )
+
+
+@pytest.fixture
+def authentication_service_use_cookies(
+    fake_uow, fake_static_user, fake_identity_provider
+) -> AuthenticationService:
+    return AuthenticationService(
+        identity_provider=fake_identity_provider,
+        uow=fake_uow,
+        users_repository_name="authentication_service",
+        static_user=fake_static_user,
+        use_cookies=True,
+    )

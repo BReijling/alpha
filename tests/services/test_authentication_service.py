@@ -1,6 +1,7 @@
 import pytest
 from alpha import exceptions
 from alpha.providers.models.identity import Identity
+from alpha.services.models.cookie import Cookie
 
 
 def test_authentication_service_init(authentication_service, fake_static_user):
@@ -19,22 +20,53 @@ def test_authentication_service_init(authentication_service, fake_static_user):
 def test_authentication_service_login(
     authentication_service, fake_user_credentials
 ):
-    credentials = fake_user_credentials
-    token = authentication_service.login(credentials)
+    token = authentication_service.login(fake_user_credentials)
     assert token == "static_user_token"
 
 
 def test_authentication_service_login_with_static_user(
     authentication_service, static_user_credentials
 ):
-    credentials = static_user_credentials
-    token = authentication_service.login(credentials)
+    token = authentication_service.login(static_user_credentials)
     assert token == "static_user_token"
+
+
+def test_authentication_service_login_use_cookies(
+    authentication_service_use_cookies, static_user_credentials
+):
+    cookie = authentication_service_use_cookies.login(static_user_credentials)
+    assert isinstance(cookie, Cookie)
+    assert (
+        cookie.key
+        == authentication_service_use_cookies._cookie_auth_token_name
+    )
+    assert cookie.value == "static_user_token"
+    assert (
+        cookie.max_age
+        == authentication_service_use_cookies._cookie_auth_token_max_age
+    )
+    assert cookie.path == authentication_service_use_cookies._cookie_path
+    assert cookie.domain == authentication_service_use_cookies._cookie_domain
+    assert cookie.secure == authentication_service_use_cookies._cookie_secure
+    assert (
+        cookie.httponly == authentication_service_use_cookies._cookie_httponly
+    )
+    assert (
+        cookie.samesite == authentication_service_use_cookies._cookie_samesite
+    )
 
 
 def test_authentication_service_logout(authentication_service):
     result = authentication_service.logout(None)
     assert result == "Logout successful"
+
+
+def test_authentication_service_logout_use_cookies(
+    authentication_service_use_cookies,
+):
+    cookie = authentication_service_use_cookies.logout(None)
+    assert isinstance(cookie, Cookie)
+    assert cookie.operation == "delete"
 
 
 def test_authentication_service_change_password(
