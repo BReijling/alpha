@@ -20,6 +20,7 @@ dependencies = [
     "requests>=2.28.1",
     "dependency-injector[yaml]>=4.42.0,<5.0.0,!=4.48.3",
     "argon2-cffi>=25.1.0",
+    "flask<2",
 ]
 
 [project.scripts]
