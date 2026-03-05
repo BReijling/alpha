@@ -6,7 +6,7 @@ from alpha.interfaces.token_factory import TokenFactory
 
 
 def test_jwt_factory_init():
-    jwt_factory = JWTFactory(secret="mysecret")
+    jwt_factory = JWTFactory(secret="mysecret", lifetime_hours=None)
     assert isinstance(jwt_factory, TokenFactory)
 
     with pytest.raises(ValueError) as exc_info:
