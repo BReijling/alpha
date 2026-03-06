@@ -13,4 +13,4 @@ class PydanticAddressIncorrectType(BaseModel):
     street: str
     house_number: int
     city: str
-    country: Type
+    country: Type  # type: ignore # noqa: F821

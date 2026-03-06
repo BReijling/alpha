@@ -5,6 +5,61 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+###  Added
+
+- Added option to AuthenticationService to authenticate with a staticly configurerd user. This option can be used in development and testing environments. 
+
+## [0.4.0] - 2026-02-23
+
+### Added
+
+- Added PasswordFactory class which can be used for password hashing. It contains methods for hashing and verification of a password. By default it uses the argon2.PasswordHasher class with a salt length of 16, but this can by overruled during initialization.
+- Added DatabaseProvider class which is an implementation of IdentityProvider. This provider uses a database to store user information and credentials, and provides methods for authenticating users, retrieving user information, and changing passwords.
+
+### Fixed
+
+- Added FLASK_ENV=production to Dockerfile mustache template so the API runs in the proper mode.
+
+### Changed
+
+- Loosened up the version dependency of the dependency-injector library and excluded version 4.48.3 because of a PydanticImportError. https://github.com/ets-labs/python-dependency-injector/issues/942.
+
+## [0.3.3] - 2026-01-28
+
+### Added
+
+- Added support for having a `pyproject.toml` file that only contains metadata in the `[tool.poetry]` section instead of a `[project]` section.
+
+## [0.3.2] - 2026-01-27
+
+### Fixed
+
+- Fixed a bug that alpha cannot be imported when the ldap extra is not installed. The classes that depend on the ldap3 library will now not be imported in __init__.py modules when ldap3 is not installed.
+
+### Changed
+
+- When using the `alpha api gen` command the presents of the `openapi-generator-cli` package is checked first.
+
+## [0.3.1] - 2026-01-20
+
+### Fixed
+
+- Fixed a bug in the `AuthenticationService` when the `merge_with_database_users` parameter is True. Identity object was not updated correctly by the User object from the database.
+
+## [0.3.0] - 2026-01-19
+
+### Added
+
+- Adds OIDCConnector and KeyCloakOIDCConnector classes for OAuth2/OIDC protocol operations
+- Implements OIDCProvider and KeyCloakProvider classes for identity management via OIDC
+
+### Changed
+
+- Refactors LDAP provider to add configurable connection parameters and improve error handling
+- Updates TLS configuration in LDAP connector from deprecated PROTOCOL_TLSv1_2 to PROTOCOL_TLS_CLIENT
+
 ## [0.2.6] - 2026-01-16
 
 ### Fixed

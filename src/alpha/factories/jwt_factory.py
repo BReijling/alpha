@@ -19,6 +19,24 @@ class JWTFactory:
         issuer: str = "http://localhost",
         jwt_algorithm: str = "HS256",
     ) -> None:
+        """Initialize the JWTFactory.
+
+        Parameters
+        ----------
+        secret
+            The secret key used to sign the JWT.
+        lifetime_hours, optional
+            The lifetime of the JWT in hours, by default "12"
+        issuer, optional
+            The issuer of the JWT, by default "http://localhost"
+        jwt_algorithm, optional
+            The algorithm used to sign the JWT, by default "HS256"
+
+        Raises
+        ------
+        ValueError
+            If the secret value is empty.
+        """
         if not secret:
             raise ValueError("Secret value cannot be empty")
         if lifetime_hours is None:

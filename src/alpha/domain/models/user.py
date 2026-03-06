@@ -48,7 +48,7 @@ class User(LifeCycleBase, BaseDomainModel):
 
         Parameters
         ----------
-        user
+        obj
             User object to update from.
         """
         if not isinstance(obj, User):
@@ -60,7 +60,7 @@ class User(LifeCycleBase, BaseDomainModel):
         self.display_name = obj.display_name
         self.permissions = obj.permissions
         self.groups = obj.groups
-        self.updated_at = datetime.now(tz=timezone.utc)
+        self.modified_at = datetime.now(tz=timezone.utc)
         self.is_active = obj.is_active
         self.admin = obj.admin
         return cast(DomainModel, self)

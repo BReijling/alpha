@@ -27,43 +27,43 @@ DEFAULT_AD_MAPPINGS = {
 }
 
 AD_SEARCH_ATTRIBUTES = [
-    'cn',
-    'generationQualifier',
-    'name',
-    'postalAddress',
-    'lastLogonTimestamp',
-    'mobile',
-    'postalCode',
-    'countryCode',
-    'company',
-    'displayName',
-    'o',
-    'st',
-    'ou',
-    'givenName',
-    'msExchUserCulture',
-    'l',
-    'initials',
-    'msTSLicenseVersion',
-    'memberOf',
-    'whenChanged',
-    'mailNickname',
-    'sn',
-    'street',
-    'accountExpires',
-    'uSNChanged',
-    'distinguishedName',
-    'whenCreated',
-    'sAMAccountName',
-    'c',
-    'employeeID',
-    'streetAddress',
-    'description',
-    'mail',
-    'title',
-    'department',
-    'co',
-    'personalTitle',
+    "cn",
+    "generationQualifier",
+    "name",
+    "postalAddress",
+    "lastLogonTimestamp",
+    "mobile",
+    "postalCode",
+    "countryCode",
+    "company",
+    "displayName",
+    "o",
+    "st",
+    "ou",
+    "givenName",
+    "msExchUserCulture",
+    "l",
+    "initials",
+    "msTSLicenseVersion",
+    "memberOf",
+    "whenChanged",
+    "mailNickname",
+    "sn",
+    "street",
+    "accountExpires",
+    "uSNChanged",
+    "distinguishedName",
+    "whenCreated",
+    "sAMAccountName",
+    "c",
+    "employeeID",
+    "streetAddress",
+    "description",
+    "mail",
+    "title",
+    "department",
+    "co",
+    "personalTitle",
 ]
 
 
@@ -130,6 +130,22 @@ class Identity:
     audience: Sequence[str] | None = None
     admin: bool = False
     pretend_identity: Self | None = None
+
+    @property
+    def has_admin_privileges(self) -> bool:
+        """Check if the identity has administrative privileges.
+
+        Returns
+        -------
+            True if the identity is an admin, False otherwise.
+        """
+        if self.admin is True:
+            return True
+        if self.role and self.role.lower() == "admin":
+            return True
+        if "admin" in (p.lower() for p in self.permissions):
+            return True
+        return False
 
     @classmethod
     def from_ldap_dict(
@@ -230,6 +246,32 @@ class Identity:
             ),
         )
 
+    @classmethod
+    def from_user(cls, user: User) -> "Identity":
+        """Instantiate an Identity from a User instance.
+
+        Parameters
+        ----------
+        user
+            User object to create the Identity from.
+
+        Returns
+        -------
+            An Identity instance populated with data from the User object.
+        """
+        return cls(
+            subject=str(user.id),
+            username=user.username,
+            email=user.email,
+            display_name=user.display_name,
+            groups=user.groups or [],
+            permissions=user.permissions or [],
+            claims={},
+            issued_at=datetime.now(tz=timezone.utc),
+            role=user.role,
+            admin=user.admin,
+        )
+
     def update_from_user(self, user: User) -> None:
         """Update the Identity instance with data from a User instance.
 
@@ -244,11 +286,11 @@ class Identity:
         if not self.display_name:
             self.display_name = user.display_name
         for permission in user.permissions or []:
-            if permission not in self.permissions:
-                self.permissions.append(permission)  # type: ignore
+            self.permissions = self._append_on_sequence(
+                self.permissions, permission
+            )
         for group in user.groups or []:
-            if group not in self.groups:
-                self.groups.append(group)  # type: ignore
+            self.groups = self._append_on_sequence(self.groups, group)
         self.role = user.role
         self.admin = user.admin
 
@@ -379,11 +421,33 @@ class Identity:
         groups: list[str] = []
         for item in entry.get("memberOf", []):
             group = (
-                item.replace('\\,', ';')
-                .split(',')[0]
-                .replace(';', ',')
-                .replace('CN=', '')
-                .replace('cn=', '')
+                item.replace("\\,", ";")
+                .split(",")[0]
+                .replace(";", ",")
+                .replace("CN=", "")
+                .replace("cn=", "")
             )
             groups.append(group)
         return groups
+
+    def _append_on_sequence(
+        self, sequence: Sequence[str], item: str
+    ) -> Sequence[str]:
+        """Helper method to append an item to a sequence if it's not already
+        present.
+
+        Parameters
+        ----------
+        sequence
+            The original sequence to append to.
+        item
+            The item to append if not already in the sequence.
+
+        Returns
+        -------
+            A new sequence with the item appended if it was not already
+            present.
+        """
+        if item not in sequence:
+            return list(sequence) + [item]
+        return sequence

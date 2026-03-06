@@ -15,24 +15,6 @@ class AuthenticationService:
     application. It provides methods for user authentication, token, issuance,
     token validation, password change, pretending to login as another user,
     and merging user data with identity data.
-
-    Parameters
-    ----------
-    identity_provider
-        Identity provider to use for authentication.
-    identity_id_attribute, optional
-        Attribute name in the identity to use as the unique identifier, by
-        default "subject"
-    merge_with_database_users, optional
-        Whether to merge identity data with database user data, by default
-        False
-    user_id_attribute, optional
-        Attribute name in the user database to use as the unique
-        identifier, by default "username"
-    uow, optional
-        UnitOfWork instance for database operations, by default None
-    repository_name, optional
-        Name of the user repository in the UnitOfWork, by default "users"
     """
 
     def __init__(
@@ -42,15 +24,42 @@ class AuthenticationService:
         merge_with_database_users: bool = False,
         user_id_attribute: str = "username",
         uow: UnitOfWork | None = None,
-        repository_name: str = "users",
+        users_repository_name: str = "users",
+        static_user: User | None = None,
     ) -> None:
-        """Initialize the AuthenticationService."""
+        """Initialize the AuthenticationService.
+
+        Parameters
+        ----------
+        identity_provider
+            Identity provider to use for authentication.
+        identity_id_attribute, optional
+            Attribute name in the identity to use as the unique identifier, by
+            default "subject"
+        merge_with_database_users, optional
+            Whether to merge identity data with database user data, by default
+            False
+        user_id_attribute, optional
+            Attribute name in the user database to use as the unique
+            identifier, by default "username"
+        uow, optional
+            UnitOfWork instance for database operations, by default None
+        users_repository_name, optional
+            Name of the user repository in the UnitOfWork, by default "users"
+        static_user, optional
+            Static user to use for authentication, by default None.
+            If provided, this user will be authenticated if the credentials
+            match, bypassing the identity provider. This can be used for
+            development/testing or as a fallback user and should not be used in
+            production environments.
+        """
         self._identity_provider = identity_provider
         self._identity_id_attribute = identity_id_attribute
         self._merge_with_database_users = merge_with_database_users
         self._user_id_attribute = user_id_attribute
         self.uow = uow
-        self._repository_name = repository_name
+        self._users_repository_name = users_repository_name
+        self._static_user = static_user
 
     def login(self, credentials: PasswordCredentials) -> str:
         """Authenticate a user by their credentials.
@@ -64,10 +73,17 @@ class AuthenticationService:
         -------
             Authentication token as a string.
         """
-        identity = self._identity_provider.authenticate(credentials)
+        if (
+            self._static_user
+            and credentials.username == self._static_user.username
+            and credentials.password == self._static_user.password
+        ):
+            identity = Identity.from_user(self._static_user)
+        else:
+            identity = self._identity_provider.authenticate(credentials)
 
-        if self._merge_with_database_users and identity:
-            identity = self._merge_identity_with_user(identity)
+            if self._merge_with_database_users and identity:
+                identity = self._merge_identity_with_user(identity)
 
         token = self._identity_provider.issue_token(identity)
         return token.value
@@ -91,7 +107,7 @@ class AuthenticationService:
         """
         if not self._identity_provider.validate(Token(value=token)):
             raise exceptions.UnauthorizedException("Invalid token")
-        return "Logged out"
+        return "Logout successful"
 
     def verify(self, token: str) -> Identity:
         """Verify a token and return the associated identity.
@@ -107,16 +123,28 @@ class AuthenticationService:
         """
         return self._identity_provider.validate(Token(value=token))
 
-    # def refresh_token(self, token: str) -> str:
-    #     if not self._token_factory.validate(token):
-    #         raise exceptions.UnauthorizedException("Invalid token")
+    def refresh_token(self, refresh_token: str) -> str:
+        """Refresh an authentication token using a refresh token. This method
+        expects a stateful implementation where refresh tokens are stored and
+        validated.
 
-    #     payload = self._token_factory.get_payload(token)
-    #     user_id = payload.get(self._identity_id_attribute)
-    #     if not user_id:
-    #         raise exceptions.BadRequestException("Invalid token payload")
+        Parameters
+        ----------
+        refresh_token
+            Refresh token to use for refreshing the authentication token.
 
-    #     return self._token_factory.create(user_id, payload)
+        Returns
+        -------
+            New authentication token as a string.
+
+        Raises
+        ------
+        exceptions.UnauthorizedException
+            If the refresh token is invalid.
+        """
+        raise NotImplementedError(
+            "Refresh token functionality is not implemented yet"
+        )
 
     def change_password(
         self,
@@ -154,7 +182,13 @@ class AuthenticationService:
         exceptions.NotFoundException
             If the user to pretend to be is not found.
         """
+        if identity.has_admin_privileges is not True:
+            raise exceptions.UnauthorizedException(
+                "Only admin users can pretend to be another user"
+            )
+
         pretend_identity = self._identity_provider.get_user(pretend_subject)
+
         if not pretend_identity:
             raise exceptions.NotFoundException("User not found")
 
@@ -184,10 +218,11 @@ class AuthenticationService:
 
         with self.uow:
             users: SqlRepository[User] = getattr(
-                self.uow, self._repository_name
+                self.uow, self._users_repository_name
             )
             user = users.get_by_id(
-                value=identity.subject, attr=self._user_id_attribute
+                value=getattr(identity, self._user_id_attribute),
+                attr=self._user_id_attribute,
             )
             if user:
                 identity.update_from_user(user)

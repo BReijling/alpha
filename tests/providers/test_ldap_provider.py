@@ -18,8 +18,8 @@ def test_ldap_provider(ldap_provider):
     assert isinstance(ldap_provider, IdentityProvider)
 
 
-def test_ldap_provider_authenticate(ldap_provider, credentials):
-    identity = ldap_provider.authenticate(credentials)
+def test_ldap_provider_authenticate(ldap_provider, ldap_credentials):
+    identity = ldap_provider.authenticate(ldap_credentials)
 
     assert isinstance(identity, Identity)
     assert identity.subject == "ldap_user"
@@ -38,8 +38,8 @@ def test_ldap_provider_get_user(ldap_provider):
     assert identity.display_name == "LDAP User"
 
 
-def test_ad_provider_authenticate(ad_provider, credentials):
-    identity = ad_provider.authenticate(credentials)
+def test_ad_provider_authenticate(ad_provider, ldap_credentials):
+    identity = ad_provider.authenticate(ldap_credentials)
 
     assert isinstance(identity, Identity)
     assert identity.subject == "ldap_user"

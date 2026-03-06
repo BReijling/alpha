@@ -6,13 +6,21 @@ from typing import Any
 
 import pytest
 from alpha.domain.models.base_model import BaseDomainModel
+from alpha.domain.models.user import User
 from alpha.encoder import JSONEncoder
 from alpha.factories.jwt_factory import JWTFactory
+from alpha.factories.password_factory import PasswordFactory
 from alpha.factories.request_factory import RequestFactory
 from alpha.factories.response_factory import ResponseFactory
 from alpha.providers.models.identity import Identity
 from tests.fixtures._api_classes import ApiTrack
 from tests.fixtures.fake_factory_classes import FakeTypeFactory
+from tests.fixtures.fake_uow_repositories import (
+    FakeAuthenticationServiceUserRepository,
+    FakeDatabaseProviderUserRepository,
+    FakeDatabaseProviderUserRepositoryNoUser,
+    FakeUnitOfWork,
+)
 
 
 class PetType(Enum):
@@ -129,4 +137,57 @@ def identity() -> Identity:
         audience=None,
         admin=False,
         pretend_identity=None,
+    )
+
+
+@pytest.fixture
+def fake_authentication_service_repository():
+    return FakeAuthenticationServiceUserRepository()
+
+
+@pytest.fixture
+def fake_database_provider_user_repository():
+    return FakeDatabaseProviderUserRepository(
+        [
+            User(
+                id=1,
+                username="test_user",
+                password=PasswordFactory().hash_password("test_password"),
+                email="test_user@example.com",
+            )
+        ]
+    )
+
+
+@pytest.fixture
+def fake_database_provider_user_repository_empty_password():
+    return FakeDatabaseProviderUserRepository(
+        [
+            User(
+                id=1,
+                username="test_user",
+                password=None,
+                email="test_user@example.com",
+            )
+        ]
+    )
+
+
+@pytest.fixture
+def fake_database_provider_user_repository_no_user():
+    return FakeDatabaseProviderUserRepositoryNoUser()
+
+
+@pytest.fixture
+def fake_uow(
+    fake_authentication_service_repository,
+    fake_database_provider_user_repository,
+    fake_database_provider_user_repository_empty_password,
+    fake_database_provider_user_repository_no_user,
+):
+    return FakeUnitOfWork(
+        authentication_service=fake_authentication_service_repository,
+        database_provider=fake_database_provider_user_repository,
+        database_provider_empty_password=fake_database_provider_user_repository_empty_password,
+        database_provider_no_user=fake_database_provider_user_repository_no_user,
     )

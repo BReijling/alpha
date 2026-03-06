@@ -8,10 +8,12 @@ from alpha.adapters.sqla_unit_of_work import SqlAlchemyUnitOfWork
 from alpha.factories.jwt_factory import JWTFactory
 from alpha.factories.request_factory import RequestFactory
 from alpha.infra.connectors.ldap_connector import LDAPConnector
+from alpha.infra.connectors.oidc_connector import KeyCloakOIDCConnector
 from alpha.infra.databases.sql_alchemy import SqlAlchemyDatabase
 from alpha.infra.models.json_patch import JsonPatch
 from alpha.interfaces.sql_repository import SqlRepository
 from alpha.providers.ldap_provider import LDAPProvider
+from alpha.providers.oidc_provider import KeyCloakProvider, OIDCProvider
 from alpha.repositories.sql_alchemy_repository import SqlAlchemyRepository
 from alpha.repositories.models.repository_model import RepositoryModel
 from tests.fixtures._domain_models import Gender, TrackPoint
@@ -369,3 +371,28 @@ def subject():
 @pytest.fixture
 def credentials(subject):
     return PasswordCredentials(username=subject, password='test123')
+
+
+@pytest.fixture
+def keycloak_connector() -> KeyCloakOIDCConnector:
+    return KeyCloakOIDCConnector(
+        base_url=os.getenv("TEST_KEYCLOAK_BASE_URL", "http://localhost:5080"),
+        realm=os.getenv("TEST_KEYCLOAK_REALM", "test-realm"),
+        client_id=os.getenv("TEST_KEYCLOAK_CLIENT_ID", "test-client"),
+        client_secret=os.getenv("TEST_KEYCLOAK_CLIENT_SECRET", "supersecret"),
+        scope=["openid", "profile", "email"],
+    )
+
+
+@pytest.fixture
+def keycloak_provider(keycloak_connector) -> OIDCProvider:
+    provider = KeyCloakProvider(
+        connector=keycloak_connector,
+        populate_claims=True,
+    )
+    return provider
+
+
+@pytest.fixture
+def keycloak_credentials():
+    return PasswordCredentials(username="alice", password="secret")
