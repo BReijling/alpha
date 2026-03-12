@@ -1,7 +1,13 @@
-from typing import Any, Literal, overload
-from flask import Response
+from typing import TYPE_CHECKING, Any, Literal, overload
+import json
+from alpha.encoder import JSONEncoder
 from alpha.services.models.cookie import Cookie
 from alpha.utils._http_codes import http_codes_en
+
+if TYPE_CHECKING:
+    from flask.wrappers import Response
+else:
+    Response = Any
 
 
 @overload
@@ -11,6 +17,7 @@ def create_response_object(
     data: Any | None,
     data_type: str,
     http_codes: dict[int, tuple[str, str]],
+    json_encoder: type[json.JSONEncoder] | None,
     response_type: Literal["dict"],
 ) -> tuple[dict[str, Any], int]: ...
 
@@ -22,6 +29,7 @@ def create_response_object(
     data: Any | None,
     data_type: str,
     http_codes: dict[int, tuple[str, str]],
+    json_encoder: type[json.JSONEncoder] | None,
     response_type: Literal["flask"],
 ) -> tuple[Response, int]: ...
 
@@ -30,9 +38,10 @@ def create_response_object(
 def create_response_object(
     status_code: int,
     status_message: str,
-    data: Any | None = None,
-    data_type: str = "application/json",
-    http_codes: dict[int, tuple[str, str]] = http_codes_en,
+    data: Any | None,
+    data_type: str,
+    http_codes: dict[int, tuple[str, str]],
+    json_encoder: type[json.JSONEncoder] | None,
     response_type: None = None,
 ) -> tuple[dict[str, Any], int]: ...
 
@@ -43,6 +52,7 @@ def create_response_object(
     data: Any | None = None,
     data_type: str = "application/json",
     http_codes: dict[int, tuple[str, str]] = http_codes_en,
+    json_encoder: type[json.JSONEncoder] | None = JSONEncoder,
     response_type: str | None = "dict",
 ) -> tuple[Response, int] | tuple[dict[str, Any], int]:
     """Create a HTTP response object.
@@ -60,6 +70,9 @@ def create_response_object(
     http_codes, optional
         A dictionary mapping HTTP status codes to their descriptions, by
         default http_codes_en
+    json_encoder, optional
+        A custom JSON encoder class to use when encoding the response data, by
+        default alpha.encoder.JSONEncoder
     response_type, optional
         The type of response to create, either "flask" or "dict", by default
         "dict"
@@ -75,20 +88,26 @@ def create_response_object(
         "detail": status_message,
         "status": status_code,
         "title": http_codes[status_code][0],
-        "type": "about:blank" if not data_type else data_type,
+        "type": data_type or "about:blank",
     }
 
-    if data is not None:
-        obj["data"] = data
-
     if response_type == "flask":
+        # Importing Flask's Response class here lazyly to avoid unnecessary
+        # dependencies when not using Flask.
+        from flask.wrappers import Response
+
+        filtered_data, cookies = _split_cookies_from_object(data)
+
+        if filtered_data is not None:
+            obj["data"] = filtered_data
+
         resp = Response(
-            response=obj,
+            response=json.dumps(obj, cls=json_encoder),
             status=status_code,
             mimetype=data_type,
         )
 
-        for cookie in extract_cookies_from_object(data):
+        for cookie in cookies:
             if cookie.operation == "set":
                 resp.set_cookie(
                     key=cookie.key,
@@ -111,25 +130,35 @@ def create_response_object(
         return resp, status_code
 
     if response_type == "dict":
+        if data is not None:
+            obj["data"] = data
         return obj, status_code
 
     raise ValueError("Invalid response type. Must be 'flask' or 'dict'.")
 
 
-def extract_cookies_from_object(obj: dict[str, Any]) -> list[Cookie]:
-    """Extract Cookie objects from an object.
+def _split_cookies_from_object(
+    obj: Any | None,
+) -> tuple[Any | None, list[Cookie]]:
+    """Split a response object into its data and cookies.
 
     Parameters
     ----------
     obj
-        The response object containing the cookies.
+        The response object containing the data and cookies.
 
     Returns
     -------
-        A list of Cookie objects representing the cookies.
+        A tuple containing the data and a list of Cookie objects representing
+        the cookies.
     """
     if isinstance(obj, Cookie):
-        return [obj]
-    if isinstance(obj, list | tuple | set):
-        return [cookie for cookie in obj if isinstance(cookie, Cookie)]
-    return []
+        return None, [obj]
+    if isinstance(obj, (list, tuple, set)):
+        data = [item for item in obj if not isinstance(item, Cookie)]
+        cookies = [cookie for cookie in obj if isinstance(cookie, Cookie)]
+
+        if len(data) == 1:
+            data = data[0]
+        return data, cookies
+    return obj, []
