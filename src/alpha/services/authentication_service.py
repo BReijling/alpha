@@ -141,7 +141,7 @@ class AuthenticationService:
 
         return token.value
 
-    def logout(self, token: str) -> str | Cookie:
+    def logout(self, token: str) -> tuple[Cookie, str]:
         """Logout a user by invalidating their token.
 
         Parameters
@@ -151,18 +151,22 @@ class AuthenticationService:
 
         Returns
         -------
-            Confirmation message.
+            Confirmation message. If using cookies, returns a Cookie object to
+            clear the authentication cookie.
 
         Raises
         ------
-        exceptions.UnauthorizedException
-            If the token is invalid.
+        NotImplementedError
+            If token invalidation is not implemented for non-cookie
+            authentication.
         """
-        if not self._identity_provider.validate(Token(value=token)):
-            raise exceptions.UnauthorizedException("Invalid token")
         if self._use_cookies:
-            return self._create_logout_cookie()
-        return "Logout successful"
+            return self._create_logout_cookie(), "Logout successful"
+
+        raise NotImplementedError(
+            "Token invalidation is not implemented for non-cookie"
+            " authentication"
+        )
 
     def verify(self, token: str) -> Identity:
         """Verify a token and return the associated identity.

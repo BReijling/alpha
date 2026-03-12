@@ -57,14 +57,14 @@ def test_authentication_service_login_use_cookies(
 
 
 def test_authentication_service_logout(authentication_service):
-    result = authentication_service.logout(None)
-    assert result == "Logout successful"
+    with pytest.raises(NotImplementedError):
+        authentication_service.logout(None)
 
 
 def test_authentication_service_logout_use_cookies(
     authentication_service_use_cookies,
 ):
-    cookie = authentication_service_use_cookies.logout(None)
+    cookie, _ = authentication_service_use_cookies.logout(None)
     assert isinstance(cookie, Cookie)
     assert cookie.operation == "delete"
 
