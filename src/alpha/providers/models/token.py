@@ -10,4 +10,4 @@ class Token:
         return self.value
 
     def __repr__(self) -> str:
-        return f"Token(value='{self.value}', token_type='{self.token_type}')"
+        return f"Token(value='<redacted>', token_type='{self.token_type}')"
