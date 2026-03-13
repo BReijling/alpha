@@ -1,0 +1,31 @@
+openapi: 3.0.0
+info:
+  title: alpha-test-api
+  description: "This is an API specification for testing the OpenAPI specification parser"
+  version: 0.0.1
+  contact:
+    name: Bart Reijling
+    email: bart@reijling.eu
+servers:
+  - url: http://localhost:8080
+    description: local server used for testing
+paths:
+  /:
+    get:
+      description: Use the hello method to return the example string
+      operationId: hello
+      tags:
+        - Test
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: API is running
+      x-alpha-import:
+        - from alpha.utils.openapi_test.service import TestService
+      x-alpha-method: TestService.hello
+      x-alpha-permissions:
+        - ALPHA_TEST_API_READ
