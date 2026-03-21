@@ -28,9 +28,6 @@ class SqlAlchemyUnitOfWork:
         ------
         TypeError
             If the provided database is not a valid SqlDatabase instance.
-        TypeError
-            If the provided repositories list is empty or contains invalid
-            models.
         """
         if not isinstance(db, SqlDatabase):  # type: ignore
             raise TypeError("No valid database provided")
@@ -55,17 +52,16 @@ class SqlAlchemyUnitOfWork:
         self._session = self._db.get_session()
 
         for repo in self._repositories:
-            session = self._session
-            model = repo.default_model
-
             name: str = repo.name
-            repository = repo.repository
             interface: Any = repo.interface
 
             self.__setattr__(
                 name,
-                repository(session=session, default_model=model),  # type: ignore
+                repo.repository(
+                    session=self._session, default_model=repo.default_model
+                ),
             )
+
             if interface:
                 if not isinstance(getattr(self, name), interface):
                     raise TypeError(f"Repository for {name} has no interface")

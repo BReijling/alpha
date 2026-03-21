@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from datetime import date
 from enum import Enum, auto
+from typing import Any
 
 from alpha.domain.models.base_model import BaseDomainModel
 
@@ -103,3 +104,15 @@ class Track(BaseDomainModel):
     id: int
     name: str
     tracks: list[TrackPoint]
+
+
+@dataclass
+class TestModel:
+    value: str
+
+    @classmethod
+    def factory(cls, data: dict[str, Any]) -> "TestModel":
+        return cls(value=data.get("value", ""))
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"value": self.value}

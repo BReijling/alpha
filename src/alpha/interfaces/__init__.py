@@ -6,8 +6,12 @@ from alpha.interfaces.openapi_model import OpenAPIModel
 from alpha.interfaces.updateable import Updateable
 from alpha.interfaces.patchable import Patchable
 
-# import all database related interfaces
+# import all repository related interfaces
+from alpha.interfaces.repository import Repository
+from alpha.interfaces.api_repository import ApiRepository
 from alpha.interfaces.sql_repository import SqlRepository
+
+# import all database related interfaces
 from alpha.interfaces.sql_mapper import SqlMapper
 from alpha.interfaces.sql_database import SqlDatabase
 from alpha.interfaces.unit_of_work import UnitOfWork
@@ -30,6 +34,8 @@ __all__ = [
     "OpenAPIModel",
     "Updateable",
     "Patchable",
+    "Repository",
+    "ApiRepository",
     "SqlRepository",
     "SqlMapper",
     "SqlDatabase",

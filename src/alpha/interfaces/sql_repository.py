@@ -30,17 +30,6 @@ class SqlRepository(Protocol[DomainModel]):
     session: Session
     _default_model: DomainModel
 
-    def __init__(self, session: Session, default_model: DomainModel) -> None:
-        """_summary_
-
-        Parameters
-        ----------
-        session : Session
-            _description_
-        default_model : DomainModel
-            _description_
-        """
-
     @overload
     def add(
         self,

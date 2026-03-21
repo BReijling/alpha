@@ -11,7 +11,9 @@
         "editor.formatOnSave": true,
         "editor.wordBasedSuggestions": "off"
     },
-    "docwriter.style": "NumPy",
-    "autoDocstring.docstringFormat": "numpy-notypes"
+    "autoDocstring.docstringFormat": "numpy-notypes",
+    "conventionalCommits.scopes": [
+        "ApiRepository"
+    ]
 
 }
