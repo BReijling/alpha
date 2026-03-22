@@ -15,7 +15,7 @@ class RestApiUnitOfWork:
 
     def __init__(
         self,
-        repos: list[RepositoryModel],
+        repos: list[RepositoryModel[Any]],
         session: requests.sessions.Session | None = None,
     ) -> None:
         """Initialize the Unit of Work with repositories.
@@ -30,20 +30,31 @@ class RestApiUnitOfWork:
         Raises
         ------
         TypeError
-            If the provided repositories list is empty or contains invalid
-            models.
+            If any repository does not implement its specified interface.
         """
         self._repositories = repos
         self._session = session
 
     def __enter__(self: UOW) -> UOW:
-        """_summary_"""
+        """Enter the REST API Unit of Work context.
+        Initializes a :class:`requests.sessions.Session` if one was not
+        provided and attaches the configured repositories as attributes on the
+        unit of work instance. Each repository is constructed using the shared
+        session and its associated configuration, and optionally validated
+        against a declared interface.
+
+        Returns
+        -------
+        UOW
+            The configured :class:`RestApiUnitOfWork` instance to be used
+            within the context manager.
+        """
         self._session = self._session or requests.sessions.Session()
 
         for repo in self._repositories:
             name: str = repo.name
             interface: Any = repo.interface
-            additional_config: dict[str, Any] | None = (
+            additional_config: dict[str, Any] = dict(
                 repo.additional_config or {}
             )
 

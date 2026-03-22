@@ -4,6 +4,7 @@ import threading
 from flask import Flask, request
 from werkzeug.serving import make_server
 
+from alpha.infra.models.json_patch import JsonPatch
 from alpha.repositories.rest_api_repository import RestApiRepository
 from alpha.repositories.sql_alchemy_repository import SqlAlchemyRepository
 from tests.fixtures._domain_models import TestModel
@@ -46,10 +47,15 @@ def flask_app() -> Flask:
         obj = request.json
         return {"status": "ok", "data": obj}, 201
 
-    @app.route("/objects", methods=["PUT"])
-    def test_endpoint_put():
+    @app.route("/objects/<id>", methods=["PUT"])
+    def test_endpoint_put(id):
         obj = request.json
         return {"status": "ok", "data": obj}, 200
+
+    @app.route("/objects/<id>", methods=["PATCH"])
+    def test_endpoint_patch(id):
+        patch = request.json
+        return {"status": "ok", "data": {"value": patch[0]["value"]}}, 200
 
     @app.route("/objects/<id>", methods=["DELETE"])
     def test_endpoint_delete(id):
@@ -119,3 +125,10 @@ def rest_api_repository_for_build_url() -> RestApiRepository:
 @pytest.fixture
 def test_model() -> TestModel:
     return TestModel(value="def")
+
+
+@pytest.fixture
+def json_patch():
+    return JsonPatch(
+        [{"op": "replace", "path": "/value", "value": "patched_value"}]
+    )

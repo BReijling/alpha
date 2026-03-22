@@ -113,7 +113,7 @@ class ApiRepository(Protocol[DomainModel]):
     def add_all(
         self,
         objs: list[DomainModel],
-        return_obj: Literal[True],
+        return_objs: Literal[True],
         serialize: bool | None,
         use_factory: Literal[True, None],
         endpoint: str | None,
@@ -129,7 +129,7 @@ class ApiRepository(Protocol[DomainModel]):
     def add_all(
         self,
         objs: list[DomainModel],
-        return_obj: Literal[True],
+        return_objs: Literal[True],
         serialize: bool | None,
         use_factory: Literal[False],
         endpoint: str | None,
@@ -145,7 +145,7 @@ class ApiRepository(Protocol[DomainModel]):
     def add_all(
         self,
         objs: list[DomainModel],
-        return_obj: Literal[False],
+        return_objs: Literal[False],
         serialize: bool | None,
         use_factory: bool | None,
         endpoint: str | None,
@@ -160,7 +160,7 @@ class ApiRepository(Protocol[DomainModel]):
     def add_all(
         self,
         objs: list[DomainModel],
-        return_obj: bool,
+        return_objs: bool,
         serialize: bool | None,
         use_factory: bool | None,
         endpoint: str | None,

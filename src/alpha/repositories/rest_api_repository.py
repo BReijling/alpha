@@ -246,7 +246,8 @@ class RestApiRepository(Generic[DomainModel]):
 
         Returns
         -------
-            The added objects if `return_obj` is `True`, otherwise `None`.
+            A list of added objects if `return_objs` is `True`, otherwise
+            `None`.
         """
         if one_by_one:
             results: list[DomainModel] | list[dict[str, Any]] = []
@@ -442,7 +443,8 @@ class RestApiRepository(Generic[DomainModel]):
         ----------
         patch
             The JSON Patch object containing the changes to be applied to the
-            resource.
+            resource. This object should conform to the JSON Patch
+            specification.
         return_obj
             Whether to return the updated object or not.
         use_factory
@@ -486,7 +488,7 @@ class RestApiRepository(Generic[DomainModel]):
 
         response_data: dict[str, Any] = self._patch(
             url=url,
-            patch=patch,
+            data=patch.patch,
             additional_request_params=additional_request_params,
         )
 
@@ -706,7 +708,7 @@ class RestApiRepository(Generic[DomainModel]):
     def _patch(
         self,
         url: str,
-        patch: JsonPatch,
+        data: Any,
         additional_request_params: dict[str, Any] | None = None,
     ) -> Any:
         """Call the PATCH method of the API.
@@ -718,10 +720,10 @@ class RestApiRepository(Generic[DomainModel]):
             This URL should include any necessary query parameters. The URL is
             expected to be properly formatted and ready for use in an API
             request.
-        patch
-            The JSON Patch object containing the changes to be applied to the
-            resource. This object should conform to the JSON Patch
-            specification.
+        data
+            The data to be sent in the body of the PATCH request. This data is
+            expected to be in a format that can be serialized to JSON, as it
+            will be sent as JSON in the request body.
         additional_request_params, optional
             Additional parameters to include in the function call which handles
             the API request. This allows for flexibility in specifying
@@ -734,7 +736,7 @@ class RestApiRepository(Generic[DomainModel]):
         """
         response = self._session.patch(
             url=url,
-            json=patch,
+            json=data,
             timeout=self._request_timeout,
             **(additional_request_params or {}),
         )

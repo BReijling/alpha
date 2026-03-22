@@ -1,7 +1,9 @@
+from alpha.interfaces.api_repository import ApiRepository
 from tests.fixtures._domain_models import TestModel
 
 
 def test_rest_api_repository(rest_api_repository):
+    assert isinstance(rest_api_repository, ApiRepository)
     assert rest_api_repository is not None
     assert rest_api_repository._session is not None
     assert rest_api_repository._host.startswith("http://127.0.0.1:")
@@ -138,9 +140,36 @@ def test_rest_api_repository_remove(rest_api_repository, test_model):
     assert response is None
 
 
+def test_rest_api_repository_patch(rest_api_repository, json_patch):
+    response = rest_api_repository.patch(
+        endpoint=f"{rest_api_repository._host}/objects/1",
+        patch=json_patch,
+    )
+
+    assert isinstance(response, TestModel)
+    assert response.value == "patched_value"
+
+    response = rest_api_repository.patch(
+        endpoint=f"{rest_api_repository._host}/objects/1",
+        patch=json_patch,
+        use_factory=False,
+    )
+
+    assert isinstance(response, dict)
+    assert response["value"] == "patched_value"
+
+    response = rest_api_repository.patch(
+        endpoint=f"{rest_api_repository._host}/objects/1",
+        patch=json_patch,
+        return_obj=False,
+    )
+
+    assert response is None
+
+
 def test_rest_api_repository_update(rest_api_repository, test_model):
     response = rest_api_repository.update(
-        endpoint=f"{rest_api_repository._host}/objects",
+        endpoint=f"{rest_api_repository._host}/objects/1",
         obj=test_model,
     )
 
@@ -148,7 +177,7 @@ def test_rest_api_repository_update(rest_api_repository, test_model):
     assert response.value == test_model.value
 
     response = rest_api_repository.update(
-        endpoint=f"{rest_api_repository._host}/objects",
+        endpoint=f"{rest_api_repository._host}/objects/1",
         obj=test_model,
         use_factory=False,
     )
@@ -157,7 +186,7 @@ def test_rest_api_repository_update(rest_api_repository, test_model):
     assert response["value"] == test_model.value
 
     response = rest_api_repository.update(
-        endpoint=f"{rest_api_repository._host}/objects",
+        endpoint=f"{rest_api_repository._host}/objects/1",
         obj=test_model,
         return_obj=False,
     )

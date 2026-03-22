@@ -14,7 +14,11 @@ UOW = TypeVar("UOW", bound="SqlAlchemyUnitOfWork")
 class SqlAlchemyUnitOfWork:
     """Unit of Work implementation for SQLAlchemy databases."""
 
-    def __init__(self, db: SqlDatabase, repos: list[RepositoryModel]) -> None:
+    def __init__(
+        self,
+        db: SqlDatabase,
+        repos: list[RepositoryModel[Any]],
+    ) -> None:
         """Initialize the Unit of Work with a database and repositories.
 
         Parameters
