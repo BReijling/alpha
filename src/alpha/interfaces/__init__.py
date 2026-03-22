@@ -7,7 +7,6 @@ from alpha.interfaces.updateable import Updateable
 from alpha.interfaces.patchable import Patchable
 
 # import all repository related interfaces
-from alpha.interfaces.repository import Repository
 from alpha.interfaces.api_repository import ApiRepository
 from alpha.interfaces.sql_repository import SqlRepository
 
@@ -34,7 +33,6 @@ __all__ = [
     "OpenAPIModel",
     "Updateable",
     "Patchable",
-    "Repository",
     "ApiRepository",
     "SqlRepository",
     "SqlMapper",

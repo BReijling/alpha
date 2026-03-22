@@ -1,4 +1,4 @@
-"""This module contains the the `RestApiRepository` class."""
+"""This module contains the `RestApiRepository` class."""
 
 from urllib.parse import urlencode, urljoin
 from uuid import UUID
@@ -6,7 +6,7 @@ from uuid import UUID
 import requests
 from requests.cookies import cookiejar_from_dict  # type: ignore
 from requests.models import Response
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, TypeVar, cast
 
 from alpha.domain.models.base_model import BaseDomainModel, DomainModel
 from alpha.infra.models.json_patch import JsonPatch
@@ -98,17 +98,23 @@ class RestApiRepository(Generic[DomainModel]):
         self._serialize = serialize
         self._model_factory_method_name = model_factory_method_name
         self._model_serialization_method_name = model_serialization_method_name
-        self._session = session or requests.sessions.Session()
+
+        session_obj = session or requests.sessions.Session()
+        # Expose the underlying session publicly for consistency with other
+        # repositories
+        self.session = session_obj
+        # Preserve the existing private attribute for backward compatibility
+        self._session = session_obj
+
         self._request_headers = request_headers or {}
         self._request_cookies = request_cookies or {}
         self._request_timeout = request_timeout
         self._response_data_attribute = response_data_attribute
-
         # Update session with default headers and cookies
-        self._session.headers.update(request_headers or {})
+        self.session.headers.update(request_headers or {})
         cookiejar_from_dict(
             request_cookies or {},
-            cookiejar=self._session.cookies,
+            cookiejar=self.session.cookies,
             overwrite=True,
         )
 
@@ -173,7 +179,7 @@ class RestApiRepository(Generic[DomainModel]):
             **params,
         )
 
-        object = self._post(
+        response_data = self._post(
             url=url,
             data=obj,
             additional_request_params=additional_request_params,
@@ -183,9 +189,9 @@ class RestApiRepository(Generic[DomainModel]):
             return None
 
         if not self._determine_use_factory(use_factory):
-            return object
+            return response_data
 
-        return self._map_object(object, model)
+        return self._map_response_object(response_data, model)
 
     def add_all(
         self,
@@ -257,7 +263,7 @@ class RestApiRepository(Generic[DomainModel]):
                     additional_request_params=additional_request_params,
                     **params,
                 )
-                if result:
+                if result is not None:
                     results.append(result)  # type: ignore
             return results if return_objs else None
 
@@ -271,7 +277,7 @@ class RestApiRepository(Generic[DomainModel]):
             **params,
         )
 
-        response = self._post(
+        response_data = self._post(
             url=url,
             data=objs,
             additional_request_params=additional_request_params,
@@ -281,9 +287,9 @@ class RestApiRepository(Generic[DomainModel]):
             return None
 
         if not self._determine_use_factory(use_factory):
-            return response
+            return response_data
 
-        return self._map_array(response, model)
+        return self._map_response_array(response_data, model)
 
     def get(
         self,
@@ -341,15 +347,15 @@ class RestApiRepository(Generic[DomainModel]):
             **params,
         )
 
-        object = self._get(
+        response_data: dict[str, Any] = self._get(
             url=url,
             additional_request_params=additional_request_params,
         )
 
         if not self._determine_use_factory(use_factory):
-            return object
+            return response_data
 
-        return self._map_object(object, model)
+        return self._map_response_object(response_data, model)
 
     def get_all(
         self,
@@ -399,21 +405,23 @@ class RestApiRepository(Generic[DomainModel]):
         -------
             The retrieved objects.
         """
-        objects = self.get(
-            use_factory=False,
-            endpoint=endpoint,
+        url = self._build_url(
+            endpoint,
             parent_endpoint=parent_endpoint,
             parent_param=parent_param,
             param=param,
-            model=model,
-            additional_request_params=additional_request_params,
             **params,
         )
 
-        if not self._determine_use_factory(use_factory):
-            return objects
+        response_data: list[dict[str, Any]] = self._get(
+            url=url,
+            additional_request_params=additional_request_params,
+        )
 
-        return self._map_array(objects, model)
+        if not self._determine_use_factory(use_factory):
+            return response_data
+
+        return self._map_response_array(response_data, model)
 
     def patch(
         self,
@@ -476,7 +484,7 @@ class RestApiRepository(Generic[DomainModel]):
             **params,
         )
 
-        object = self._patch(
+        response_data: dict[str, Any] = self._patch(
             url=url,
             patch=patch,
             additional_request_params=additional_request_params,
@@ -486,9 +494,9 @@ class RestApiRepository(Generic[DomainModel]):
             return None
 
         if not self._determine_use_factory(use_factory):
-            return object
+            return response_data
 
-        return self._map_object(object, model)
+        return self._map_response_object(response_data, model)
 
     def remove(
         self,
@@ -605,7 +613,7 @@ class RestApiRepository(Generic[DomainModel]):
             **params,
         )
 
-        object = self._put(
+        response_data: dict[str, Any] = self._put(
             url=url,
             data=obj,
             additional_request_params=additional_request_params,
@@ -615,9 +623,9 @@ class RestApiRepository(Generic[DomainModel]):
             return None
 
         if not self._determine_use_factory(use_factory):
-            return object
+            return response_data
 
-        return self._map_object(object, model)
+        return self._map_response_object(response_data, model)
 
     def _get(
         self,
@@ -780,7 +788,7 @@ class RestApiRepository(Generic[DomainModel]):
     def _delete(
         self, url: str, additional_request_params: dict[str, Any] | None = None
     ) -> None:
-        """_summary_
+        """Call the DELETE method of the API.
 
         Parameters
         ----------
@@ -804,7 +812,9 @@ class RestApiRepository(Generic[DomainModel]):
         if response.status_code != 204:
             response.raise_for_status()
 
-    def _map_object(self, response: Any, model: MODEL | None) -> MODEL:
+    def _map_response_object(
+        self, response: Any, model: MODEL | None
+    ) -> MODEL:
         """Map a single object from the API response to a model instance.
 
         Parameters
@@ -820,11 +830,11 @@ class RestApiRepository(Generic[DomainModel]):
             An instance of the model populated with the data from the API
             response.
         """
-        model_to_use = model or self._default_model
+        model_to_use = self._determine_model(model)
 
         return getattr(model_to_use, self._model_factory_method_name)(response)
 
-    def _map_array(
+    def _map_response_array(
         self, response: list[Any], model: MODEL | None
     ) -> list[MODEL]:
         """Map an array of objects from the API response to model instances.
@@ -842,7 +852,7 @@ class RestApiRepository(Generic[DomainModel]):
             A list of model instances populated with the data from the API
             response.
         """
-        model_to_use = model or self._default_model
+        model_to_use = self._determine_model(model)
 
         return [
             getattr(model_to_use, self._model_factory_method_name)(item)
@@ -913,7 +923,7 @@ class RestApiRepository(Generic[DomainModel]):
         if endpoint:
             url = urljoin(url + "/", endpoint.lstrip("/"))
 
-        if param:
+        if param is not None:
             url = urljoin(url + "/", str(param))
 
         if params:
@@ -998,3 +1008,43 @@ class RestApiRepository(Generic[DomainModel]):
             method for creating models from response data.
         """
         return use_factory if use_factory is not None else self._use_factory
+
+    def _determine_model(self, model: MODEL | None) -> MODEL:
+        """Determine the model to use for mapping response data.
+
+        Parameters
+        ----------
+        model
+            The model class to which the data should be mapped. If None, the
+            default model for the repository will be used.
+
+        Returns
+        -------
+             The model class to use for mapping response data.
+
+        Raises
+        ------
+        ValueError
+            If no model is provided and no default model is set for the
+            repository.
+        AttributeError
+            If the determined model does not have the required factory method
+            defined.
+        """
+        if not model and not self._default_model:
+            raise ValueError(
+                "No model provided for mapping response and no default model "
+                "set for the repository."
+            )
+
+        model_to_use = cast(MODEL, model or self._default_model)
+
+        if not hasattr(model_to_use, self._model_factory_method_name):
+            raise AttributeError(
+                f"The model {model_to_use} does not have the factory method "
+                f"'{self._model_factory_method_name}' defined. Please ensure "
+                f"that the model has this method or set the correct "
+                f"model_factory_method_name for the repository."
+            )
+
+        return model_to_use
