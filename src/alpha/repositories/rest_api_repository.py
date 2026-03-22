@@ -1,6 +1,6 @@
 """This module contains the the `RestApiRepository` class."""
 
-from urllib.parse import urljoin
+from urllib.parse import urlencode, urljoin
 from uuid import UUID
 
 import requests
@@ -917,8 +917,7 @@ class RestApiRepository(Generic[DomainModel]):
             url = urljoin(url + "/", str(param))
 
         if params:
-            url = url + "?"
-            url += "&".join(f"{key}={value}" for key, value in params.items())
+            url = url + "?" + urlencode(params, doseq=True)
 
         return url
 
