@@ -12,6 +12,6 @@ class RepositoryModel:
 
     name: str
     repository: type[Repository[BaseDomainModel]]
-    default_model: BaseDomainModel
+    default_model: type[BaseDomainModel]
     interface: object | None
     additional_config: dict[str, object] | None = None

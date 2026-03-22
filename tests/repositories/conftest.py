@@ -1,7 +1,3 @@
-from math import e
-from typing import Any
-
-from attr import dataclass
 import pytest
 import requests
 import threading
@@ -34,6 +30,10 @@ def flask_app() -> Flask:
     def test_single_object(id):
         return {"status": "ok", "data": {"value": id}}, 200
 
+    @app.route("/parents/<parent_id>/objects/<id>", methods=["GET"])
+    def test_single_object_by_parent(parent_id, id):
+        return {"status": "ok", "data": {"value": f"{parent_id}_{id}"}}, 200
+
     @app.route("/objects", methods=["GET"])
     def test_multiple_objects():
         return {
@@ -45,6 +45,16 @@ def flask_app() -> Flask:
     def test_endpoint_post():
         obj = request.json
         return {"status": "ok", "data": obj}, 201
+
+    @app.route("/objects", methods=["PUT"])
+    def test_endpoint_put():
+        obj = request.json
+        return {"status": "ok", "data": obj}, 200
+
+    @app.route("/objects/<id>", methods=["DELETE"])
+    def test_endpoint_delete(id):
+        obj = request.json
+        return {"status": "ok", "data": obj}, 204
 
     yield app
 
@@ -72,6 +82,23 @@ def rest_api_repository(test_api_server) -> RestApiRepository:
         default_model=TestModel,
         response_data_attribute="data",
         model_factory_method_name="factory",
+    )
+    yield repository
+    session.close()
+
+
+@pytest.fixture
+def rest_api_repository_no_serialization(test_api_server) -> RestApiRepository:
+    session = requests.sessions.Session()
+    repository = RestApiRepository(
+        session=session,
+        host=test_api_server,
+        endpoint="/objects",
+        default_model=TestModel,
+        response_data_attribute="data",
+        model_factory_method_name="factory",
+        model_serialization_method_name="test",
+        serialize=True,
     )
     yield repository
     session.close()

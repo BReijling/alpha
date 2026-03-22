@@ -64,12 +64,12 @@ from alpha.encoder import JSONEncoder
 # Optional LDAP support - only import if ldap3 is available
 try:
     from alpha.infra.connectors.ldap_connector import (
-        LDAPConnector,
-    )  # noqa: F401
+        LDAPConnector,  # noqa: F401
+    )
     from alpha.providers.ldap_provider import (
-        LDAPProvider,
-        ADProvider,
-    )  # noqa: F401
+        LDAPProvider,  # noqa: F401
+        ADProvider,  # noqa: F401
+    )
 
     _LDAP_AVAILABLE = True
 except ImportError:

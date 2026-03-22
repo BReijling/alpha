@@ -95,7 +95,7 @@ requires-dist = [
     { name = "pyjwt", specifier = ">=2.10.1" },
     { name = "pymysql", marker = "extra == 'mysql'", specifier = ">=1.1.2" },
     { name = "python-dateutil", marker = "extra == 'flask'", specifier = ">=2.6.0" },
-    { name = "requests", specifier = ">=2.28.1" },
+    { name = "requests", specifier = ">=2" },
     { name = "six", specifier = ">=1.17.0" },
     { name = "sqlalchemy", specifier = ">=2.0.44" },
     { name = "swagger-ui-bundle", marker = "extra == 'flask'", specifier = ">=0.0.2" },

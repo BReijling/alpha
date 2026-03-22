@@ -1,6 +1,5 @@
 """Interfaces for HTTP/API-backed repository implementations."""
 
-from re import L
 from typing import Any, Literal, Protocol, overload, runtime_checkable
 from uuid import UUID
 
