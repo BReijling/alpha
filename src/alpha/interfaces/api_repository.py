@@ -59,14 +59,14 @@ class ApiRepository(Protocol[DomainModel]):
     def add(
         self,
         obj: DomainModel,
-        return_obj: bool,
-        serialize: bool | None,
-        use_factory: bool | None,
-        endpoint: str | None,
-        parent_endpoint: str | None,
-        parent_param: str | int | UUID | None,
-        model: DomainModel | None,
-        additional_request_params: dict[str, Any] | None,
+        return_obj: bool = True,
+        serialize: bool | None = None,
+        use_factory: bool | None = None,
+        endpoint: str | None = None,
+        parent_endpoint: str | None = None,
+        parent_param: str | int | UUID | None = None,
+        model: DomainModel | None = None,
+        additional_request_params: dict[str, Any] | None = None,
         **params: Any,
     ) -> DomainModel | dict[str, Any] | None:
         """Add a new resource.
@@ -160,15 +160,15 @@ class ApiRepository(Protocol[DomainModel]):
     def add_all(
         self,
         objs: list[DomainModel],
-        return_objs: bool,
-        serialize: bool | None,
-        use_factory: bool | None,
-        endpoint: str | None,
-        parent_endpoint: str | None,
-        parent_param: str | int | UUID | None,
-        model: DomainModel | None,
-        additional_request_params: dict[str, Any] | None,
-        one_by_one: bool,
+        return_objs: bool = True,
+        serialize: bool | None = None,
+        use_factory: bool | None = None,
+        endpoint: str | None = None,
+        parent_endpoint: str | None = None,
+        parent_param: str | int | UUID | None = None,
+        model: DomainModel | None = None,
+        additional_request_params: dict[str, Any] | None = None,
+        one_by_one: bool = False,
         **params: Any,
     ) -> list[DomainModel] | list[dict[str, Any]] | None:
         """Add multiple new resources.
@@ -242,13 +242,13 @@ class ApiRepository(Protocol[DomainModel]):
 
     def get(
         self,
-        use_factory: bool | None,
-        endpoint: str | None,
-        parent_endpoint: str | None,
-        parent_param: str | int | UUID | None,
-        param: str | int | UUID | None,
-        model: DomainModel | None,
-        additional_request_params: dict[str, Any] | None,
+        use_factory: bool | None = None,
+        endpoint: str | None = None,
+        parent_endpoint: str | None = None,
+        parent_param: str | int | UUID | None = None,
+        param: str | int | UUID | None = None,
+        model: DomainModel | None = None,
+        additional_request_params: dict[str, Any] | None = None,
         **params: Any,
     ) -> DomainModel | dict[str, Any]:
         """Retrieve a single resource.
@@ -318,13 +318,13 @@ class ApiRepository(Protocol[DomainModel]):
 
     def get_all(
         self,
-        use_factory: bool | None,
-        endpoint: str | None,
-        parent_endpoint: str | None,
-        parent_param: str | int | UUID | None,
-        param: str | int | UUID | None,
-        model: DomainModel | None,
-        additional_request_params: dict[str, Any] | None,
+        use_factory: bool | None = None,
+        endpoint: str | None = None,
+        parent_endpoint: str | None = None,
+        parent_param: str | int | UUID | None = None,
+        param: str | int | UUID | None = None,
+        model: DomainModel | None = None,
+        additional_request_params: dict[str, Any] | None = None,
         **params: Any,
     ) -> list[DomainModel] | list[dict[str, Any]]:
         """Retrieve multiple resources.
@@ -366,10 +366,41 @@ class ApiRepository(Protocol[DomainModel]):
         """
         ...
 
+    @overload
     def patch(
         self,
         patch: JsonPatch,
-        return_obj: bool,
+        return_obj: Literal[True],
+        use_factory: Literal[True, None],
+        endpoint: str | None,
+        parent_endpoint: str | None,
+        parent_param: str | int | UUID | None,
+        param: str | int | UUID | None,
+        model: DomainModel | None,
+        additional_request_params: dict[str, Any] | None,
+        **params: Any,
+    ) -> DomainModel: ...
+
+    @overload
+    def patch(
+        self,
+        patch: JsonPatch,
+        return_obj: Literal[True],
+        use_factory: Literal[False],
+        endpoint: str | None,
+        parent_endpoint: str | None,
+        parent_param: str | int | UUID | None,
+        param: str | int | UUID | None,
+        model: DomainModel | None,
+        additional_request_params: dict[str, Any] | None,
+        **params: Any,
+    ) -> dict[str, Any]: ...
+
+    @overload
+    def patch(
+        self,
+        patch: JsonPatch,
+        return_obj: Literal[False],
         use_factory: bool | None,
         endpoint: str | None,
         parent_endpoint: str | None,
@@ -378,7 +409,21 @@ class ApiRepository(Protocol[DomainModel]):
         model: DomainModel | None,
         additional_request_params: dict[str, Any] | None,
         **params: Any,
-    ) -> DomainModel | None:
+    ) -> None: ...
+
+    def patch(
+        self,
+        patch: JsonPatch,
+        return_obj: bool = True,
+        use_factory: bool | None = None,
+        endpoint: str | None = None,
+        parent_endpoint: str | None = None,
+        parent_param: str | int | UUID | None = None,
+        param: str | int | UUID | None = None,
+        model: DomainModel | None = None,
+        additional_request_params: dict[str, Any] | None = None,
+        **params: Any,
+    ) -> DomainModel | dict[str, Any] | None:
         """Update a resource.
 
         Parameters
@@ -423,11 +468,11 @@ class ApiRepository(Protocol[DomainModel]):
 
     def remove(
         self,
-        endpoint: str | None,
-        parent_endpoint: str | None,
-        parent_param: str | int | UUID | None,
-        param: str | int | UUID | None,
-        additional_request_params: dict[str, Any] | None,
+        endpoint: str | None = None,
+        parent_endpoint: str | None = None,
+        parent_param: str | int | UUID | None = None,
+        param: str | int | UUID | None = None,
+        additional_request_params: dict[str, Any] | None = None,
         **params: Any,
     ) -> None:
         """Remove a resource.
@@ -458,10 +503,43 @@ class ApiRepository(Protocol[DomainModel]):
         """
         ...
 
+    @overload
     def update(
         self,
         obj: DomainModel,
-        return_obj: bool,
+        return_obj: Literal[True],
+        serialize: bool | None,
+        use_factory: Literal[True, None],
+        endpoint: str | None,
+        parent_endpoint: str | None,
+        parent_param: str | int | UUID | None,
+        param: str | int | UUID | None,
+        model: DomainModel | None,
+        additional_request_params: dict[str, Any] | None,
+        **params: Any,
+    ) -> DomainModel: ...
+
+    @overload
+    def update(
+        self,
+        obj: DomainModel,
+        return_obj: Literal[True],
+        serialize: bool | None,
+        use_factory: Literal[False],
+        endpoint: str | None,
+        parent_endpoint: str | None,
+        parent_param: str | int | UUID | None,
+        param: str | int | UUID | None,
+        model: DomainModel | None,
+        additional_request_params: dict[str, Any] | None,
+        **params: Any,
+    ) -> dict[str, Any]: ...
+
+    @overload
+    def update(
+        self,
+        obj: DomainModel,
+        return_obj: Literal[False],
         serialize: bool | None,
         use_factory: bool | None,
         endpoint: str | None,
@@ -470,6 +548,21 @@ class ApiRepository(Protocol[DomainModel]):
         param: str | int | UUID | None,
         model: DomainModel | None,
         additional_request_params: dict[str, Any] | None,
+        **params: Any,
+    ) -> None: ...
+
+    def update(
+        self,
+        obj: DomainModel,
+        return_obj: bool = True,
+        serialize: bool | None = None,
+        use_factory: bool | None = None,
+        endpoint: str | None = None,
+        parent_endpoint: str | None = None,
+        parent_param: str | int | UUID | None = None,
+        param: str | int | UUID | None = None,
+        model: DomainModel | None = None,
+        additional_request_params: dict[str, Any] | None = None,
         **params: Any,
     ) -> DomainModel | dict[str, Any] | None:
         """Update a resource.
