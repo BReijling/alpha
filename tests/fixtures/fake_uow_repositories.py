@@ -1,5 +1,30 @@
 from alpha.domain.models.user import User
-from alpha.factories.password_factory import PasswordFactory
+
+
+class FakeRepository:
+    def __init__(self, *args, **kwargs) -> None:
+        pass
+
+    def add(self, *args, **kwargs) -> None:
+        pass
+
+    def add_all(self, *args, **kwargs) -> None:
+        pass
+
+    def get(self, *args, **kwargs) -> None:
+        pass
+
+    def get_all(self, *args, **kwargs) -> None:
+        pass
+
+    def patch(self, *args, **kwargs) -> None:
+        pass
+
+    def remove(self, *args, **kwargs) -> None:
+        pass
+
+    def update(self, *args, **kwargs) -> None:
+        pass
 
 
 class FakeAuthenticationServiceUserRepository:

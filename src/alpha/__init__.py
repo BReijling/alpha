@@ -1,3 +1,4 @@
+from alpha.adapters.rest_api_unit_of_work import RestApiUnitOfWork
 from alpha.adapters.sqla_unit_of_work import SqlAlchemyUnitOfWork
 from alpha.factories.jwt_factory import JWTFactory
 from alpha.factories.logging_handler_factory import LoggingHandlerFactory
@@ -20,6 +21,7 @@ from alpha.interfaces.pydantic_instance import PydanticInstance
 from alpha.interfaces.openapi_model import OpenAPIModel
 from alpha.interfaces.updateable import Updateable
 from alpha.interfaces.patchable import Patchable
+from alpha.interfaces.api_repository import ApiRepository
 from alpha.interfaces.sql_repository import SqlRepository
 from alpha.interfaces.sql_mapper import SqlMapper
 from alpha.interfaces.sql_database import SqlDatabase
@@ -44,6 +46,7 @@ from alpha.providers.models.credentials import PasswordCredentials
 from alpha.providers.models.token import Token
 from alpha.providers.oidc_provider import OIDCProvider, KeyCloakProvider
 from alpha.repositories.models.repository_model import RepositoryModel
+from alpha.repositories.rest_api_repository import RestApiRepository
 from alpha.repositories.sql_alchemy_repository import SqlAlchemyRepository
 from alpha.services.authentication_service import AuthenticationService
 from alpha.utils.is_attrs import is_attrs
@@ -60,13 +63,20 @@ from alpha.encoder import JSONEncoder
 
 # Optional LDAP support - only import if ldap3 is available
 try:
-    from alpha.infra.connectors.ldap_connector import LDAPConnector  # noqa: F401
-    from alpha.providers.ldap_provider import LDAPProvider, ADProvider  # noqa: F401
+    from alpha.infra.connectors.ldap_connector import (
+        LDAPConnector,  # noqa: F401
+    )
+    from alpha.providers.ldap_provider import (
+        LDAPProvider,  # noqa: F401
+        ADProvider,  # noqa: F401
+    )
+
     _LDAP_AVAILABLE = True
 except ImportError:
-    _LDAP_AVAILABLE = False # type: ignore
+    _LDAP_AVAILABLE = False  # type: ignore
 
 __all__ = [
+    "RestApiUnitOfWork",
     "SqlAlchemyUnitOfWork",
     "JWTFactory",
     "LoggingHandlerFactory",
@@ -91,6 +101,7 @@ __all__ = [
     "OpenAPIModel",
     "Updateable",
     "Patchable",
+    "ApiRepository",
     "SqlRepository",
     "SqlMapper",
     "SqlDatabase",
@@ -112,6 +123,7 @@ __all__ = [
     "OIDCProvider",
     "KeyCloakProvider",
     "RepositoryModel",
+    "RestApiRepository",
     "SqlAlchemyRepository",
     "AuthenticationService",
     "is_attrs",
@@ -128,8 +140,10 @@ __all__ = [
 
 # Conditionally add LDAP-related exports if available
 if _LDAP_AVAILABLE:
-    __all__.extend([
-        "LDAPConnector",
-        "LDAPProvider",
-        "ADProvider",
-    ])
+    __all__.extend(
+        [
+            "LDAPConnector",
+            "LDAPProvider",
+            "ADProvider",
+        ]
+    )

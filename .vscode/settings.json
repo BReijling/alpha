@@ -14,7 +14,8 @@
     "docwriter.style": "NumPy",
     "autoDocstring.docstringFormat": "numpy-notypes",
     "conventionalCommits.scopes": [
-        "license"
+        "license",
+        "ApiRepository"
     ],
     "workbench.colorCustomizations": {
         "activityBar.activeBackground": "#65c89b",
