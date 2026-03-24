@@ -107,7 +107,7 @@ class Track(BaseDomainModel):
 
 
 @dataclass
-class TestModel:
+class TestModel(BaseDomainModel):
     value: str
 
     @classmethod

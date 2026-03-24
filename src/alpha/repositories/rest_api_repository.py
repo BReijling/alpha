@@ -11,7 +11,7 @@ from typing import Any, Generic, TypeVar, cast
 from alpha.domain.models.base_model import BaseDomainModel, DomainModel
 from alpha.infra.models.json_patch import JsonPatch
 
-MODEL = TypeVar("MODEL", bound=BaseDomainModel)
+T = TypeVar("T", bound=BaseDomainModel)
 
 
 class RestApiRepository(Generic[DomainModel]):
@@ -47,7 +47,6 @@ class RestApiRepository(Generic[DomainModel]):
         session: requests.sessions.Session | None = None,
         request_headers: dict[str, str] | None = None,
         request_cookies: dict[str, str] | None = None,
-        request_timeout: int | None = 30,
         response_data_attribute: str | None = None,
     ) -> None:
         """Initialize the REST API repository.
@@ -108,7 +107,6 @@ class RestApiRepository(Generic[DomainModel]):
 
         self._request_headers = request_headers or {}
         self._request_cookies = request_cookies or {}
-        self._request_timeout = request_timeout
         self._response_data_attribute = response_data_attribute
         # Update session with default headers and cookies
         self.session.headers.update(request_headers or {})
@@ -213,16 +211,16 @@ class RestApiRepository(Generic[DomainModel]):
         ----------
         objs
             The objects to add.
-        return_obj
-            Whether to return the added object or not.
+        return_objs
+            Whether to return the added objects or not.
         serialize
-            Whether to serialize the object before sending it in the API
+            Whether to serialize the objects before sending it in the API
             request.
         use_factory
             Whether to use the model factory method for creating models from
             response data.
         endpoint
-            The API endpoint to which the object should be added.
+            The API endpoint to which the objects should be added.
         parent_endpoint
             The parent API endpoint, if the resource is nested under a parent
             resource.
@@ -655,7 +653,6 @@ class RestApiRepository(Generic[DomainModel]):
         """
         response = self._session.get(
             url=url,
-            timeout=self._request_timeout,
             **(additional_request_params or {}),
         )
 
@@ -696,7 +693,6 @@ class RestApiRepository(Generic[DomainModel]):
         response = self._session.post(
             url=url,
             json=data,
-            timeout=self._request_timeout,
             **(additional_request_params or {}),
         )
 
@@ -737,7 +733,6 @@ class RestApiRepository(Generic[DomainModel]):
         response = self._session.patch(
             url=url,
             json=data,
-            timeout=self._request_timeout,
             **(additional_request_params or {}),
         )
 
@@ -778,7 +773,6 @@ class RestApiRepository(Generic[DomainModel]):
         response = self._session.put(
             url=url,
             json=data,
-            timeout=self._request_timeout,
             **(additional_request_params or {}),
         )
 
@@ -807,16 +801,13 @@ class RestApiRepository(Generic[DomainModel]):
         """
         response = self._session.delete(
             url=url,
-            timeout=self._request_timeout,
             **(additional_request_params or {}),
         )
 
         if response.status_code != 204:
             response.raise_for_status()
 
-    def _map_response_object(
-        self, response: Any, model: MODEL | None
-    ) -> MODEL:
+    def _map_response_object(self, response: Any, model: T | None) -> T:
         """Map a single object from the API response to a model instance.
 
         Parameters
@@ -837,8 +828,8 @@ class RestApiRepository(Generic[DomainModel]):
         return getattr(model_to_use, self._model_factory_method_name)(response)
 
     def _map_response_array(
-        self, response: list[Any], model: MODEL | None
-    ) -> list[MODEL]:
+        self, response: list[Any], model: T | None
+    ) -> list[T]:
         """Map an array of objects from the API response to model instances.
 
         Parameters
@@ -1011,7 +1002,7 @@ class RestApiRepository(Generic[DomainModel]):
         """
         return use_factory if use_factory is not None else self._use_factory
 
-    def _determine_model(self, model: MODEL | None) -> MODEL:
+    def _determine_model(self, model: T | None) -> T:
         """Determine the model to use for mapping response data.
 
         Parameters
@@ -1039,7 +1030,7 @@ class RestApiRepository(Generic[DomainModel]):
                 "set for the repository."
             )
 
-        model_to_use = cast(MODEL, model or self._default_model)
+        model_to_use = cast(T, model or self._default_model)
 
         if not hasattr(model_to_use, self._model_factory_method_name):
             raise AttributeError(
