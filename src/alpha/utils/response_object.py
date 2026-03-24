@@ -92,7 +92,7 @@ def create_response_object(
     }
 
     if response_type == "flask":
-        # Importing Flask's Response class here lazyly to avoid unnecessary
+        # Importing Flask's Response class here lazily to avoid unnecessary
         # dependencies when not using Flask.
         from flask.wrappers import Response
 
@@ -109,7 +109,7 @@ def create_response_object(
 
         for cookie in cookies:
             if cookie.operation == "set":
-                resp.set_cookie(
+                resp.set_cookie(  # type: ignore
                     key=cookie.key,
                     value=cookie.value,
                     max_age=cookie.max_age,
@@ -121,7 +121,7 @@ def create_response_object(
                     samesite=cookie.samesite,
                 )
             if cookie.operation == "delete":
-                resp.delete_cookie(
+                resp.delete_cookie(  # type: ignore
                     key=cookie.key,
                     path=cookie.path,
                     domain=cookie.domain,
@@ -155,8 +155,10 @@ def _split_cookies_from_object(
     if isinstance(obj, Cookie):
         return None, [obj]
     if isinstance(obj, (list, tuple, set)):
-        data = [item for item in obj if not isinstance(item, Cookie)]
-        cookies = [cookie for cookie in obj if isinstance(cookie, Cookie)]
+        data: list[Any] = [
+            item for item in obj if not isinstance(item, Cookie)  # type: ignore
+        ]
+        cookies = [cookie for cookie in obj if isinstance(cookie, Cookie)]  # type: ignore
 
         if len(data) == 1:
             data = data[0]
