@@ -36,6 +36,7 @@ class AuthenticationService:
         user_id_attribute: str = "username",
         uow: UnitOfWork | None = None,
         users_repository_name: str = "users",
+        # TODO: Add support for refresh token repository and configuration for refresh token storage/validation
         static_user: User | None = None,
     ) -> None:
         """Initialize the AuthenticationService.
@@ -253,6 +254,8 @@ class AuthenticationService:
 
         identity.pretend_identity = pretend_identity
         token = self._identity_provider.issue_token(identity)
+        # TODO: Add support for cookie-based authentication in pretend_login as well
+
         return token.value
 
     def _merge_identity_with_user(
