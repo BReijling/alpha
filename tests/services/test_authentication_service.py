@@ -34,7 +34,15 @@ def test_authentication_service_login_with_static_user(
 def test_authentication_service_login_use_cookies(
     authentication_service_use_cookies, static_user_credentials
 ):
-    cookie = authentication_service_use_cookies.login(static_user_credentials)
+    result = authentication_service_use_cookies.login(static_user_credentials)
+
+    assert isinstance(result, tuple)
+
+    cookie, token = result
+
+    assert isinstance(token, str)
+    assert token == "static_user_token"
+
     assert isinstance(cookie, Cookie)
     assert (
         cookie.key
@@ -43,7 +51,7 @@ def test_authentication_service_login_use_cookies(
     assert cookie.value == "static_user_token"
     assert (
         cookie.max_age
-        == authentication_service_use_cookies._cookie_auth_token_max_age
+        == authentication_service_use_cookies._auth_token_max_age
     )
     assert cookie.path == authentication_service_use_cookies._cookie_path
     assert cookie.domain == authentication_service_use_cookies._cookie_domain
