@@ -5,7 +5,9 @@ import json
 from datetime import datetime, timedelta, timezone
 from typing import Literal, NoReturn
 
+from alpha.domain.models.group import Group
 from alpha.domain.models.user import User
+from alpha.infra.models.search_filter import Operator, SearchFilter
 from alpha.interfaces.sql_repository import SqlRepository
 from alpha.interfaces.unit_of_work import UnitOfWork
 from alpha.providers.models.identity import Identity
@@ -40,9 +42,11 @@ class AuthenticationService:
         auth_token_max_age: int = 900,
         refresh_token_max_age: int = 3600 * 24 * 7,
         merge_with_database_users: bool = False,
+        merge_with_database_groups: bool = False,
         user_id_attribute: str = "username",
         uow: UnitOfWork | None = None,
         users_repository_name: str = "users",
+        groups_repository_name: str = "groups",
         refresh_token_storage: Literal[
             "database",
             "memory",
@@ -98,6 +102,9 @@ class AuthenticationService:
         merge_with_database_users, optional
             Whether to merge identity data with database user data,
             by default False
+        merge_with_database_groups, optional
+            Whether to merge identity data with database group data,
+            by default False
         user_id_attribute, optional
             Attribute name in the user database to use as the unique
             identifier, by default "username"
@@ -105,6 +112,8 @@ class AuthenticationService:
             UnitOfWork instance for database operations, by default None
         users_repository_name, optional
             Name of the user repository in the UnitOfWork, by default "users"
+        groups_repository_name, optional
+            Name of the group repository in the UnitOfWork, by default "groups"
         refresh_token_storage, optional
             Storage mechanism for refresh tokens, by default "database"
         refresh_token_repository_name, optional
@@ -161,9 +170,11 @@ class AuthenticationService:
         self._auth_token_max_age = auth_token_max_age
         self._refresh_token_max_age = refresh_token_max_age
         self._merge_with_database_users = merge_with_database_users
+        self._merge_with_database_groups = merge_with_database_groups
         self._user_id_attribute = user_id_attribute
         self.uow = uow
         self._users_repository_name = users_repository_name
+        self._groups_repository_name = groups_repository_name
         self._refresh_token_storage = refresh_token_storage
         self._refresh_token_repository_name = refresh_token_repository_name
         self._refresh_token_storage_file_path = (
@@ -195,22 +206,31 @@ class AuthenticationService:
             Authentication token as a string or a tuple containing a Cookie
             object and the token string.
         """
+        # Check if static user is configured and matches the provided
+        # credentials
         if (
             self._static_user
             and credentials.username == self._static_user.username
             and credentials.password == self._static_user.password
         ):
             identity = Identity.from_user(self._static_user)
+
+        # Use the identity provider to authenticate the user and retrieve their
+        # identity
         else:
             identity = self._identity_provider.authenticate(credentials)
 
             if self._merge_with_database_users and identity:
                 identity = self._merge_identity_with_user(identity)
 
+        # Issue an authentication token for the authenticated identity
         token = self._identity_provider.issue_token(identity)
 
+        # If using cookies, create an authentication cookie for the token and
+        # return it along with the token string.
         if self._use_cookies:
             auth_cookie = self._create_auth_cookie(token)
+            # If using refresh tokens, also create a refresh token and cookie.
             if self._use_refresh_tokens:
                 refresh_token = self._create_refresh_token(
                     subject=getattr(identity, self._identity_id_attribute)
@@ -392,10 +412,12 @@ class AuthenticationService:
             users: SqlRepository[User] = getattr(
                 self.uow, self._users_repository_name
             )
+
             user = users.get_by_id(
                 value=getattr(identity, self._user_id_attribute),
                 attr=self._user_id_attribute,
             )
+
             if user:
                 identity.update_from_user(user)
             else:
@@ -403,6 +425,19 @@ class AuthenticationService:
                 user = User.from_identity(identity)
                 users.add(user)
                 self.uow.commit()
+
+            if self._merge_with_database_groups:
+                groups: SqlRepository[Group] = getattr(
+                    self.uow, self._groups_repository_name
+                )
+                filters = [
+                    SearchFilter(
+                        field="name", op=Operator.IN, value=user.groups
+                    )
+                ]
+                user_groups = groups.select(filters=filters)
+                identity.update_from_groups(user_groups)
+
         return identity
 
     def _create_auth_cookie(self, token: Token) -> Cookie:
