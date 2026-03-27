@@ -1,3 +1,4 @@
+import httpx
 import pytest
 import requests
 import threading
@@ -62,6 +63,12 @@ def flask_app() -> Flask:
         obj = request.json
         return {"status": "ok", "data": obj}, 204
 
+    @app.route("/status/<status_code>", methods=["GET"])
+    def test_status(status_code):
+        return {"status": "ok", "data": {"value": status_code}}, int(
+            status_code
+        )
+
     yield app
 
 
@@ -80,7 +87,45 @@ def test_api_server(flask_app):
 
 @pytest.fixture
 def rest_api_repository(test_api_server) -> RestApiRepository:
+    repository = RestApiRepository(
+        host=test_api_server,
+        endpoint="/objects",
+        default_model=TestModel,
+        response_data_attribute="data",
+        model_factory_method_name="factory",
+    )
+    session = repository._session
+    yield repository
+    session.close()
+
+
+@pytest.fixture
+def rest_api_repository_no_model(test_api_server) -> RestApiRepository:
     session = requests.sessions.Session()
+    repository = RestApiRepository(
+        session=session,
+        host=test_api_server,
+        endpoint="/objects",
+    )
+    yield repository
+    session.close()
+
+
+@pytest.fixture
+def rest_api_repository_status(test_api_server) -> RestApiRepository:
+    session = requests.sessions.Session()
+    repository = RestApiRepository(
+        session=session,
+        host=test_api_server,
+        endpoint="/status",
+    )
+    yield repository
+    session.close()
+
+
+@pytest.fixture
+def rest_api_repository_httpx(test_api_server) -> RestApiRepository:
+    session = httpx.Client()
     repository = RestApiRepository(
         session=session,
         host=test_api_server,

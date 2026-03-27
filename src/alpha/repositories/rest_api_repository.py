@@ -8,6 +8,7 @@ from requests.cookies import cookiejar_from_dict  # type: ignore
 from requests.models import Response
 from typing import Any, Generic, TypeVar, cast
 
+from alpha import exceptions
 from alpha.domain.models.base_model import BaseDomainModel, DomainModel
 from alpha.infra.models.json_patch import JsonPatch
 
@@ -79,7 +80,8 @@ class RestApiRepository(Generic[DomainModel]):
             The name of the method to use for serializing models to
             dictionaries, by default "to_dict"
         session, optional
-            The requests session to use, by default None
+            The requests session (or compatible HTTP client, e.g., httpx) to
+            use for context management, by default None
         request_headers, optional
             Default headers to include in every request, by default None
         request_timeout, optional
@@ -656,10 +658,7 @@ class RestApiRepository(Generic[DomainModel]):
             **(additional_request_params or {}),
         )
 
-        if response.status_code == 200:
-            return self._get_data_from_response(response)
-        else:
-            response.raise_for_status()
+        return self._handle_response(response)
 
     def _post(
         self,
@@ -696,10 +695,7 @@ class RestApiRepository(Generic[DomainModel]):
             **(additional_request_params or {}),
         )
 
-        if response.status_code in (200, 201):
-            return self._get_data_from_response(response)
-        else:
-            response.raise_for_status()
+        return self._handle_response(response)
 
     def _patch(
         self,
@@ -736,10 +732,7 @@ class RestApiRepository(Generic[DomainModel]):
             **(additional_request_params or {}),
         )
 
-        if response.status_code == 200:
-            return self._get_data_from_response(response)
-        else:
-            response.raise_for_status()
+        return self._handle_response(response)
 
     def _put(
         self,
@@ -776,10 +769,7 @@ class RestApiRepository(Generic[DomainModel]):
             **(additional_request_params or {}),
         )
 
-        if response.status_code == 200:
-            return self._get_data_from_response(response)
-        else:
-            response.raise_for_status()
+        return self._handle_response(response)
 
     def _delete(
         self, url: str, additional_request_params: dict[str, Any] | None = None
@@ -804,8 +794,7 @@ class RestApiRepository(Generic[DomainModel]):
             **(additional_request_params or {}),
         )
 
-        if response.status_code != 204:
-            response.raise_for_status()
+        return self._handle_response(response)
 
     def _map_response_object(self, response: Any, model: T | None) -> T:
         """Map a single object from the API response to a model instance.
@@ -1041,3 +1030,160 @@ class RestApiRepository(Generic[DomainModel]):
             )
 
         return model_to_use
+
+    def _handle_response(self, response: Response) -> Any:
+        """Handle the API response and extract the relevant data.
+
+        In addition to extracting data from successful responses, this method
+        also handles various HTTP error responses by raising appropriate
+        exceptions based on the status code of the response. This ensures that
+        the caller can handle different error scenarios in a structured way.
+
+        Parameters
+        ----------
+        response
+            The API response object to be processed.
+
+        Returns
+        -------
+            The processed data extracted from the API response.
+
+        Raises
+        ------
+        exceptions.BadRequestException
+            If the API response indicates a bad request (HTTP status code 400).
+        exceptions.UnauthorizedException
+            If the API response indicates an unauthorized request (HTTP status
+            code 401).
+        exceptions.ForbiddenException
+            If the API response indicates a forbidden request (HTTP status code
+            403).
+        exceptions.NotFoundException
+            If the API response indicates that the requested resource was not
+            found (HTTP status code 404).
+        exceptions.MethodNotAllowedException
+            If the API response indicates that the HTTP method is not allowed
+            (HTTP status code 405).
+        exceptions.NotAcceptableException
+            If the API response indicates that the requested resource is not
+            acceptable (HTTP status code 406).
+        exceptions.ConflictException
+            If the API response indicates a conflict with the current state of
+            the resource (HTTP status code 409).
+        exceptions.PayloadTooLargeException
+            If the API response indicates that the request payload is too large
+            (HTTP status code 413).
+        exceptions.UnprocessableContentException
+            If the API response indicates that the server cannot process the
+            contained instructions (HTTP status code 422).
+        exceptions.InternalServerErrorException
+            If the API response indicates an internal server error (HTTP status
+            code 500).
+        exceptions.NotImplementedException
+            If the API response indicates that the server does not support the
+            functionality required to fulfill the request (HTTP status code
+            501).
+        exceptions.BadGatewayException
+            If the API response indicates a bad gateway error (HTTP status code
+            502).
+        exceptions.ServiceUnavailableException
+            If the API response indicates that the service is unavailable (HTTP
+            status code 503).
+        exceptions.GatewayTimeoutException
+            If the API response indicates a gateway timeout error (HTTP status
+            code 504).
+        exceptions.ClientErrorException
+            If the API response indicates a client error that is not
+            specifically handled by the above exceptions.
+        exceptions.ServerErrorException
+            If the API response indicates a server error that is not
+            specifically handled by the above exceptions.
+        """
+        match response.status_code:
+            case 200 | 201 | 202:
+                return self._get_data_from_response(response)
+            case 204:
+                return None
+            case 400:
+                raise exceptions.BadRequestException(
+                    "Bad request: The server could not understand the request due "
+                    "to invalid syntax."
+                )
+            case 401:
+                raise exceptions.UnauthorizedException(
+                    "Unauthorized: The client must authenticate itself to get the "
+                    "requested response."
+                )
+            case 403:
+                raise exceptions.ForbiddenException(
+                    "Forbidden: The client does not have access rights to the "
+                    "content."
+                )
+            case 404:
+                raise exceptions.NotFoundException(
+                    "Not Found: The server can not find the requested resource."
+                )
+            case 405:
+                raise exceptions.MethodNotAllowedException(
+                    "Method Not Allowed: The request method is known by the server "
+                    "but is not supported by the target resource."
+                )
+            case 406:
+                raise exceptions.NotAcceptableException(
+                    "Not Acceptable: The server cannot produce a response matching "
+                    "the list of acceptable values defined in the request's "
+                    "proactive content negotiation headers."
+                )
+            case 409:
+                raise exceptions.ConflictException(
+                    "Conflict: The request could not be completed due to a conflict "
+                    "with the current state of the target resource."
+                )
+            case 413:
+                raise exceptions.PayloadTooLargeException(
+                    "Payload Too Large: The request entity is larger than limits "
+                    "defined by the server."
+                )
+            case 422:
+                raise exceptions.UnprocessableContentException(
+                    "Unprocessable Content: The server understands the content type "
+                    "of the request entity, and the syntax of the request entity is "
+                    "correct, but it was unable to process the contained instructions."
+                )
+            case 500:
+                raise exceptions.InternalServerErrorException(
+                    "Internal Server Error: The server has encountered a situation "
+                    "it doesn't know how to handle."
+                )
+            case 501:
+                raise exceptions.NotImplementedException(
+                    "Not Implemented: The server does not support the functionality "
+                    "required to fulfill the request."
+                )
+            case 502:
+                raise exceptions.BadGatewayException(
+                    "Bad Gateway: The server was acting as a gateway or proxy and "
+                    "received an invalid response from the upstream server."
+                )
+            case 503:
+                raise exceptions.ServiceUnavailableException(
+                    "Service Unavailable: The server is not ready to handle the "
+                    "request. Common causes are a server that is down for "
+                    "maintenance or that is overloaded."
+                )
+            case 504:
+                raise exceptions.GatewayTimeoutException(
+                    "Gateway Timeout: The server was acting as a gateway or proxy and "
+                    "did not receive a timely response from the upstream server."
+                )
+            case _:
+                try:
+                    return response.raise_for_status()
+                except requests.HTTPError as e:
+                    if 400 <= response.status_code < 500:
+                        raise exceptions.ClientErrorException(
+                            f"An HTTP client error occurred: {str(e)}"
+                        ) from e
+                    raise exceptions.ServerErrorException(
+                        f"An HTTP server error occurred: {str(e)}"
+                    ) from e

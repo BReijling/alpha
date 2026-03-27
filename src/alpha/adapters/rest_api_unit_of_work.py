@@ -25,7 +25,8 @@ class RestApiUnitOfWork:
         repos : list[RepositoryModel]
             The list of repository models to use.
         session : requests.sessions.Session | None
-            The session to use for API interactions.
+            The requests session (or compatible HTTP client, e.g., httpx) to
+            use for context management, by default None
 
         Raises
         ------
