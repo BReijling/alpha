@@ -69,7 +69,7 @@ class FakeRefreshTokenRepository:
         self.tokens.append(token)
         return token
 
-    def get_one_or_none(self, *args, **kwargs) -> Token:
+    def get_one_or_none(self, *args, **kwargs) -> Token | None:
         if not self.tokens:
             return None
         return self.tokens[0]
