@@ -286,7 +286,7 @@ class AuthenticationService:
 
     def refresh_token(
         self, refresh_token: str, identity: Identity | None = None
-    ) -> str | tuple[Cookie, str]:
+    ) -> tuple[Cookie, str]:
         """Refresh an authentication token using a refresh token. This method
         expects a stateful implementation where refresh tokens are stored and
         validated.
@@ -300,15 +300,22 @@ class AuthenticationService:
 
         Returns
         -------
-            New authentication token as a string. If using cookies, returns a
-            tuple containing a Cookie object for the new authentication token
+            A tuple containing a Cookie object for the new authentication token
             and the token string.
 
         Raises
         ------
+        exceptions.MissingConfigurationException
+            If refresh token authentication is not properly configured.
         exceptions.UnauthorizedException
             If the refresh token is invalid.
         """
+        if not self._use_cookies or not self._use_refresh_tokens:
+            raise exceptions.MissingConfigurationException(
+                "Refresh token authentication is not enabled. Both use_cookies"
+                "and use_refresh_tokens must be True."
+            )
+
         stored_refresh_token = self._get_refresh_token_from_storage(
             refresh_token
         )
@@ -329,11 +336,8 @@ class AuthenticationService:
 
         token = self._identity_provider.issue_token(identity)
 
-        if self._use_cookies:
-            auth_cookie = self._create_auth_cookie(token)
-            return auth_cookie, str(token)
-
-        return str(token)
+        auth_cookie = self._create_auth_cookie(token)
+        return auth_cookie, str(token)
 
     def change_password(
         self,

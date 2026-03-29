@@ -1,6 +1,10 @@
+from unittest import result
+from weakref import ref
+
 import pytest
 from alpha import exceptions
 from alpha.providers.models.identity import Identity
+from alpha.services.authentication_service import AuthenticationService
 from alpha.services.models.cookie import Cookie
 
 
@@ -15,6 +19,13 @@ def test_authentication_service_init(authentication_service, fake_static_user):
         == "authentication_service"
     )
     assert authentication_service._static_user == fake_static_user
+
+    with pytest.raises(ValueError):
+        AuthenticationService(
+            identity_provider=None,
+            use_cookies=False,
+            use_refresh_tokens=True,
+        )
 
 
 def test_authentication_service_login(
@@ -63,6 +74,81 @@ def test_authentication_service_login_use_cookies(
         cookie.samesite == authentication_service_use_cookies._cookie_samesite
     )
 
+    with pytest.raises(exceptions.MissingConfigurationException):
+        authentication_service_use_cookies.refresh_token(
+            refresh_token="fake_refresh_token"
+        )
+
+
+def test_authentication_service_use_refresh_tokens(
+    authentication_service_use_refresh_tokens,
+    static_user_credentials,
+    identity,
+):
+    result = authentication_service_use_refresh_tokens.login(
+        static_user_credentials
+    )
+
+    assert isinstance(result, tuple)
+    assert len(result) == 3
+
+    cookie, refresh_cookie, token = result
+
+    assert isinstance(token, str)
+    assert token == "static_user_token"
+
+    assert isinstance(cookie, Cookie)
+    assert isinstance(refresh_cookie, Cookie)
+
+    assert (
+        refresh_cookie.key
+        == authentication_service_use_refresh_tokens._cookie_refresh_token_name
+    )
+    assert len(refresh_cookie.value) == 28
+    assert refresh_cookie.max_age == 3600
+
+    result = authentication_service_use_refresh_tokens.refresh_token(
+        refresh_token=refresh_cookie.value, identity=identity
+    )
+
+    assert isinstance(result, tuple)
+    assert len(result) == 2
+
+    new_cookie, new_token = result
+
+    assert isinstance(new_token, str)
+    assert new_token == "static_user_token"
+    assert isinstance(new_cookie, Cookie)
+    assert (
+        new_cookie.key
+        == authentication_service_use_refresh_tokens._cookie_auth_token_name
+    )
+    assert new_cookie.value == "static_user_token"
+    assert (
+        new_cookie.max_age
+        == authentication_service_use_refresh_tokens._auth_token_max_age
+    )
+
+    with pytest.raises(exceptions.UnauthorizedException):
+        authentication_service_use_refresh_tokens.refresh_token(
+            refresh_token=refresh_cookie.value
+        )
+
+
+def test_authentication_service_use_refresh_tokens_memory(
+    authentication_service_use_refresh_tokens_memory,
+    static_user_credentials,
+    identity,
+):
+    result = authentication_service_use_refresh_tokens_memory.login(
+        static_user_credentials,
+    )
+
+    assert isinstance(result, tuple)
+    assert len(result) == 3
+
+    cookie, refresh_cookie, token = result
+
 
 def test_authentication_service_logout(authentication_service):
     with pytest.raises(NotImplementedError):
@@ -96,7 +182,7 @@ def test_authentication_service_verify(authentication_service, identity):
 
 
 def test_authentication_service_pretend_login(
-    authentication_service, identity
+    authentication_service, authentication_service_use_cookies, identity
 ):
     pretend_subject = "fake_subject"
 
@@ -118,6 +204,19 @@ def test_authentication_service_pretend_login(
 
     assert isinstance(token, str)
     assert token == "static_user_token"
+
+    auth_cookie, token = authentication_service_use_cookies.pretend_login(
+        identity=identity, pretend_subject=pretend_subject
+    )
+
+    assert isinstance(token, str)
+    assert token == "static_user_token"
+    assert isinstance(auth_cookie, Cookie)
+    assert (
+        auth_cookie.key
+        == authentication_service_use_cookies._cookie_auth_token_name
+    )
+    assert auth_cookie.value == "static_user_token"
 
 
 def test_authentication_service_merge_identity_with_user(
