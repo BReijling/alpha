@@ -68,6 +68,10 @@ class MissingConfigurationException(Exception):
     """Raised when a required configuration is missing."""
 
 
+class InvalidAttributeError(Exception):
+    """Raised when a required attribute is invalid."""
+
+
 class MissingDependencyException(Exception):
     """Raised when a required dependency is missing."""
 

@@ -3,7 +3,7 @@
 import os
 import json
 from datetime import datetime, timedelta, timezone
-from typing import Literal, NoReturn
+from typing import Any, Literal, NoReturn
 
 from alpha.domain.models.group import Group
 from alpha.domain.models.user import User
@@ -14,9 +14,9 @@ from alpha.providers.models.identity import Identity
 from alpha.providers.models.token import Token
 from alpha.providers.models.credentials import PasswordCredentials
 from alpha.interfaces.providers import IdentityProvider
-from alpha import exceptions
 from alpha.services.models.cookie import Cookie
 from alpha.utils.secret_generator import generate_secret
+from alpha import exceptions
 
 
 class AuthenticationService:
@@ -44,6 +44,7 @@ class AuthenticationService:
         merge_with_database_users: bool = False,
         merge_with_database_groups: bool = False,
         user_id_attribute: str = "username",
+        group_id_attribute: str = "name",
         uow: UnitOfWork | None = None,
         users_repository_name: str = "users",
         groups_repository_name: str = "groups",
@@ -108,6 +109,9 @@ class AuthenticationService:
         user_id_attribute, optional
             Attribute name in the user database to use as the unique
             identifier, by default "username"
+        group_id_attribute, optional
+            Attribute name in the group database to use as the unique
+            identifier, by default "name"
         uow, optional
             UnitOfWork instance for database operations, by default None
         users_repository_name, optional
@@ -143,7 +147,7 @@ class AuthenticationService:
             Whether to refresh the identity when refreshing the token, by
             default False. This need to be implemented in the
             identity provider's issue_token method. This usually requires
-            additional authorization from the indentity service.
+            additional authorization from the identity service.
         static_user, optional
             Static user to use for authentication, by default None.
             If provided, this user will be authenticated if the credentials
@@ -172,6 +176,7 @@ class AuthenticationService:
         self._merge_with_database_users = merge_with_database_users
         self._merge_with_database_groups = merge_with_database_groups
         self._user_id_attribute = user_id_attribute
+        self._group_id_attribute = group_id_attribute
         self.uow = uow
         self._users_repository_name = users_repository_name
         self._groups_repository_name = groups_repository_name
@@ -220,28 +225,36 @@ class AuthenticationService:
         else:
             identity = self._identity_provider.authenticate(credentials)
 
-            if self._merge_with_database_users and identity:
-                identity = self._merge_identity_with_user(identity)
+        if self._merge_with_database_users and identity:
+            identity = self._merge_identity_with_user(identity)
+        if self._merge_with_database_groups and identity:
+            identity = self._merge_identity_with_groups(identity)
 
         # Issue an authentication token for the authenticated identity
         token = self._identity_provider.issue_token(identity)
 
+        if not self._use_cookies:
+            return str(token)
+
         # If using cookies, create an authentication cookie for the token and
         # return it along with the token string.
-        if self._use_cookies:
-            auth_cookie = self._create_auth_cookie(token)
-            # If using refresh tokens, also create a refresh token and cookie.
-            if self._use_refresh_tokens:
-                refresh_token = self._create_refresh_token(
-                    subject=getattr(identity, self._identity_id_attribute)
-                )
-                refresh_cookie = self._create_refresh_token_cookie(
-                    refresh_token
-                )
-                return auth_cookie, refresh_cookie, str(token)
+        auth_cookie = self._create_token_cookie(
+            token, self._cookie_auth_token_name, self._auth_token_max_age
+        )
+
+        if not self._use_refresh_tokens:
             return auth_cookie, str(token)
 
-        return str(token)
+        # If using refresh tokens, also create a refresh token and cookie.
+        refresh_token = self._create_refresh_token(
+            subject=getattr(identity, self._identity_id_attribute)
+        )
+        refresh_cookie = self._create_token_cookie(
+            refresh_token,
+            self._cookie_refresh_token_name,
+            self._refresh_token_max_age,
+        )
+        return auth_cookie, refresh_cookie, str(token)
 
     def logout(self, token: str) -> tuple[Cookie, str]:
         """Logout a user by invalidating their token.
@@ -336,7 +349,9 @@ class AuthenticationService:
 
         token = self._identity_provider.issue_token(identity)
 
-        auth_cookie = self._create_auth_cookie(token)
+        auth_cookie = self._create_token_cookie(
+            token, self._cookie_auth_token_name, self._auth_token_max_age
+        )
         return auth_cookie, str(token)
 
     def change_password(
@@ -389,10 +404,13 @@ class AuthenticationService:
 
         identity.pretend_identity = pretend_identity
         token = self._identity_provider.issue_token(identity)
-        if self._use_cookies:
-            return self._create_auth_cookie(token), str(token)
+        if not self._use_cookies:
+            return str(token)
 
-        return str(token)
+        auth_cookie = self._create_token_cookie(
+            token, self._cookie_auth_token_name, self._auth_token_max_age
+        )
+        return auth_cookie, str(token)
 
     def _merge_identity_with_user(
         self,
@@ -421,45 +439,74 @@ class AuthenticationService:
                 value=getattr(identity, self._user_id_attribute),
                 attr=self._user_id_attribute,
             )
-
             if user:
                 identity.update_from_user(user)
+
             else:
                 # Create new user from identity if not found in database
                 user = User.from_identity(identity)
                 users.add(user)
                 self.uow.commit()
 
-            if self._merge_with_database_groups:
-                groups: SqlRepository[Group] = getattr(
-                    self.uow, self._groups_repository_name
+        return identity
+
+    def _merge_identity_with_groups(
+        self,
+        identity: Identity,
+    ) -> Identity:
+        """Merge Group data into an Identity instance.
+
+        Parameters
+        ----------
+        identity
+            Identity object containing group information.
+
+        Returns
+        -------
+            Updated Identity instance.
+        """
+        if self.uow is None:
+            self._raise_no_uow()
+
+        with self.uow:
+            groups: SqlRepository[Group] = getattr(
+                self.uow, self._groups_repository_name
+            )
+
+            filters = [
+                SearchFilter(
+                    field=self._group_id_attribute,
+                    op=Operator.IN,
+                    value=identity.groups,
                 )
-                filters = [
-                    SearchFilter(
-                        field="name", op=Operator.IN, value=user.groups
-                    )
-                ]
-                user_groups = groups.select(filters=filters)
-                identity.update_from_groups(user_groups)
+            ]
+            user_groups = groups.select(filters=filters)
+            identity.update_from_groups(user_groups)
 
         return identity
 
-    def _create_auth_cookie(self, token: Token) -> Cookie:
-        """Create an authentication cookie for a token.
+    def _create_token_cookie(
+        self, token: Token, cookie_name: str, max_age: int
+    ) -> Cookie:
+        """Create a cookie for a token.
 
         Parameters
         ----------
         token
-            Token to create the authentication cookie for.
+            Token to create the cookie for.
+        cookie_name
+            Name of the cookie.
+        max_age
+            Maximum age of the cookie in seconds.
 
         Returns
         -------
-            Cookie object representing the authentication cookie.
+            Cookie object representing the cookie.
         """
         return Cookie(
-            key=self._cookie_auth_token_name,
+            key=cookie_name,
             value=token.value,
-            max_age=self._auth_token_max_age,
+            max_age=max_age,
             path=self._cookie_path,
             domain=self._cookie_domain,
             secure=self._cookie_secure,
@@ -468,7 +515,7 @@ class AuthenticationService:
         )
 
     def _create_refresh_token(self, subject: str) -> Token:
-        """Create a refresh token for a subject.
+        """Create and store a refresh token for a subject.
 
         Parameters
         ----------
@@ -488,31 +535,13 @@ class AuthenticationService:
         )
 
         if self._refresh_token_storage == "database":
-            if self.uow is None:
-                self._raise_no_uow()
-
-            with self.uow:
-                refresh_tokens: SqlRepository[Token] = getattr(
-                    self.uow, self._refresh_token_repository_name
-                )
-                token = refresh_tokens.add(token)
-                self.uow.commit()
+            token = self._store_refresh_token_to_database(token)
 
         elif self._refresh_token_storage == "file":
-            if not os.path.exists(self._refresh_token_storage_file_path):
-                with open(self._refresh_token_storage_file_path, "w") as f:
-                    json.dump({}, f)
-
-            with open(self._refresh_token_storage_file_path, "r") as f:
-                tokens_data = json.load(f)
-
-            tokens_data[token.value] = token.to_dict()
-
-            with open(self._refresh_token_storage_file_path, "w") as f:
-                json.dump(tokens_data, f, indent=4)
+            self._store_refresh_token_to_file(token)
 
         elif self._refresh_token_storage == "memory":
-            self._in_memory_refresh_tokens[token.value] = token
+            self._store_refresh_token_to_memory(token)
 
         elif self._refresh_token_storage == "cache":
             # Implement cache storage for refresh tokens if needed
@@ -521,32 +550,81 @@ class AuthenticationService:
             )
 
         else:
-            raise ValueError("Invalid refresh token storage mechanism")
+            raise exceptions.InvalidAttributeError(
+                "Invalid refresh token storage mechanism. Configured storage"
+                " mechanism is not supported. Check the configuration of the"
+                " AuthenticationService."
+            )
 
         return token
 
-    def _create_refresh_token_cookie(self, refresh_token: Token) -> Cookie:
-        """Create a cookie for a refresh token.
+    def _store_refresh_token_to_database(self, token: Token) -> Token:
+        """Store a refresh token in the database.
 
         Parameters
         ----------
-        refresh_token
-            Token object representing the refresh token.
+        token
+            Token object representing the refresh token to store.
 
         Returns
         -------
-            Cookie object representing the refresh token cookie.
+            The stored Token object.
+
+        Raises
+        ------
+        exceptions.MissingDependencyException
+            If the UnitOfWork is not configured for the AuthenticationService.
         """
-        return Cookie(
-            key=self._cookie_refresh_token_name,
-            value=refresh_token.value,
-            max_age=self._refresh_token_max_age,
-            path=self._cookie_path,
-            domain=self._cookie_domain,
-            secure=self._cookie_secure,
-            httponly=self._cookie_httponly,
-            samesite=self._cookie_samesite,
-        )
+        if self.uow is None:
+            self._raise_no_uow()
+
+        with self.uow:
+            refresh_tokens: SqlRepository[Token] = getattr(
+                self.uow, self._refresh_token_repository_name
+            )
+            token = refresh_tokens.add(token)
+            self.uow.commit()
+
+        return token
+
+    def _store_refresh_token_to_file(self, token: Token) -> None:
+        """Store a refresh token in a file.
+
+        Parameters
+        ----------
+        token
+            Token object representing the refresh token to store.
+
+        Returns
+        -------
+            The stored Token object.
+
+        Raises
+        ------
+        exceptions.ServerErrorException
+            If the refresh token storage file is not found.
+        """
+        if not os.path.exists(self._refresh_token_storage_file_path):
+            with open(self._refresh_token_storage_file_path, "w") as f:
+                json.dump({}, f)
+
+        with open(self._refresh_token_storage_file_path, "r") as f:
+            tokens_data = json.load(f)
+
+        tokens_data[token.value] = token.to_dict()
+
+        with open(self._refresh_token_storage_file_path, "w") as f:
+            json.dump(tokens_data, f, indent=4)
+
+    def _store_refresh_token_to_memory(self, token: Token) -> None:
+        """Store a refresh token in in-memory storage.
+
+        Parameters
+        ----------
+        token
+            Token object representing the refresh token to store.
+        """
+        self._in_memory_refresh_tokens[token.value] = token
 
     def _create_logout_cookie(self) -> Cookie:
         """Create a cookie to clear the authentication cookie on logout.
@@ -587,34 +665,13 @@ class AuthenticationService:
             Token object representing the refresh token.
         """
         if self._refresh_token_storage == "database":
-            if self.uow is None:
-                self._raise_no_uow()
-
-            with self.uow:
-                refresh_tokens: SqlRepository[Token] = getattr(
-                    self.uow, self._refresh_token_repository_name
-                )
-                token = refresh_tokens.get(attr="token", value=refresh_token)
+            token = self._get_refresh_token_from_database(refresh_token)
 
         elif self._refresh_token_storage == "file":
-            if not os.path.exists(self._refresh_token_storage_file_path):
-                raise exceptions.ServerErrorException(
-                    "Refresh token storage file not found"
-                )
-
-            with open(self._refresh_token_storage_file_path, "r") as f:
-                tokens_data = json.load(f)
-
-            token_data = tokens_data.get(refresh_token)
-            if not token_data:
-                raise exceptions.UnauthorizedException("Invalid refresh token")
-
-            token = Token.from_dict(token_data)
+            token = self._get_refresh_token_from_file(refresh_token)
 
         elif self._refresh_token_storage == "memory":
-            token = self._in_memory_refresh_tokens.get(refresh_token)
-            if not token:
-                raise exceptions.UnauthorizedException("Invalid refresh token")
+            token = self._get_refresh_token_from_memory(refresh_token)
 
         elif self._refresh_token_storage == "cache":
             # Implement cache retrieval for refresh tokens if needed
@@ -623,13 +680,112 @@ class AuthenticationService:
             )
 
         else:
-            raise ValueError("Invalid refresh token storage mechanism")
+            raise exceptions.InvalidAttributeError(
+                "Invalid refresh token storage mechanism. Configured storage"
+                " mechanism is not supported. Check the configuration of the"
+                " AuthenticationService."
+            )
 
+        token = self._verify_refresh_token(token)
+        return token
+
+    def _get_refresh_token_from_database(
+        self, refresh_token: str
+    ) -> Token | None:
+        """Retrieve a refresh token from the database.
+
+        Parameters
+        ----------
+        refresh_token
+            The refresh token string to retrieve.
+
+        Returns
+        -------
+            The retrieved refresh token, or None if not found.
+        """
+        if self.uow is None:
+            self._raise_no_uow()
+
+        with self.uow:
+            refresh_tokens: SqlRepository[Token] = getattr(
+                self.uow, self._refresh_token_repository_name
+            )
+            token = refresh_tokens.get_one_or_none(
+                attr="value", value=refresh_token
+            )
+
+        return token
+
+    def _get_refresh_token_from_file(self, refresh_token: str) -> Token | None:
+        """Retrieve a refresh token from a file.
+
+        Parameters
+        ----------
+        refresh_token
+            The refresh token string to retrieve.
+
+        Returns
+        -------
+            The retrieved refresh token, or None if not found.
+
+        Raises
+        ------
+        exceptions.ServerErrorException
+            If the refresh token storage file is not found.
+        """
+        if not os.path.exists(self._refresh_token_storage_file_path):
+            raise exceptions.ServerErrorException(
+                "Refresh token storage file not found"
+            )
+
+        with open(self._refresh_token_storage_file_path, "r") as f:
+            tokens_data: dict[str, dict[str, Any]] = json.load(f)
+
+        token_data = tokens_data.get(refresh_token)
+        if not token_data:
+            return None
+
+        return Token.from_dict(token_data)
+
+    def _get_refresh_token_from_memory(
+        self, refresh_token: str
+    ) -> Token | None:
+        """Retrieve a refresh token from in-memory storage.
+
+        Parameters
+        ----------
+        refresh_token
+            The refresh token string to retrieve.
+
+        Returns
+        -------
+            The retrieved refresh token, or None if not found.
+        """
+        token = self._in_memory_refresh_tokens.get(refresh_token)
+
+        return token
+
+    def _verify_refresh_token(self, token: Token | None) -> Token:
+        """Verify the validity of a refresh token.
+
+        Parameters
+        ----------
+        token
+            The refresh token to verify.
+
+        Returns
+        -------
+            The verified refresh token.
+
+        Raises
+        ------
+        exceptions.UnauthorizedException
+            If the refresh token is invalid or has expired.
+        """
         if not token or token.token_type != "Refresh":
             raise exceptions.UnauthorizedException("Invalid refresh token")
         elif token.expires_at is None or token.expires_at < datetime.now(
             tz=timezone.utc
         ):
-            raise exceptions.UnauthorizedException("Refresh token has expired")
-
+            raise exceptions.TokenExpiredException("Refresh token has expired")
         return token

@@ -1,6 +1,3 @@
-from unittest import result
-from weakref import ref
-
 import pytest
 from alpha import exceptions
 from alpha.providers.models.identity import Identity
@@ -135,6 +132,52 @@ def test_authentication_service_use_refresh_tokens(
         )
 
 
+def test_authentication_service_use_refresh_tokens_database(
+    authentication_service_use_refresh_tokens_database,
+    static_user_credentials,
+    identity,
+):
+    result = authentication_service_use_refresh_tokens_database.login(
+        static_user_credentials
+    )
+
+    assert isinstance(result, tuple)
+    assert len(result) == 3
+
+    _, refresh_cookie, _ = result
+
+    assert isinstance(refresh_cookie, Cookie)
+
+    result = authentication_service_use_refresh_tokens_database.refresh_token(
+        refresh_token=refresh_cookie.value, identity=identity
+    )
+
+    assert isinstance(result, tuple)
+    assert len(result) == 2
+
+    new_cookie, new_token = result
+
+    assert isinstance(new_token, str)
+    assert new_token == "static_user_token"
+    assert isinstance(new_cookie, Cookie)
+    assert (
+        new_cookie.key
+        == authentication_service_use_refresh_tokens_database._cookie_auth_token_name
+    )
+    assert new_cookie.value == "static_user_token"
+    assert (
+        new_cookie.max_age
+        == authentication_service_use_refresh_tokens_database._auth_token_max_age
+    )
+
+    authentication_service_use_refresh_tokens_database.uow = None
+
+    with pytest.raises(exceptions.MissingDependencyException):
+        authentication_service_use_refresh_tokens_database.refresh_token(
+            refresh_token=refresh_cookie.value, identity=identity
+        )
+
+
 def test_authentication_service_use_refresh_tokens_memory(
     authentication_service_use_refresh_tokens_memory,
     static_user_credentials,
@@ -148,6 +191,53 @@ def test_authentication_service_use_refresh_tokens_memory(
     assert len(result) == 3
 
     cookie, refresh_cookie, token = result
+
+    result = authentication_service_use_refresh_tokens_memory.refresh_token(
+        refresh_token=refresh_cookie.value, identity=identity
+    )
+
+    assert isinstance(result, tuple)
+    assert len(result) == 2
+
+    new_cookie, new_token = result
+
+    assert isinstance(new_token, str)
+    assert new_token == "static_user_token"
+    assert isinstance(new_cookie, Cookie)
+
+
+def test_authentication_service_use_refresh_tokens_invalid_refresh_token(
+    authentication_service_use_refresh_tokens, identity
+):
+    with pytest.raises(exceptions.UnauthorizedException):
+        authentication_service_use_refresh_tokens.refresh_token(
+            refresh_token="invalid_refresh_token", identity=identity
+        )
+
+
+def test_authentication_service_use_refresh_tokens_expired(
+    authentication_service_use_refresh_tokens_memory_expired,
+    static_user_credentials,
+    identity,
+):
+    result = authentication_service_use_refresh_tokens_memory_expired.login(
+        static_user_credentials
+    )
+
+    with pytest.raises(exceptions.TokenExpiredException):
+        authentication_service_use_refresh_tokens_memory_expired.refresh_token(
+            refresh_token=result[1].value, identity=identity
+        )
+
+
+def test_authentication_service_invalid_refresh_token_storage(
+    authentication_service,
+):
+    with pytest.raises(exceptions.InvalidAttributeError):
+        authentication_service._create_refresh_token("test")
+
+    with pytest.raises(exceptions.InvalidAttributeError):
+        authentication_service._get_refresh_token_from_storage("test")
 
 
 def test_authentication_service_logout(authentication_service):
@@ -220,7 +310,8 @@ def test_authentication_service_pretend_login(
 
 
 def test_authentication_service_merge_identity_with_user(
-    authentication_service, identity
+    authentication_service,
+    identity,
 ):
     assert "group3" not in identity.groups
     assert "group4" not in identity.groups
@@ -245,3 +336,37 @@ def test_authentication_service_merge_identity_with_user(
 
     with pytest.raises(exceptions.MissingDependencyException):
         authentication_service._merge_identity_with_user(identity=identity)
+
+
+def test_authentication_service_merge_identity_with_groups(
+    authentication_service_merge_groups,
+    identity_for_groups,
+):
+
+    merged_identity = (
+        authentication_service_merge_groups._merge_identity_with_user(
+            identity=identity_for_groups
+        )
+    )
+
+    assert merged_identity is not None
+    assert "group1" in merged_identity.groups
+    assert "group2" in merged_identity.groups
+    assert "group3" in merged_identity.groups
+    assert "group4" in merged_identity.groups
+    assert "group5" in merged_identity.groups
+    assert "group6" in merged_identity.groups
+
+    merged_identity = (
+        authentication_service_merge_groups._merge_identity_with_groups(
+            identity=identity_for_groups
+        )
+    )
+
+    assert "read" in merged_identity.permissions
+    assert "write" in merged_identity.permissions
+    assert "modify" in merged_identity.permissions
+    assert "delete" in merged_identity.permissions
+    assert "append" in merged_identity.permissions
+    assert "create" in merged_identity.permissions
+    assert "admin" in merged_identity.permissions

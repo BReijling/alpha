@@ -1,4 +1,6 @@
+from alpha.domain.models.group import Group
 from alpha.domain.models.user import User
+from alpha.providers.models.token import Token
 
 
 class FakeRepository:
@@ -49,6 +51,28 @@ class FakeDatabaseProviderUserRepository:
 
     def get_one_or_none(self, *args, **kwargs) -> User:
         return self.users[0]
+
+
+class FakeDatabaseProviderGroupRepository:
+    def __init__(self, groups: list[Group] | None = None):
+        self.groups = groups
+
+    def select(self, *args, **kwargs) -> User:
+        return self.groups
+
+
+class FakeRefreshTokenRepository:
+    def __init__(self, tokens: list[Token] | None = None):
+        self.tokens = tokens or []
+
+    def add(self, token: Token, *args, **kwargs) -> Token:
+        self.tokens.append(token)
+        return token
+
+    def get_one_or_none(self, *args, **kwargs) -> Token:
+        if not self.tokens:
+            return None
+        return self.tokens[0]
 
 
 class FakeDatabaseProviderUserRepositoryNoUser:

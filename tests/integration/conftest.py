@@ -5,17 +5,23 @@ from typing import Any
 import pytest
 
 from alpha.adapters.sqla_unit_of_work import SqlAlchemyUnitOfWork
+from alpha.domain.models.group import Group
+from alpha.domain.models.user import User
 from alpha.factories.jwt_factory import JWTFactory
+from alpha.factories.password_factory import PasswordFactory
 from alpha.factories.request_factory import RequestFactory
 from alpha.infra.connectors.ldap_connector import LDAPConnector
 from alpha.infra.connectors.oidc_connector import KeyCloakOIDCConnector
 from alpha.infra.databases.sql_alchemy import SqlAlchemyDatabase
 from alpha.infra.models.json_patch import JsonPatch
 from alpha.interfaces.sql_repository import SqlRepository
+from alpha.providers.database_provider import DatabaseProvider
 from alpha.providers.ldap_provider import LDAPProvider
+from alpha.providers.models.token import Token
 from alpha.providers.oidc_provider import KeyCloakProvider, OIDCProvider
 from alpha.repositories.sql_alchemy_repository import SqlAlchemyRepository
 from alpha.repositories.models.repository_model import RepositoryModel
+from alpha.services.authentication_service import AuthenticationService
 from tests.fixtures._domain_models import Gender, TrackPoint
 from tests.fixtures.api_generate_models.json_patch import (
     JsonPatch as ApiJsonPatch,
@@ -39,7 +45,7 @@ from tests.integration.fixtures.api_generate_models.nested_object import (
     NestedObject,
 )
 
-from tests.integration._classes import FakeMapper, Pet, PetType
+from tests.integration._classes import AppMapper, FakeMapper, Pet, PetType
 from tests.integration._filters import (
     contains_filter,
     endswith_filter,
@@ -121,18 +127,6 @@ def psql_database() -> SqlAlchemyDatabase:
     db.drop_tables(FakeMapper.metadata)
 
 
-# @pytest.fixture(
-#     params=["sqlite_database", "psql_database"],
-#     ids=["sqlite", "postgresql"],
-# )
-# @pytest.fixture(
-#     params=[
-#         "sqlite_database",
-#     ],
-#     ids=[
-#         "sqlite",
-#     ],
-# )
 @pytest.fixture(
     params=["sqlite_database", "mysql_database", "psql_database"],
     ids=["sqlite", "mysql", "postgresql"],
@@ -147,6 +141,49 @@ def uow(request) -> SqlAlchemyUnitOfWork:
                 default_model=Pet,
                 interface=SqlRepository,
             )
+        ],
+    )
+
+
+@pytest.fixture
+def app_database() -> SqlAlchemyDatabase:
+    db = SqlAlchemyDatabase(
+        host=os.getenv("TEST_PSQL_HOST", "127.0.0.1"),
+        port=int(os.getenv("TEST_PSQL_PORT", "5432")),
+        username=os.getenv("TEST_PSQL_USERNAME", "postgres"),
+        password=os.getenv("TEST_PSQL_PASSWORD", "postgres"),
+        db_name=os.getenv("TEST_PSQL_DATABASE", "postgres"),
+        db_type="postgresql",
+        create_tables=True,
+        mapper=AppMapper,
+    )
+    yield db
+    db.drop_tables(AppMapper.metadata)
+
+
+@pytest.fixture
+def uow_auth(app_database) -> SqlAlchemyUnitOfWork:
+    return SqlAlchemyUnitOfWork(
+        db=app_database,
+        repos=[
+            RepositoryModel(
+                name="users",
+                repository=SqlAlchemyRepository[User],
+                default_model=User,
+                interface=SqlRepository,
+            ),
+            RepositoryModel(
+                name="groups",
+                repository=SqlAlchemyRepository[Group],
+                default_model=Group,
+                interface=SqlRepository,
+            ),
+            RepositoryModel(
+                name="refresh_tokens",
+                repository=SqlAlchemyRepository[Token],
+                default_model=Token,
+                interface=SqlRepository,
+            ),
         ],
     )
 
@@ -385,10 +422,22 @@ def keycloak_connector() -> KeyCloakOIDCConnector:
 
 
 @pytest.fixture
-def keycloak_provider(keycloak_connector) -> OIDCProvider:
+def keycloak_provider(keycloak_connector, jwt_factory) -> OIDCProvider:
     provider = KeyCloakProvider(
         connector=keycloak_connector,
         populate_claims=True,
+        token_factory=jwt_factory,
+    )
+    return provider
+
+
+@pytest.fixture
+def keycloak_provider_with_token_factory(
+    keycloak_connector, jwt_factory
+) -> OIDCProvider:
+    provider = KeyCloakProvider(
+        connector=keycloak_connector,
+        token_factory=jwt_factory,
     )
     return provider
 
@@ -396,3 +445,110 @@ def keycloak_provider(keycloak_connector) -> OIDCProvider:
 @pytest.fixture
 def keycloak_credentials():
     return PasswordCredentials(username="alice", password="secret")
+
+
+@pytest.fixture
+def database_provider(uow_auth, jwt_factory) -> DatabaseProvider:
+    return DatabaseProvider(
+        uow=uow_auth,
+        token_factory=jwt_factory,
+    )
+
+
+@pytest.fixture
+def password_factory() -> PasswordFactory:
+    return PasswordFactory()
+
+
+@pytest.fixture
+def user_alice():
+    return User(
+        username="alice",
+        email="alice@example.com",
+        display_name="Alice",
+        groups=["group1", "group2"],
+        permissions=[],
+        admin=False,
+    )
+
+
+@pytest.fixture
+def fred_credentials():
+    return PasswordCredentials(username="fred", password='test123')
+
+
+@pytest.fixture
+def user_fred(password_factory, fred_credentials):
+    return User(
+        username=fred_credentials.username,
+        password=password_factory.hash_password(fred_credentials.password),
+        email="fred@example.com",
+        display_name="Fred",
+        groups=["group2", "group3"],
+        permissions=[],
+        admin=True,
+    )
+
+
+@pytest.fixture
+def group1():
+    return Group(
+        name="group1",
+        description="Read only group",
+        permissions=["read"],
+    )
+
+
+@pytest.fixture
+def group2():
+    return Group(
+        name="group2",
+        description="Read and write group",
+        permissions=["read", "write"],
+    )
+
+
+@pytest.fixture
+def group3():
+    return Group(
+        name="superuser",
+        description="Superuser group",
+        permissions=["read", "write", "admin"],
+    )
+
+
+@pytest.fixture
+def authentication_service_with_database_provider(
+    uow_auth, database_provider
+) -> AuthenticationService:
+    return AuthenticationService(
+        identity_provider=database_provider,
+        uow=uow_auth,
+        merge_with_database_groups=True,
+    )
+
+
+@pytest.fixture
+def authentication_service_with_keycloak_provider(
+    uow_auth, keycloak_provider_with_token_factory
+) -> AuthenticationService:
+    return AuthenticationService(
+        identity_provider=keycloak_provider_with_token_factory,
+        uow=uow_auth,
+        merge_with_database_users=True,
+        merge_with_database_groups=True,
+        use_cookies=True,
+        use_refresh_tokens=True,
+        refresh_token_storage="database",
+    )
+
+
+@pytest.fixture
+def authentication_service_with_ldap_provider(
+    uow_auth, ldap_provider
+) -> AuthenticationService:
+    return AuthenticationService(
+        identity_provider=ldap_provider,
+        uow=uow_auth,
+        use_cookies=True,
+    )
