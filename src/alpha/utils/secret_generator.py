@@ -16,4 +16,4 @@ def generate_secret(length: int = 32) -> str:
     str
         A randomly generated secret string.
     """
-    return secrets.token_hex(length).upper()[:length]
+    return secrets.token_hex((length + 1) // 2).upper()[:length]
