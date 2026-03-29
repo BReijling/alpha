@@ -325,7 +325,7 @@ class AuthenticationService:
         """
         if not self._use_cookies or not self._use_refresh_tokens:
             raise exceptions.MissingConfigurationException(
-                "Refresh token authentication is not enabled. Both use_cookies"
+                "Refresh token authentication is not enabled. Both use_cookies "
                 "and use_refresh_tokens must be True."
             )
 
