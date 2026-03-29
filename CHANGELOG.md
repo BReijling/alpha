@@ -12,7 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added an ApiRepository interface, a RestApiRepository implementation for domain model lifecycle management and a RestApiUnitOfWork for API session management.
 - Added support for Cookies to the `create_response_object` function, which is used by the generated API code to set or delete cookies in the response.
 - Added support for Cookies to the AuthenticationService class, so it can generate cookies after login or remove them on logout.
-- Added option to AuthenticationService to authenticate with a statically configured user. This option can be used in development and testing environments. 
+- Added support for Refresh tokens and cookies to the AuthenticationService class.
+- Added option to AuthenticationService to authenticate with a statically configured user. This option can be used in development and testing environments.
+- Added option to AuthenticationService to merge permissions from database Group objects with the Identity.
+
+### Changed
+
+- Updated the response handling of the RestApiRepository for better error handling. A specific exception will now be raised for each 4xx or 5xx status code.
 
 ## [0.4.0] - 2026-02-23
 
