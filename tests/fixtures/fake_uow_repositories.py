@@ -57,7 +57,7 @@ class FakeDatabaseProviderGroupRepository:
     def __init__(self, groups: list[Group] | None = None):
         self.groups = groups
 
-    def select(self, *args, **kwargs) -> User:
+    def select(self, *args, **kwargs) -> list[Group] | None:
         return self.groups
 
 
