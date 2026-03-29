@@ -239,7 +239,7 @@ def test_rest_api_repository_update(rest_api_repository, test_model):
 
 
 def test_rest_api_repository_error_handling_4xx(rest_api_repository_status):
-    # Test 400 Not Found
+    # Test 400 Bad Request
     with pytest.raises(exceptions.BadRequestException):
         rest_api_repository_status.get(param=400)
 
