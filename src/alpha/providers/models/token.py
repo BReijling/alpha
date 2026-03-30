@@ -27,7 +27,7 @@ class Token(BaseDomainModel):
             id=UUID(data["id"]) if data.get("id") else None,
             value=data["value"],
             subject=data.get("subject"),
-            token_type=data.get("token_type", "Refresh"),
+            token_type=data.get("token_type", "Bearer"),
             created_at=(
                 datetime.fromisoformat(data["created_at"])
                 if data.get("created_at")
