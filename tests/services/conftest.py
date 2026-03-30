@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta, timezone
 import json
-import os
 
 import pytest
 
@@ -127,8 +126,8 @@ def refresh_tokens_file_content(
 
 
 @pytest.fixture
-def refresh_token_storage_file_path():
-    return "refresh_tokens.json"
+def refresh_token_storage_file_path(tmp_path):
+    return tmp_path / "refresh_tokens.json"
 
 
 @pytest.fixture
@@ -137,8 +136,7 @@ def refresh_token_storage_file(
 ):
     with open(refresh_token_storage_file_path, "w") as f:
         f.write(json.dumps(refresh_tokens_file_content))
-    yield refresh_token_storage_file_path
-    os.remove(refresh_token_storage_file_path)
+    return refresh_token_storage_file_path
 
 
 @pytest.fixture
