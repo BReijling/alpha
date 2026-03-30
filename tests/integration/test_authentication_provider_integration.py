@@ -4,14 +4,16 @@ import pytest
 
 
 def test_authentication_service_with_database_provider(
-    authentication_service_with_database_provider,
+    authentication_service_with_database_provider_and_static_user,
     user_fred,
     fred_credentials,
+    static_credentials,
+    static_user,
     group2,
     group3,
 ):
     # Prepare the database with the user and groups
-    uow = authentication_service_with_database_provider.uow
+    uow = authentication_service_with_database_provider_and_static_user.uow
 
     with uow:
         fred_object = uow.users.add(user_fred)
@@ -29,16 +31,39 @@ def test_authentication_service_with_database_provider(
         assert uow.groups.count() == 2
 
     # Authenticate the user using the authentication service
-    auth_token = authentication_service_with_database_provider.login(
-        credentials=fred_credentials
+    auth_token = (
+        authentication_service_with_database_provider_and_static_user.login(
+            credentials=fred_credentials
+        )
     )
 
-    identity = authentication_service_with_database_provider.verify(auth_token)
+    identity = (
+        authentication_service_with_database_provider_and_static_user.verify(
+            auth_token
+        )
+    )
     assert identity.username == user_fred.username
     assert identity.email == user_fred.email
     assert identity.groups == ["group2", "group3"]
     assert identity.permissions == ["read", "write"]
     assert identity.has_admin_privileges is True
+
+    # Authenticate the static user using the authentication service
+    auth_token = (
+        authentication_service_with_database_provider_and_static_user.login(
+            credentials=static_credentials
+        )
+    )
+    identity = (
+        authentication_service_with_database_provider_and_static_user.verify(
+            auth_token
+        )
+    )
+    assert identity.username == static_user.username
+    assert identity.email == static_user.email
+    assert identity.groups == static_user.groups
+    assert identity.permissions == ["read", "write"]
+    assert identity.has_admin_privileges is False
 
 
 @pytest.mark.skipif(
@@ -136,8 +161,8 @@ def test_authentication_service_with_keycloak_provider(
 
 
 @pytest.mark.skipif(
-    os.getenv('GITHUB_ACTIONS') == 'true',
-    reason='Unable to run LDAP service in GitHub Actions',
+    os.getenv("GITHUB_ACTIONS") == "true",
+    reason="Unable to run LDAP service in GitHub Actions",
 )
 def test_authentication_service_with_ldap_provider(
     authentication_service_with_ldap_provider,
@@ -149,9 +174,9 @@ def test_authentication_service_with_ldap_provider(
     )
 
     identity = authentication_service_with_ldap_provider.verify(auth_token)
-    assert identity.username == 'jdoe'
-    assert identity.email == 'jdoe@example.org'
-    assert identity.display_name == 'John Doe'
+    assert identity.username == "jdoe"
+    assert identity.email == "jdoe@example.org"
+    assert identity.display_name == "John Doe"
     assert identity.groups == []
     assert identity.permissions == []
     assert identity.has_admin_privileges is False

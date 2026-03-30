@@ -199,7 +199,12 @@ class AuthenticationService:
     def login(
         self, credentials: PasswordCredentials
     ) -> str | tuple[Cookie, str] | tuple[Cookie, Cookie, str]:
-        """Authenticate a user by their credentials.
+        """Authenticate a user by their credentials. The identity provider is
+        used to authenticate the user and retrieve their identity. An
+        authentication token is then issued for the authenticated identity. If
+        configured to use cookies, the token is also stored in a cookie. If
+        configured to use refresh tokens, a refresh token is also created and
+        stored in a cookie.
 
         Parameters
         ----------
@@ -215,6 +220,8 @@ class AuthenticationService:
         # credentials
         if (
             self._static_user
+            and self._static_user.username is not None
+            and self._static_user.password is not None
             and credentials.username == self._static_user.username
             and credentials.password == self._static_user.password
         ):
@@ -225,6 +232,8 @@ class AuthenticationService:
         else:
             identity = self._identity_provider.authenticate(credentials)
 
+        # If configured to merge with database users and groups, perform the
+        # merge operations on the retrieved identity.
         if self._merge_with_database_users and identity:
             identity = self._merge_identity_with_user(identity)
         if self._merge_with_database_groups and identity:

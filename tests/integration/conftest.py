@@ -402,12 +402,12 @@ def ldap_provider(
 
 @pytest.fixture
 def subject():
-    return 'jdoe'
+    return "jdoe"
 
 
 @pytest.fixture
 def credentials(subject):
-    return PasswordCredentials(username=subject, password='test123')
+    return PasswordCredentials(username=subject, password="test123")
 
 
 @pytest.fixture
@@ -474,7 +474,7 @@ def user_alice():
 
 @pytest.fixture
 def fred_credentials():
-    return PasswordCredentials(username="fred", password='test123')
+    return PasswordCredentials(username="fred", password="test123")
 
 
 @pytest.fixture
@@ -518,13 +518,34 @@ def group3():
 
 
 @pytest.fixture
-def authentication_service_with_database_provider(
-    uow_auth, database_provider
+def static_credentials():
+    return PasswordCredentials(
+        username="static_user", password="test_password"
+    )
+
+
+@pytest.fixture
+def static_user(static_credentials):
+    return User(
+        username=static_credentials.username,
+        password=static_credentials.password,
+        email="static_user@example.com",
+        display_name="Static User",
+        groups=["group1", "group2"],
+        permissions=[],
+        admin=False,
+    )
+
+
+@pytest.fixture
+def authentication_service_with_database_provider_and_static_user(
+    uow_auth, database_provider, static_user
 ) -> AuthenticationService:
     return AuthenticationService(
         identity_provider=database_provider,
         uow=uow_auth,
         merge_with_database_groups=True,
+        static_user=static_user,
     )
 
 
