@@ -261,8 +261,9 @@ class Identity:
         -------
             An Identity instance populated with data from the User object.
         """
+        subject = str(user.id) if user.id else user.username
         return cls(
-            subject=str(user.id),
+            subject=subject,
             username=user.username,
             email=user.email,
             display_name=user.display_name,

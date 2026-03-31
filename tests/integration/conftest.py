@@ -527,6 +527,7 @@ def static_credentials():
 @pytest.fixture
 def static_user(static_credentials):
     return User(
+        id=1,
         username=static_credentials.username,
         password=static_credentials.password,
         email="static_user@example.com",

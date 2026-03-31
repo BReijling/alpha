@@ -119,7 +119,8 @@ class AuthenticationService:
         groups_repository_name, optional
             Name of the group repository in the UnitOfWork, by default "groups"
         refresh_token_storage, optional
-            Storage mechanism for refresh tokens, by default "database"
+            Storage mechanism for refresh tokens, by default "file". Supported
+            values are "database", "memory", "cache", and "file".
         refresh_token_repository_name, optional
             Name of the refresh token repository in the UnitOfWork,
             by default "refresh_tokens"

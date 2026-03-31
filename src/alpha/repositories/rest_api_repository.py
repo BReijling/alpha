@@ -1177,13 +1177,23 @@ class RestApiRepository(Generic[DomainModel]):
                     "did not receive a timely response from the upstream server."
                 )
             case _:
-                try:
-                    return response.raise_for_status()
-                except requests.HTTPError as e:
-                    if 400 <= response.status_code < 500:
-                        raise exceptions.ClientErrorException(
-                            f"An HTTP client error occurred: {str(e)}"
-                        ) from e
+                status_code = response.status_code
+                if 300 <= status_code < 400:
+                    # Unexpected redirect or other 3xx status not explicitly handled above.
+                    raise exceptions.ClientErrorException(
+                        f"Unexpected redirect or 3xx HTTP status code: {status_code}"
+                    )
+                if 400 <= status_code < 500:
+                    # Generic client error for 4xx statuses not explicitly handled above.
+                    raise exceptions.ClientErrorException(
+                        f"An HTTP client error occurred (status code {status_code})."
+                    )
+                if 500 <= status_code < 600:
+                    # Generic server error for 5xx statuses not explicitly handled above.
                     raise exceptions.ServerErrorException(
-                        f"An HTTP server error occurred: {str(e)}"
-                    ) from e
+                        f"An HTTP server error occurred (status code {status_code})."
+                    )
+                # Any other unexpected status code (e.g., 1xx or outside normal ranges).
+                raise exceptions.ClientErrorException(
+                    f"Unexpected HTTP status code: {status_code}"
+                )

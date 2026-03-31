@@ -42,6 +42,25 @@ def fake_identity_provider():
 
 
 @pytest.fixture
+def test_identity() -> Identity:
+    return Identity(
+        subject="static_user",
+        username="static_user",
+        email="static_user@example.com",
+        display_name="Static User",
+        groups=["group1", "group2"],
+        permissions=["read", "write"],
+        claims={"role": "admin"},
+        issued_at=datetime.now(tz=timezone.utc),
+        expires_at=datetime(3000, 1, 1, tzinfo=timezone.utc),
+        role="SUPERUSER",
+        audience=None,
+        admin=False,
+        pretend_identity=None,
+    )
+
+
+@pytest.fixture
 def identity_for_groups() -> Identity:
     return Identity(
         subject="fake_user",
