@@ -55,7 +55,7 @@ def fake_jwt_factory(jwt_payload: dict[str, Any]) -> FakeJWTFactory:
 @pytest.fixture
 def jwt_provider(fake_jwt_factory):
     provider = JWTProviderMixin()
-    provider._token_factory = fake_jwt_factory
+    provider.token_factory = fake_jwt_factory
     return provider
 
 

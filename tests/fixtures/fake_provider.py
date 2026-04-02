@@ -1,3 +1,4 @@
+from alpha.interfaces.token_factory import TokenFactory
 from alpha.providers.models.identity import Identity
 from alpha.providers.models.token import Token
 
@@ -8,11 +9,13 @@ class FakeIdentityProvider:
     def __init__(
         self,
         identity: Identity | None = None,
+        token_factory: TokenFactory | None = None,
     ) -> None:
         if identity is None:
             identity = Identity.from_dict({"subject": "fake_subject"})
         self._identity = identity
         self._new_password = None
+        self.token_factory = token_factory
 
     def authenticate(self, *args, **kwargs) -> Identity:
         return self._identity

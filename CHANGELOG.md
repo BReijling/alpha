@@ -7,12 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Implements a repository for REST API's, refresh-token based authentication flows (with cookie support), introduces group-based permission merging alongside new unit/integration tests and dependencies.
+
 ### Added
 
-- Added an ApiRepository interface, a RestApiRepository implementation for domain model lifecycle management and a RestApiUnitOfWork for API session management.
-- Added support for Cookies to the `create_response_object` function, which is used by the generated API code to set or delete cookies in the response.
-- Added support for Cookies to the AuthenticationService class, so it can generate cookies after login or remove them on logout.
-- Added option to AuthenticationService to authenticate with a statically configured user. This option can be used in development and testing environments. 
+- Add an ApiRepository interface, a RestApiRepository implementation for domain model lifecycle management and a RestApiUnitOfWork for API session management.
+- Add support for Cookies to the `create_response_object` function, which is used by the generated API code to set or delete cookies in the response.
+- Add support for Cookies to the AuthenticationService class, so it can generate cookies after login or remove them on logout.
+- Add support for Refresh tokens and cookies to the AuthenticationService class.
+- Add option to AuthenticationService to authenticate with a statically configured user. This option can be used in development and testing environments.
+- Add option to AuthenticationService to merge permissions from database Group objects with the Identity.
+- Add refresh token creation/storage/refresh flow to AuthenticationService (file/memory/database backends) and group merging support.
+- Add centralized HTTP response handling in RestApiRepository plus tests (including an httpx-backed client test).
+- Introduce new domain/model utilities (Group, Token enhancements, generate_secret) and expand integration test fixtures.
+
+### Changed
+
+- Updated the response handling of the RestApiRepository for better error handling. A specific exception will now be raised for each 4xx or 5xx status code.
 
 ## [0.4.0] - 2026-02-23
 

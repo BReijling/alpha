@@ -15,7 +15,8 @@
     "autoDocstring.docstringFormat": "numpy-notypes",
     "conventionalCommits.scopes": [
         "license",
-        "ApiRepository"
+        "ApiRepository",
+        "AuthenticationService"
     ],
     "peacock.color": "#42b883",
     "workbench.colorCustomizations": {
