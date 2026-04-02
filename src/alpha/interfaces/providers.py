@@ -154,7 +154,7 @@ class TokenProvider(TokenValidator, TokenIssuer, Protocol):
     such as issuing and validating tokens.
     """
 
-    _token_factory: ClassVar[TokenFactory | None]
+    token_factory: ClassVar[TokenFactory | None]
 
 
 @runtime_checkable

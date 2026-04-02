@@ -60,7 +60,7 @@ class OIDCProvider(JWTProviderMixin):
     """
 
     protocol = "oidc"
-    _token_factory: TokenFactory | None = None
+    token_factory: TokenFactory | None = None
 
     def __init__(
         self,
@@ -73,7 +73,7 @@ class OIDCProvider(JWTProviderMixin):
         change_password_supported: bool = False,
     ) -> None:
         self._connector = connector
-        self._token_factory = token_factory
+        self.token_factory = token_factory
         self._claim_mappings = (
             dict(claim_mappings) if claim_mappings else DEFAULT_OIDC_MAPPINGS
         )
@@ -147,11 +147,14 @@ class OIDCProvider(JWTProviderMixin):
             New password to set.
         """
         if not self._change_password_supported:
-            message = "Change password operation is not supported by this provider"
+            message = (
+                "Change password operation is not supported by this provider"
+            )
         else:
             message = "Change password is not implemented for OIDC providers"
 
         raise exceptions.NotSupportedException(message)
+
     def validate(self, token: Token) -> Identity:
         """Validate a token using token factory or introspection.
 
@@ -165,7 +168,7 @@ class OIDCProvider(JWTProviderMixin):
         Identity
             Validated user identity.
         """
-        if self._token_factory:
+        if self.token_factory:
             return super().validate(token)
 
         if not self._connector.introspection_url:
@@ -406,7 +409,6 @@ class KeyCloakProvider(OIDCProvider):
         populate_claims: bool = False,
         change_password_supported: bool = False,
     ) -> None:
-
         super().__init__(
             connector=connector,
             token_factory=token_factory,

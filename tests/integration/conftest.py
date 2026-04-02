@@ -367,12 +367,12 @@ def fake_service():
     return FakeService()
 
 
-# LDAP fixtures
 @pytest.fixture
 def jwt_factory():
     return JWTFactory(secret="supersecret123", jwt_algorithm="HS256")
 
 
+# LDAP fixtures
 @pytest.fixture
 def ldap_server() -> LDAPConnector:
     return LDAPConnector(
@@ -573,4 +573,11 @@ def authentication_service_with_ldap_provider(
         identity_provider=ldap_provider,
         uow=uow_auth,
         use_cookies=True,
+    )
+
+
+@pytest.fixture
+def auth_token(identity, jwt_factory) -> str:
+    return jwt_factory.create(
+        subject=identity.subject, payload=identity.to_dict()
     )

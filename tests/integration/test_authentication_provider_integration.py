@@ -77,6 +77,7 @@ def test_authentication_service_with_keycloak_provider(
     group2,
     group3,
     keycloak_credentials,
+    auth_token,
 ):
     # Prepare the database with the user and groups
     uow = authentication_service_with_keycloak_provider.uow
@@ -142,7 +143,7 @@ def test_authentication_service_with_keycloak_provider(
 
     _, new_auth_token = (
         authentication_service_with_keycloak_provider.refresh_token(
-            refresh_token=refresh_cookie.value, identity=identity
+            refresh_token=refresh_cookie.value, auth_token=auth_token
         )
     )
 

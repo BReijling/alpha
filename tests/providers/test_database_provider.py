@@ -10,7 +10,7 @@ from alpha.providers.models.identity import Identity
 
 def test_database_provider(database_provider):
     assert database_provider.protocol == "database"
-    assert database_provider._token_factory is None
+    assert database_provider.token_factory is None
     assert isinstance(database_provider._password_factory, PasswordFactory)
     assert database_provider._user_name_attribute == "username"
     assert database_provider._users_repository_name == "database_provider"

@@ -308,7 +308,7 @@ class AuthenticationService:
         return self._identity_provider.validate(Token(value=token))
 
     def refresh_token(
-        self, refresh_token: str, identity: Identity | None = None
+        self, refresh_token: str, auth_token: str | None = None
     ) -> tuple[Cookie, str]:
         """Refresh an authentication token using a refresh token. This method
         expects a stateful implementation where refresh tokens are stored and
@@ -318,8 +318,9 @@ class AuthenticationService:
         ----------
         refresh_token
             Refresh token to use for refreshing the authentication token.
-        identity, optional
-            Optional current identity, which can be reused if needed.
+        auth_token, optional
+            Optional current authentication token, which can be reused if
+            needed.
 
         Returns
         -------
@@ -343,6 +344,9 @@ class AuthenticationService:
             refresh_token
         )
 
+        # Set default identity to None.
+        identity = None
+
         if self._refresh_identity_on_refresh:
             if stored_refresh_token.subject is None:
                 raise exceptions.UnauthorizedException(
@@ -351,6 +355,25 @@ class AuthenticationService:
             identity = self._identity_provider.get_user(
                 subject=stored_refresh_token.subject
             )
+
+        # If an auth token is provided and the identity could not be retrieved
+        # using the refresh token, attempt to retrieve the identity from the
+        # auth token.
+        if auth_token and not identity:
+            if not self._identity_provider.token_factory or not hasattr(
+                self._identity_provider.token_factory, "get_payload"
+            ):
+                raise exceptions.MissingConfigurationException(
+                    "Identity provider does not have a token factory "
+                    "configured, cannot retrieve identity from auth token."
+                )
+            try:
+                payload = self._identity_provider.token_factory.get_payload(
+                    token=auth_token
+                )
+                identity = Identity.from_dict(payload)
+            except Exception:
+                identity = None
 
         if not identity:
             raise exceptions.UnauthorizedException(

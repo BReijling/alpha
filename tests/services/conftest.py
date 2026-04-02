@@ -37,8 +37,8 @@ def fake_user_credentials():
 
 
 @pytest.fixture
-def fake_identity_provider():
-    return FakeIdentityProvider()
+def fake_identity_provider(jwt_factory):
+    return FakeIdentityProvider(token_factory=jwt_factory)
 
 
 @pytest.fixture
@@ -57,6 +57,13 @@ def test_identity() -> Identity:
         audience=None,
         admin=False,
         pretend_identity=None,
+    )
+
+
+@pytest.fixture
+def test_auth_token(test_identity, jwt_factory) -> str:
+    return jwt_factory.create(
+        subject=test_identity.subject, payload=test_identity.to_dict()
     )
 
 
