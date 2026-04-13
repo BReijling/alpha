@@ -30,5 +30,5 @@ class RepositoryModel(Generic[DomainModel]):
     name: str
     repository: Callable[..., object]
     default_model: type[DomainModel]
-    interface: object | None
+    interface: object | None = None
     additional_config: dict[str, object] | None = None

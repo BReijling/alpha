@@ -26,7 +26,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response'
+                $ref: '#/components/schemas/StringResponse'
       tags:
         - API Health
       x-alpha-service-name: api_service
@@ -113,6 +113,12 @@ paths:
       x-alpha-service-name: user_management_service
       x-alpha-service-method: update_user
       x-alpha-request-factory: true
+      x-alpha-verify-permissions:
+        - READ
+        - WRITE
+      x-alpha-verify-groups:
+        - admins
+        - users
       security:
         - bearerAuth: []
     delete:
@@ -127,6 +133,7 @@ paths:
       x-alpha-service-name: user_management_service
       x-alpha-service-method: delete_user
       x-alpha-request-factory: true
+      x-alpha-verify-roles: ["admin","user"]
       security:
         - bearerAuth: []
   /auth/login:
@@ -142,6 +149,7 @@ paths:
       responses:
         '201':
           description: Created
+          x-alpha-cookie-support: true
           content:
             application/json:
               schema:
@@ -175,6 +183,24 @@ paths:
       x-alpha-service-name: authentication_service
       x-alpha-service-method: change_password
       x-alpha-request-factory: true
+  /auth/refresh:
+    patch:
+      description: Refresh authentication token
+      operationId: refresh_auth_token
+      responses:
+        '201':
+          description: Created new authentication token
+          x-alpha-cookie-support: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StringResponse'
+      tags: [Authentication]
+      x-alpha-service-name: authentication_service
+      x-alpha-service-method: refresh_token
+      x-alpha-service-additional-parameters:
+        - auth_token
+        - refresh_token
   /auth/verify:
     get:
       description: Verify user from access token
@@ -188,15 +214,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/IdentityResponse'
       tags: [Authentication]
-      x-alpha-method: identity
-      # x-alpha-request-factory: true
-      x-alpha-verify-roles: ["admin","user"] 
-      x-alpha-verify-permissions:
-        - READ
-        - WRITE
-      x-alpha-verify-groups:
-        - admins
-        - users
+      x-alpha-custom-response: identity
       security:
         - bearerAuth: []
 components:

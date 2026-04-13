@@ -11,6 +11,7 @@ from typing import List
 from alpha.factories.request_factory import RequestFactory
 from alpha.factories.response_factory import ResponseFactory
 from alpha.utils.response_object import create_response_object
+from alpha.utils.request_headers import Headers
 from alpha.utils.verify_identity import verify_identity
 from alpha.utils._http_codes import http_codes_{{#languageCode}}{{languageCode}}{{/languageCode}}{{^languageCode}}en{{/languageCode}} as http_codes
 from alpha.exceptions import (
@@ -144,22 +145,20 @@ def {{operationId}}(
             {{response}}
         {{/isContainer}}
     {{/allParams}}
+    headers = Headers.from_headers(connexion.request.headers)
 
-    {{#authMethods}}{{#isBasicBearer}}
-    if "Authorization" in connexion.request.headers:
-        token = connexion.request.headers["Authorization"].split(" ").pop()
-    else:
-        token = None
-    {{/isBasicBearer}}{{/authMethods}}
+    auth_token = headers.auth_token if headers.has_auth_token else None
+    refresh_token = headers.refresh_token
+
     try:
         # Objects used for authorization
         roles=[{{#vendorExtensions.x-alpha-verify-roles}}"{{.}}",{{/vendorExtensions.x-alpha-verify-roles}}]
         groups=[{{#vendorExtensions.x-alpha-verify-groups}}"{{.}}",{{/vendorExtensions.x-alpha-verify-groups}}]
         permissions=[{{#vendorExtensions.x-alpha-verify-permissions}}"{{.}}",{{/vendorExtensions.x-alpha-verify-permissions}}]
         {{#authMethods}}{{#isBasicBearer}}
-        # validate token
-        if token_factory.validate(token):
-            identity = token_factory.get_payload(token)
+        # Validate authentication token
+        if token_factory.validate(auth_token):
+            identity = token_factory.get_payload(auth_token)
             verify_identity(identity,
                 roles=roles,
                 groups=groups,
@@ -180,35 +179,34 @@ def {{operationId}}(
                 {{/vendorExtensions.x-alpha-service-method}}
             {{/vendorExtensions.x-alpha-service-name}}
             {{^vendorExtensions.x-alpha-service-name}}
-                {{#vendorExtensions.x-alpha-method}}
-        result = {{vendorExtensions.x-alpha-method}}
-                {{/vendorExtensions.x-alpha-method}}
+                {{#vendorExtensions.x-alpha-custom-response}}
+        result = {{vendorExtensions.x-alpha-custom-response}}
+                {{/vendorExtensions.x-alpha-custom-response}}
             {{/vendorExtensions.x-alpha-service-name}}
         {{/vendorExtensions.x-alpha-request-factory}}
         {{^vendorExtensions.x-alpha-request-factory}}
             {{^vendorExtensions.x-alpha-service-name}}
-                {{^vendorExtensions.x-alpha-method}}
+                {{^vendorExtensions.x-alpha-custom-response}}
         raise ServerErrorException('Missing x-alpha-service-name in API specification')
-                {{/vendorExtensions.x-alpha-method}}
+                {{/vendorExtensions.x-alpha-custom-response}}
                 {{^vendorExtensions.x-alpha-service-method}}
-                    {{^vendorExtensions.x-alpha-method}}
+                    {{^vendorExtensions.x-alpha-custom-response}}
         raise ServerErrorException('Missing x-alpha-service-method in API specification')
-                    {{/vendorExtensions.x-alpha-method}}
+                    {{/vendorExtensions.x-alpha-custom-response}}
                 {{/vendorExtensions.x-alpha-service-method}}
             {{/vendorExtensions.x-alpha-service-name}}
             {{#vendorExtensions.x-alpha-service-name}}
                 {{#vendorExtensions.x-alpha-service-method}}
         result = {{vendorExtensions.x-alpha-service-name}}.{{vendorExtensions.x-alpha-service-method}}(
             {{#allParams}}{{paramName}}={{paramName}},{{/allParams}}
-            {{#vendorExtensions.x-alpha-service-additional-parameters}}{{.}}={{.}},
-            {{/vendorExtensions.x-alpha-service-additional-parameters}}
+            {{#vendorExtensions.x-alpha-service-additional-parameters}}{{.}}={{.}},{{/vendorExtensions.x-alpha-service-additional-parameters}}
         )
                 {{/vendorExtensions.x-alpha-service-method}}
             {{/vendorExtensions.x-alpha-service-name}}
             {{^vendorExtensions.x-alpha-service-name}}
-                {{#vendorExtensions.x-alpha-method}}
-        result = {{vendorExtensions.x-alpha-method}}
-                {{/vendorExtensions.x-alpha-method}}
+                {{#vendorExtensions.x-alpha-custom-response}}
+        result = {{vendorExtensions.x-alpha-custom-response}}
+                {{/vendorExtensions.x-alpha-custom-response}}
             {{/vendorExtensions.x-alpha-service-name}}
         {{/vendorExtensions.x-alpha-request-factory}}
     
