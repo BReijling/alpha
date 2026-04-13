@@ -55,6 +55,18 @@ from alpha.utils.request_headers import Headers
             ),
         ),
         (
+            {
+                "Authorization": "Bearer token extra_part",
+                "Cookie": "auth_token=cookie_auth123; refresh_token=cookie_refresh123;",
+            },
+            Headers(
+                auth_token="cookie_auth123",
+                auth_token_type="Bearer",
+                refresh_token="cookie_refresh123",
+                api_key=None,
+            ),
+        ),
+        (
             {},
             Headers(
                 auth_token=None,
@@ -75,7 +87,7 @@ def test_has_auth_token():
     assert headers.has_auth_token is True
 
     headers = Headers(auth_token="abc.def", auth_token_type="Bearer")
-    assert headers.has_auth_token is False
+    assert headers.has_auth_token is True
 
     headers = Headers(auth_token="abc.def.ghi", auth_token_type="Basic")
     assert headers.has_auth_token is False

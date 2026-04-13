@@ -59,12 +59,15 @@ class Headers:
         -------
             An instance of the Headers class.
         """
-        auth_token = headers.get("Authorization")
+        auth_token = None
         auth_token_type = None
-        if auth_token is not None:
-            parts = auth_token.split()
+        authorization_header = headers.get("Authorization")
+        if authorization_header is not None:
+            parts = authorization_header.split()
             if len(parts) == 2:
                 auth_token_type, auth_token = parts
+                if auth_token_type.lower() == "bearer":
+                    auth_token_type = "Bearer"
 
         refresh_token = headers.get("X-Refresh-Token")
         api_key = headers.get("X-API-Key")
@@ -90,13 +93,11 @@ class Headers:
 
     @property
     def has_auth_token(self) -> bool:
-        if self.auth_token is None:
+        if not self.auth_token:
             return False
-        if len(self.auth_token.split(".")) != 3:
+        if not self.auth_token_type:
             return False
-        if self.auth_token_type != "Bearer":
-            return False
-        return True
+        return self.auth_token_type.lower() == "bearer"
 
     @property
     def has_refresh_token(self) -> bool:
