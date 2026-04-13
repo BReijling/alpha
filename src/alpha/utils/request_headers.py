@@ -31,7 +31,7 @@ class Headers:
         refresh_token_cookie_name: str = "refresh_token",
         api_key_cookie_name: str = "api_key",
     ) -> Self:
-        """Create a Header instance from a mapping of headers.
+        """Create a Headers instance from a mapping of headers.
 
         For the auth token, the method first checks the "Authorization" header.
         If present, it extracts the token and its type (e.g., "Bearer"). If it
