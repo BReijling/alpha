@@ -159,13 +159,15 @@ def {{operationId}}(
         {{#authMethods}}
         {{#isBasicBearer}}
         # Validate authentication token
-        if token_factory.validate(auth_token):
-            identity = token_factory.get_payload(auth_token)
-            verify_identity(identity,
-                roles=roles,
-                groups=groups,
-                permissions=permissions,
-            )
+        if auth_token is None:
+            raise UnauthorizedException('Missing authentication token')
+        token_factory.validate(auth_token)
+        identity = token_factory.get_payload(auth_token)
+        verify_identity(identity,
+            roles=roles,
+            groups=groups,
+            permissions=permissions,
+        )
         {{/isBasicBearer}}
         {{#isApiKey}}
         # This needs to be replaced by code to authenticate with an API key
