@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Added the Headers class to handle HTTP request headers, including support for authorization tokens, refresh tokens, and API keys.
+- Added support for extracting tokens from cookies in the Headers class in the API controller template.
+- Added support for setting and deleting cookies in the API response handling when using the `x-alpha-cookie-support` vendor extension.
+- Added support for defining additional service method parameters when using the `x-alpha-service-additional-parameters` vendor extension. This can be used to pass additional parameters to the service methods, such as the Identity object or authentication tokens.
+
 ## [0.5.0] - 2026-04-02
 
 Implements a repository for REST API's, refresh-token based authentication flows (with cookie support), introduces group-based permission merging alongside new unit/integration tests and dependencies.
