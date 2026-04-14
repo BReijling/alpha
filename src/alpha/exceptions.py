@@ -19,6 +19,10 @@ class NotFoundException(ClientErrorException):
     """Equivalent to HTTP code 404"""
 
 
+class MethodNotAllowedException(ClientErrorException):
+    """Equivalent to HTTP code 405"""
+
+
 class NotAcceptableException(ClientErrorException):
     """Equivalent to HTTP code 406"""
 
@@ -55,9 +59,17 @@ class ServiceUnavailableException(ServerErrorException):
     """Equivalent to HTTP code 503"""
 
 
+class GatewayTimeoutException(ServerErrorException):
+    """Equivalent to HTTP code 504"""
+
+
 # General Exceptions
 class MissingConfigurationException(Exception):
     """Raised when a required configuration is missing."""
+
+
+class InvalidAttributeError(Exception):
+    """Raised when a required attribute is invalid."""
 
 
 class MissingDependencyException(Exception):

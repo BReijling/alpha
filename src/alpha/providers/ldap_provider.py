@@ -53,7 +53,7 @@ class LDAPProvider(JWTProviderMixin):
     """
 
     protocol = "ldap"
-    _token_factory: TokenFactory | None = None
+    token_factory: TokenFactory | None = None
 
     def __init__(
         self,
@@ -72,7 +72,7 @@ class LDAPProvider(JWTProviderMixin):
     ) -> None:
         """Initialize LDAPProvider"""
         self._connector = connector
-        self._token_factory = token_factory
+        self.token_factory = token_factory
         self._search_filter_key = search_filter_key
         self._search_base = search_base
         self._search_attributes = search_attributes
@@ -83,7 +83,7 @@ class LDAPProvider(JWTProviderMixin):
         self._auto_connect = auto_connect
         self._change_password_supported = change_password_supported
         self._additional_connector_params = additional_connector_params or {
-            'receive_timeout': 5
+            "receive_timeout": 5
         }
         if self._auto_connect and not self._connector.is_connected():
             self._connector.connect()
@@ -116,7 +116,7 @@ class LDAPProvider(JWTProviderMixin):
             entry_dn=entry_dn, credentials=credentials
         ):
             raise exceptions.InvalidCredentialsException(
-                f"Credentials for \'{credentials.username}\' are invalid"
+                f"Credentials for '{credentials.username}' are invalid"
             )
 
         return self._convert_ldap_entry_to_identity(entry)
@@ -174,7 +174,7 @@ class LDAPProvider(JWTProviderMixin):
             entry_dn=entry_dn, credentials=credentials
         ):
             raise exceptions.InvalidCredentialsException(
-                f"Credentials for \'{credentials.username}\' are invalid"
+                f"Credentials for '{credentials.username}' are invalid"
             )
 
         try:
@@ -184,7 +184,7 @@ class LDAPProvider(JWTProviderMixin):
         except LDAPException as e:
             raise exceptions.IdentityError(
                 "Failed to change password for user "
-                f"\'{credentials.username}\': {str(e)}"
+                f"'{credentials.username}': {str(e)}"
             ) from e
 
     def _search_user(self, conn: Connection, username: str) -> Entry:
@@ -214,12 +214,12 @@ class LDAPProvider(JWTProviderMixin):
             )
         except LDAPException as e:
             raise exceptions.IdentityError(
-                f"Failed to search for user \'{username}\': {str(e)}"
+                f"Failed to search for user '{username}': {str(e)}"
             ) from e
 
         if not conn.entries:  # type: ignore
             raise exceptions.UserNotFoundException(
-                f"User \'{username}\' not found by identity provider"
+                f"User '{username}' not found by identity provider"
             )
 
         return cast(Entry, conn.entries[0])  # type: ignore
@@ -266,7 +266,7 @@ class LDAPProvider(JWTProviderMixin):
             return True
         except LDAPException as e:
             raise exceptions.InvalidCredentialsException(
-                f"Credentials for \'{credentials.username}\' are invalid"
+                f"Credentials for '{credentials.username}' are invalid"
             ) from e
 
     def _convert_ldap_entry_to_identity(self, entry: Entry) -> Identity:

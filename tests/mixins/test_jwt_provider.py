@@ -18,7 +18,6 @@ def test_jwt_provider_validate(jwt_provider, fake_jwt_factory, jwt_payload):
     token = fake_jwt_factory.create(
         subject=jwt_payload["subject"], payload=jwt_payload
     )
-    print(f"{token=}")
     identity = jwt_provider.validate(Token(token, token_type="Bearer"))
 
     assert identity.subject == jwt_payload["subject"]
@@ -27,10 +26,10 @@ def test_jwt_provider_validate(jwt_provider, fake_jwt_factory, jwt_payload):
 
     fake_jwt_factory._payload = {}  # Simulate missing subject
     incomplete_token = fake_jwt_factory.create(
-        subject=jwt_payload["subject"], payload={}  # Missing subject
+        subject=jwt_payload["subject"],
+        payload={},  # Missing subject
     )
 
-    print(f"{incomplete_token=}")
     with pytest.raises(ValueError):
         jwt_provider.validate(Token(incomplete_token, token_type="Bearer"))
 

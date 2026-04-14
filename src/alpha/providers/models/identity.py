@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from typing import Mapping, Any, Self, Sequence, TYPE_CHECKING
 from datetime import datetime, timezone
 
+from alpha.domain.models.group import Group
+
 
 if TYPE_CHECKING:
     from alpha.domain.models.user import User
@@ -259,8 +261,9 @@ class Identity:
         -------
             An Identity instance populated with data from the User object.
         """
+        subject = str(user.id) if user.id else user.username
         return cls(
-            subject=str(user.id),
+            subject=subject,
             username=user.username,
             email=user.email,
             display_name=user.display_name,
@@ -270,6 +273,28 @@ class Identity:
             issued_at=datetime.now(tz=timezone.utc),
             role=user.role,
             admin=user.admin,
+        )
+
+    def __str__(self) -> str:
+        return self.subject
+
+    def __repr__(self) -> str:
+        return (
+            "Identity("
+            f"subject={self.subject!r}, "
+            f"username={self.username!r}, "
+            f"email={self.email!r}, "
+            f"display_name={self.display_name!r}, "
+            f"groups={self.groups!r}, "
+            f"permissions={self.permissions!r}, "
+            f"claims={self.claims!r}, "
+            f"issued_at={self.issued_at!r}, "
+            f"expires_at={self.expires_at!r}, "
+            f"audience={self.audience!r}, "
+            f"role={self.role!r}, "
+            f"admin={self.admin!r}, "
+            f"pretend_identity={self.pretend_identity!r}"
+            ")"
         )
 
     def update_from_user(self, user: User) -> None:
@@ -294,27 +319,20 @@ class Identity:
         self.role = user.role
         self.admin = user.admin
 
-    def __str__(self) -> str:
-        return self.subject
+    def update_from_groups(self, groups: list[Group]) -> None:
+        """Update the Identity permissions with data from a list of Group
+        instances.
 
-    def __repr__(self) -> str:
-        return (
-            "Identity("
-            f"subject={self.subject!r}, "
-            f"username={self.username!r}, "
-            f"email={self.email!r}, "
-            f"display_name={self.display_name!r}, "
-            f"groups={self.groups!r}, "
-            f"permissions={self.permissions!r}, "
-            f"claims={self.claims!r}, "
-            f"issued_at={self.issued_at!r}, "
-            f"expires_at={self.expires_at!r}, "
-            f"audience={self.audience!r}, "
-            f"role={self.role!r}, "
-            f"admin={self.admin!r}, "
-            f"pretend_identity={self.pretend_identity!r}"
-            ")"
-        )
+        Parameters
+        ----------
+        groups
+            List of Group objects to update from.
+        """
+        for group in groups:
+            for permission in group.permissions or []:
+                self.permissions = self._append_on_sequence(
+                    self.permissions, permission
+                )
 
     def to_dict(self) -> dict[str, Any]:
         """Convert the Identity instance to a dictionary.

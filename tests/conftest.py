@@ -6,6 +6,7 @@ from typing import Any
 
 import pytest
 from alpha.domain.models.base_model import BaseDomainModel
+from alpha.domain.models.group import Group
 from alpha.domain.models.user import User
 from alpha.encoder import JSONEncoder
 from alpha.factories.jwt_factory import JWTFactory
@@ -17,8 +18,10 @@ from tests.fixtures._api_classes import ApiTrack
 from tests.fixtures.fake_factory_classes import FakeTypeFactory
 from tests.fixtures.fake_uow_repositories import (
     FakeAuthenticationServiceUserRepository,
+    FakeDatabaseProviderGroupRepository,
     FakeDatabaseProviderUserRepository,
     FakeDatabaseProviderUserRepositoryNoUser,
+    FakeRefreshTokenRepository,
     FakeUnitOfWork,
 )
 
@@ -179,15 +182,51 @@ def fake_database_provider_user_repository_no_user():
 
 
 @pytest.fixture
+def fake_database_provider_group_repository():
+    return FakeDatabaseProviderGroupRepository(
+        [
+            Group(
+                id=1,
+                name="group1",
+                permissions=["read", "write"],
+                description="A test group",
+            ),
+            Group(
+                id=5,
+                name="group5",
+                permissions=["append", "create"],
+                description="Another test group",
+            ),
+            Group(
+                id=6,
+                name="group6",
+                permissions=["admin"],
+                description="Admin test group",
+            ),
+        ]
+    )
+
+
+@pytest.fixture
+def fake_refresh_token_repository():
+    return FakeRefreshTokenRepository()
+
+
+@pytest.fixture
 def fake_uow(
     fake_authentication_service_repository,
     fake_database_provider_user_repository,
     fake_database_provider_user_repository_empty_password,
     fake_database_provider_user_repository_no_user,
+    fake_database_provider_group_repository,
+    fake_refresh_token_repository,
 ):
     return FakeUnitOfWork(
         authentication_service=fake_authentication_service_repository,
         database_provider=fake_database_provider_user_repository,
         database_provider_empty_password=fake_database_provider_user_repository_empty_password,
         database_provider_no_user=fake_database_provider_user_repository_no_user,
+        users=fake_database_provider_user_repository,
+        groups=fake_database_provider_group_repository,
+        refresh_tokens=fake_refresh_token_repository,
     )

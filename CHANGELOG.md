@@ -7,9 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-###  Added
+### Added
 
-- Added option to AuthenticationService to authenticate with a staticly configurerd user. This option can be used in development and testing environments. 
+- Added the Headers class to handle HTTP request headers, including support for authorization tokens, refresh tokens, and API keys.
+- Added support for extracting tokens from cookies in the Headers class in the API controller template.
+- Added support for setting and deleting cookies in the API response handling when using the `x-alpha-cookie-support` vendor extension.
+- Added support for defining additional service method parameters when using the `x-alpha-service-additional-parameters` vendor extension. This can be used to pass additional parameters to the service methods, such as the Identity object or authentication tokens.
+
+## [0.5.0] - 2026-04-02
+
+Implements a repository for REST API's, refresh-token based authentication flows (with cookie support), introduces group-based permission merging alongside new unit/integration tests and dependencies.
+
+### Added
+
+- Add an ApiRepository interface, a RestApiRepository implementation for domain model lifecycle management and a RestApiUnitOfWork for API session management.
+- Add support for Cookies to the `create_response_object` function, which is used by the generated API code to set or delete cookies in the response.
+- Add support for Cookies to the AuthenticationService class, so it can generate cookies after login or remove them on logout.
+- Add support for Refresh tokens and cookies to the AuthenticationService class.
+- Add option to AuthenticationService to authenticate with a statically configured user. This option can be used in development and testing environments.
+- Add option to AuthenticationService to merge permissions from database Group objects with the Identity.
+- Add refresh token creation/storage/refresh flow to AuthenticationService (file/memory/database backends) and group merging support.
+- Add centralized HTTP response handling in RestApiRepository plus tests (including an httpx-backed client test).
+- Introduce new domain/model utilities (Group, Token enhancements, generate_secret) and expand integration test fixtures.
+
+### Changed
+
+- Updated the response handling of the RestApiRepository for better error handling. A specific exception will now be raised for each 4xx or 5xx status code.
 
 ## [0.4.0] - 2026-02-23
 

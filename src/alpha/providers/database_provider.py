@@ -17,7 +17,7 @@ class DatabaseProvider(JWTProviderMixin):
     """Database Identity Provider implementation."""
 
     protocol = "database"
-    _token_factory: TokenFactory | None = None
+    token_factory: TokenFactory | None = None
 
     def __init__(
         self,
@@ -47,7 +47,7 @@ class DatabaseProvider(JWTProviderMixin):
             Repository name for user entities, by default "users"
         """
         self.uow = uow
-        self._token_factory = token_factory
+        self.token_factory = token_factory
         self._password_factory = password_factory or PasswordFactory()
         self._user_name_attribute = user_name_attribute
         self._users_repository_name = users_repository_name
