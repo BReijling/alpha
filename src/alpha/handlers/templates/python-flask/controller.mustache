@@ -161,7 +161,9 @@ def {{operationId}}(
         # Validate authentication token
         if auth_token is None:
             raise UnauthorizedException('Missing authentication token')
+        
         token_factory.validate(auth_token)
+
         identity = token_factory.get_payload(auth_token)
         verify_identity(identity,
             roles=roles,
