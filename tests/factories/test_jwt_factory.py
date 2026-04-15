@@ -1,3 +1,4 @@
+from jwt import InvalidSignatureError
 import pytest
 from datetime import datetime
 from alpha import exceptions
@@ -76,9 +77,23 @@ def test_jwt_factory_validate_invalid_token(
         jwt_factory.validate(invalid_secret_token)
 
 
-def test_jwt_factory_get_payload(jwt_factory: JWTFactory, jwt_payload):
+def test_jwt_factory_get_payload(
+    jwt_factory: JWTFactory, jwt_payload, jwt_factory_factory
+):
     token = jwt_factory.create(subject="test_subject", payload=jwt_payload)
 
     payload = jwt_factory.get_payload(token)
     assert payload["sub"] == "user123"
     assert payload == jwt_payload
+
+    # test invalid token
+    other_jwt_factory: JWTFactory = jwt_factory_factory(
+        "anothersecretkey", "another_issuer", 1
+    )
+
+    payload = other_jwt_factory.get_payload(token)
+    assert payload["sub"] == "user123"
+    assert payload == jwt_payload
+
+    with pytest.raises(InvalidSignatureError):
+        other_jwt_factory.get_payload(token, validate=True)

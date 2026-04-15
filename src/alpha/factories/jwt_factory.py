@@ -94,7 +94,9 @@ class JWTFactory:
         return token
 
     def validate(self, token: str) -> bool:
-        """Validate a JWT token.
+        """Validate a JWT token. This method checks the token's signature,
+        expiration, and issuer. If the token is invalid, it raises an
+        appropriate exception. If the token is valid, it returns True.
 
         Parameters
         ----------
@@ -130,13 +132,23 @@ class JWTFactory:
                 f"Token is invalid: {str(e)}"
             ) from e
 
-    def get_payload(self, token: str) -> dict[str, Any]:
-        """Retrieve the payload from a JWT token.
+    def get_payload(
+        self, token: str, validate: bool = False
+    ) -> dict[str, Any]:
+        """Retrieve the payload from a JWT token. This method does not perform
+        validation of the token by default. It simply decodes the token and
+        extracts the payload.
+
+        If the `validate` parameter is set to True, it will
+        perform signature verification. If the token is invalid or expired, it
+        will raise an appropriate exception.
 
         Parameters
         ----------
         token
             The JWT token from which to extract the payload.
+        validate
+            Whether to perform signature verification when decoding the token.
 
         Returns
         -------
@@ -147,5 +159,7 @@ class JWTFactory:
             key=self.JWT_SECRET,
             algorithms=[self.JWT_ALGORITHM],
             issuer=self.JWT_ISSUER,
+            verify=validate,
+            options={"verify_signature": validate},
         )
         return decoded.get("payload", {})
