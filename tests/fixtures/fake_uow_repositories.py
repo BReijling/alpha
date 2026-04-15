@@ -1,32 +1,44 @@
+from typing import Any
+
 from alpha.domain.models.group import Group
 from alpha.domain.models.user import User
 from alpha.providers.models.token import Token
 
 
 class FakeRepository:
-    def __init__(self, *args, **kwargs) -> None:
-        pass
+    def __init__(self, objs: list[Any] | None = None, *args, **kwargs) -> None:
+        self.objs = objs or []
 
-    def add(self, *args, **kwargs) -> None:
-        pass
+    def add(self, obj: Any, *args, **kwargs) -> Any:
+        self.objs.append(obj)
+        return obj
 
     def add_all(self, *args, **kwargs) -> None:
-        pass
+        self.objs.extend(args[0])
 
-    def get(self, *args, **kwargs) -> None:
-        pass
+    def get(self, id: Any, *args, **kwargs) -> None:
+        return self.objs[0] if self.objs else None
+
+    def get_by_id(self, *args, **kwargs) -> Any:
+        return self.objs[0] if self.objs else None
+
+    def get_one_or_none(self, *args, **kwargs) -> User | None:
+        return self.objs[0] if self.objs else None
 
     def get_all(self, *args, **kwargs) -> None:
-        pass
+        return self.objs
 
     def patch(self, *args, **kwargs) -> None:
         pass
 
     def remove(self, *args, **kwargs) -> None:
-        pass
+        self.objs = self.objs[1:]
 
-    def update(self, *args, **kwargs) -> None:
-        pass
+    def select(self, *args, **kwargs) -> None:
+        return self.objs
+
+    def update(self, obj: Any, *args, **kwargs) -> None:
+        return obj
 
 
 class FakeAuthenticationServiceUserRepository:
@@ -42,23 +54,24 @@ class FakeAuthenticationServiceUserRepository:
         )
 
 
-class FakeDatabaseProviderUserRepository:
+class FakeDatabaseProviderUserRepository(FakeRepository):
     def __init__(self, users: list[User] | None = None):
-        self.users = users
+        self.objs = users or []
 
-    def get_by_id(self, *args, **kwargs) -> User:
-        return self.users[0]
+    def add(self, user: User, *args, **kwargs) -> User:
+        self.objs.append(user)
+        return user
 
-    def get_one_or_none(self, *args, **kwargs) -> User:
-        return self.users[0]
+    def get_one_or_none(self, *args, **kwargs) -> User | None:
+        return self.objs[0] if self.objs else None
 
 
-class FakeDatabaseProviderGroupRepository:
+class FakeDatabaseProviderGroupRepository(FakeRepository):
     def __init__(self, groups: list[Group] | None = None):
-        self.groups = groups
+        self.objs = groups or []
 
     def select(self, *args, **kwargs) -> list[Group] | None:
-        return self.groups
+        return self.objs
 
 
 class FakeRefreshTokenRepository:

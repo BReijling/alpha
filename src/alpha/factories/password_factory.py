@@ -11,6 +11,7 @@ from alpha import exceptions
 class PasswordFactory:
     """This class provides methods for hashing and verifying passwords using
     the argon2 library. It includes the following methods:
+
     - hash_password: Hashes a given password and returns the hashed value as a
         hexadecimal string.
     - verify_password: Verifies a given password against a provided hash and

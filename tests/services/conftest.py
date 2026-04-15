@@ -3,11 +3,14 @@ import json
 
 import pytest
 
+from alpha.domain.models.group import Group
 from alpha.domain.models.user import User
+from alpha.factories.password_factory import PasswordFactory
 from alpha.providers.models.credentials import PasswordCredentials
 from alpha.providers.models.identity import Identity
 from alpha.providers.models.token import Token
 from alpha.services.authentication_service import AuthenticationService
+from alpha.services.user_lifecycle_management import UserLifecycleManagement
 from tests.fixtures.fake_provider import FakeIdentityProvider
 
 
@@ -232,4 +235,53 @@ def authentication_service_use_refresh_tokens_database(
         use_refresh_tokens=True,
         refresh_identity_on_refresh=False,
         refresh_token_storage="database",
+    )
+
+
+@pytest.fixture
+def user_lifecycle_management_service(
+    fake_uow, password_factory
+) -> UserLifecycleManagement:
+    return UserLifecycleManagement(
+        uow=fake_uow,
+        password_support=True,
+        password_factory=password_factory,
+    )
+
+
+@pytest.fixture
+def user_lifecycle_management_service_alternative_username_attribute() -> (
+    UserLifecycleManagement
+):
+    return UserLifecycleManagement(
+        uow=None,
+        user_username_attribute="test_attribute",
+    )
+
+
+@pytest.fixture
+def test_user(password_factory: PasswordFactory):
+    return User(
+        id=2,
+        username="new_user",
+        password=password_factory.hash_password("new_password"),
+        email="test@test.nl",
+    )
+
+
+@pytest.fixture
+def test_user3(password_factory: PasswordFactory):
+    return User(
+        id=3,
+        username="new_user3",
+        email="test3@test.nl",
+    )
+
+
+@pytest.fixture
+def test_group():
+    return Group(
+        id=0,
+        name="test_group",
+        permissions=["read", "write"],
     )

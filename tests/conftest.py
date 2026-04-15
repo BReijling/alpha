@@ -230,3 +230,8 @@ def fake_uow(
         groups=fake_database_provider_group_repository,
         refresh_tokens=fake_refresh_token_repository,
     )
+
+
+@pytest.fixture
+def password_factory():
+    return PasswordFactory()

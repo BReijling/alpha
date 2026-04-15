@@ -1,5 +1,5 @@
 import pytest
-from requests import auth
+
 from alpha import exceptions
 from alpha.providers.models.identity import Identity
 from alpha.services.authentication_service import AuthenticationService
@@ -10,7 +10,8 @@ def test_authentication_service_init(authentication_service, fake_static_user):
     assert authentication_service._identity_provider is not None
     assert authentication_service._identity_id_attribute == "subject"
     assert authentication_service._merge_with_database_users is False
-    assert authentication_service._user_id_attribute == "username"
+    assert authentication_service._user_username_attribute == "username"
+    assert authentication_service._group_name_attribute == "name"
     assert authentication_service.uow is not None
     assert (
         authentication_service._users_repository_name

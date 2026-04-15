@@ -308,8 +308,3 @@ def jwt_factory_factory() -> Callable[[str, str, int], JWTFactory]:
         )
 
     return factory
-
-
-@pytest.fixture
-def password_factory():
-    return PasswordFactory()
