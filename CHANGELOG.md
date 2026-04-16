@@ -5,15 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.5.1] - 2026-04-15
+## [0.5.1] - 2026-04-16
 
 ### Added
 
-- The Headers class to handle HTTP request headers, including support for authorization tokens, refresh tokens, and API keys.
-- Support for extracting tokens from cookies in the Headers class in the API controller template.
-- Support for setting and deleting cookies in the API response handling when using the `x-alpha-cookie-support` vendor extension.
-- Support for defining additional service method parameters when using the `x-alpha-service-additional-parameters` vendor extension. This can be used to pass additional parameters to the service methods, such as the Identity object or authentication tokens.
-- A UserLifecycleManagement service for managing user lifecycle operations such as creating, updating, and deleting users and groups. This service uses a SqlRepository for database interactions.
+- Added the Headers class to handle HTTP request headers, including support for authorization tokens, refresh tokens, and API keys.
+- Added support for extracting tokens from cookies in the Headers class in the API controller template.
+- Added support for setting and deleting cookies in the API response handling when using the `x-alpha-cookie-support` vendor extension.
+- Added support for defining additional service method parameters when using the `x-alpha-service-additional-parameters` vendor extension. This can be used to pass additional parameters to the service methods, such as the Identity object or authentication tokens.
+- Added a UserLifecycleManagement service for managing user lifecycle operations such as creating, updating, and deleting users and groups. This service uses a SqlRepository for database interactions.
+- Added a Role model to the domain models, which can be used to define roles for users.
 
 ### Fixed
 

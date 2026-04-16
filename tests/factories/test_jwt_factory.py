@@ -1,6 +1,6 @@
-from jwt import InvalidSignatureError
-import pytest
 from datetime import datetime
+
+import pytest
 from alpha import exceptions
 from alpha.factories.jwt_factory import JWTFactory
 from alpha.interfaces.token_factory import TokenFactory
@@ -91,9 +91,13 @@ def test_jwt_factory_get_payload(
         "anothersecretkey", "another_issuer", 1
     )
 
-    payload = other_jwt_factory.get_payload(token)
+    payload = other_jwt_factory.get_payload(
+        token, options={"verify_signature": False}
+    )
     assert payload["sub"] == "user123"
     assert payload == jwt_payload
 
-    with pytest.raises(InvalidSignatureError):
-        other_jwt_factory.get_payload(token, validate=True)
+    with pytest.raises(exceptions.InvalidSignatureException):
+        other_jwt_factory.get_payload(
+            token, options={"verify_signature": True}
+        )

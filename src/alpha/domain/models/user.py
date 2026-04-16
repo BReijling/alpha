@@ -56,8 +56,8 @@ class Role(Enum):
     SUPERUSER = auto()
     OWNER = auto()
     MODERATOR = auto()
-    USER = auto()
     EDITOR = auto()
+    USER = auto()
     VIEWER = auto()
 
     def __lt__(self, obj: Self) -> bool:

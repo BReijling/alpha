@@ -260,17 +260,17 @@ def user_lifecycle_management_service_alternative_username_attribute() -> (
 
 
 @pytest.fixture
-def test_user(password_factory: PasswordFactory):
+def test_user():
     return User(
         id=2,
         username="new_user",
-        password=password_factory.hash_password("new_password"),
+        password="new_password",
         email="test@test.nl",
     )
 
 
 @pytest.fixture
-def test_user3(password_factory: PasswordFactory):
+def test_user3():
     return User(
         id=3,
         username="new_user3",

@@ -18,8 +18,12 @@ class JWTFactory:
         lifetime_hours: str | None = "12",
         issuer: str = "http://localhost",
         jwt_algorithm: str = "HS256",
+        options: dict[str, Any] | None = None,
     ) -> None:
-        """Initialize the JWTFactory.
+        """Initialize the JWTFactory. This method sets up the necessary
+        configuration for creating and validating JWT tokens. It requires a
+        secret key for signing the tokens and allows optional configuration
+        for token lifetime, issuer, algorithm, and decoding options.
 
         Parameters
         ----------
@@ -31,6 +35,10 @@ class JWTFactory:
             The issuer of the JWT, by default "http://localhost"
         jwt_algorithm, optional
             The algorithm used to sign the JWT, by default "HS256"
+        options, optional
+            A dictionary of options to customize the decoding behavior, by
+            default None. If not provided, it defaults to requiring standard
+            claims and verifying the signature.
 
         Raises
         ------
@@ -46,6 +54,10 @@ class JWTFactory:
         self.JWT_ISSUER = issuer
         self.JWT_ALGORITHM = jwt_algorithm
         self.JWT_LIFETIME_SECONDS = 3600 * int(lifetime_hours)
+        self.JWT_OPTIONS = options or {
+            "require": ["exp", "iat", "nbf", "iss", "sub"],
+            "verify_signature": True,
+        }
 
     def create(
         self,
@@ -93,7 +105,9 @@ class JWTFactory:
         )
         return token
 
-    def validate(self, token: str) -> bool:
+    def validate(
+        self, token: str, options: dict[str, Any] | None = None
+    ) -> bool:
         """Validate a JWT token. This method checks the token's signature,
         expiration, and issuer. If the token is invalid, it raises an
         appropriate exception. If the token is valid, it returns True.
@@ -102,6 +116,8 @@ class JWTFactory:
         ----------
         token
             The JWT token to be validated.
+        options
+            A dictionary of options to customize the decoding behavior.
 
         Returns
         -------
@@ -114,15 +130,62 @@ class JWTFactory:
             InvalidSignatureException
                 If the token signature is invalid.
         """
+        if self._decode(token, options):
+            return True
+        return False
+
+    def get_payload(
+        self, token: str, options: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
+        """Retrieve the payload from a JWT token. This method does not perform
+        validation of the token by default. It simply decodes the token and
+        extracts the payload.
+
+        If the `options` parameter is provided, it will be passed to the
+        `jwt.decode` function. This allows customization of the decoding
+        behavior, such as enabling or disabling signature verification.
+
+        Parameters
+        ----------
+        token
+            The JWT token from which to extract the payload.
+        options
+            A dictionary of options to customize the decoding behavior.
+
+        Returns
+        -------
+            A dictionary containing the payload data extracted from the token.
+        """
+        decoded = self._decode(token, options)
+        return decoded.get("payload", {})
+
+    def _decode(
+        self, token: str, options: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
+        """Decode a JWT token without performing validation. This method is
+        intended for internal use and should not be exposed as part of the
+        public API.
+
+        Parameters
+        ----------
+        token
+            The JWT token to be decoded.
+        options
+            A dictionary of options to customize the decoding behavior.
+
+        Returns
+        -------
+            A dictionary containing the decoded token data.
+        """
         try:
-            jwt.decode(
+            decoded: dict[str, Any] = jwt.decode(
                 jwt=token,
                 key=self.JWT_SECRET,
                 algorithms=[self.JWT_ALGORITHM],
                 issuer=self.JWT_ISSUER,
-                verify=True,
+                options=options or self.JWT_OPTIONS,
             )
-            return True
+            return decoded
         except jwt.ExpiredSignatureError as e:
             raise exceptions.TokenExpiredException(str(e)) from e
         except jwt.InvalidSignatureError as e:
@@ -131,35 +194,3 @@ class JWTFactory:
             raise exceptions.InvalidTokenException(
                 f"Token is invalid: {str(e)}"
             ) from e
-
-    def get_payload(
-        self, token: str, validate: bool = False
-    ) -> dict[str, Any]:
-        """Retrieve the payload from a JWT token. This method does not perform
-        validation of the token by default. It simply decodes the token and
-        extracts the payload.
-
-        If the `validate` parameter is set to True, it will
-        perform signature verification. If the token is invalid or expired, it
-        will raise an appropriate exception.
-
-        Parameters
-        ----------
-        token
-            The JWT token from which to extract the payload.
-        validate
-            Whether to perform signature verification when decoding the token.
-
-        Returns
-        -------
-            A dictionary containing the payload data extracted from the token.
-        """
-        decoded: dict[str, Any] = jwt.decode(
-            jwt=token,
-            key=self.JWT_SECRET,
-            algorithms=[self.JWT_ALGORITHM],
-            issuer=self.JWT_ISSUER,
-            verify=validate,
-            options={"verify_signature": validate},
-        )
-        return decoded.get("payload", {})

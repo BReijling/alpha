@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum, auto
 import json
-from typing import Any
+from typing import Any, Callable
 
 import pytest
 from alpha.domain.models.base_model import BaseDomainModel
@@ -235,3 +235,16 @@ def fake_uow(
 @pytest.fixture
 def password_factory():
     return PasswordFactory()
+
+
+@pytest.fixture
+def jwt_factory_factory() -> Callable[[str, str, int], JWTFactory]:
+    def factory(secret: str, issuer: str, lifetime_hours: int) -> JWTFactory:
+        return JWTFactory(
+            secret=secret,
+            issuer=issuer,
+            lifetime_hours=lifetime_hours,
+            jwt_algorithm="HS256",
+        )
+
+    return factory

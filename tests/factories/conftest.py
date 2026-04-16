@@ -1,13 +1,10 @@
 """_summary_"""
 
 from datetime import date, datetime
-from typing import Callable
 
 import pytest
 
 from alpha.factories.field_iterator import Field, FieldIterator
-from alpha.factories.jwt_factory import JWTFactory
-from alpha.factories.password_factory import PasswordFactory
 from alpha.infra.models.json_patch import JsonPatch
 from tests.fixtures._api_classes import (
     ApiTrack,
@@ -295,16 +292,3 @@ def jwt_payload():
         "name": "John Doe",
         "admin": True,
     }
-
-
-@pytest.fixture
-def jwt_factory_factory() -> Callable[[str, str, int], JWTFactory]:
-    def factory(secret: str, issuer: str, lifetime_hours: int) -> JWTFactory:
-        return JWTFactory(
-            secret=secret,
-            issuer=issuer,
-            lifetime_hours=lifetime_hours,
-            jwt_algorithm="HS256",
-        )
-
-    return factory

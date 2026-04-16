@@ -134,7 +134,7 @@ class UserLifecycleManagement:
             self.uow.commit()
             return group
 
-    def get_user(self, user_id: UUID) -> User:
+    def get_user(self, user_id: str | int | UUID) -> User:
         """Get an user object by id from the repository
 
         Parameters
@@ -164,7 +164,7 @@ class UserLifecycleManagement:
 
             return user
 
-    def get_group(self, group_id: UUID) -> Group:
+    def get_group(self, group_id: str | int | UUID) -> Group:
         """Get a group object by id from the repository
 
         Parameters
@@ -224,7 +224,7 @@ class UserLifecycleManagement:
 
             return result
 
-    def remove_user(self, user_id: UUID) -> None:
+    def remove_user(self, user_id: str | int | UUID) -> None:
         """Removes an user object from the repository
 
         Parameters
@@ -241,7 +241,7 @@ class UserLifecycleManagement:
             users.remove(user)
             self.uow.commit()
 
-    def remove_group(self, group_id: UUID) -> None:
+    def remove_group(self, group_id: str | int | UUID) -> None:
         """Removes a group object from the repository
 
         Parameters
@@ -259,7 +259,10 @@ class UserLifecycleManagement:
             self.uow.commit()
 
     def update_user(
-        self, user_id: UUID, user: User, identity: Identity | None = None
+        self,
+        user_id: str | int | UUID,
+        user: User,
+        identity: Identity | None = None,
     ) -> User:
         """Updates an existing user object in the repository
 
@@ -292,7 +295,10 @@ class UserLifecycleManagement:
         return updated_user
 
     def update_group(
-        self, group_id: UUID, group: Group, identity: Identity | None = None
+        self,
+        group_id: str | int | UUID,
+        group: Group,
+        identity: Identity | None = None,
     ) -> Group:
         """Updates an existing group object in the repository
 

@@ -368,8 +368,14 @@ class AuthenticationService:
                     "configured, cannot retrieve identity from auth token."
                 )
             try:
+                # Attempt to retrieve the identity from the auth token without
+                # validating the token, since it may be expired. The payload
+                # should still be retrievable if the token is expired, as long
+                # as the signature is valid. If the signature is invalid, an
+                # exception will be raised and caught, resulting in the
+                # identity remaining None.
                 payload = self._identity_provider.token_factory.get_payload(
-                    token=auth_token
+                    token=auth_token, options={"verify_exp": False}
                 )
                 identity = Identity.from_dict(payload)
             except Exception:
