@@ -49,6 +49,7 @@ from alpha.repositories.models.repository_model import RepositoryModel
 from alpha.repositories.rest_api_repository import RestApiRepository
 from alpha.repositories.sql_alchemy_repository import SqlAlchemyRepository
 from alpha.services.authentication_service import AuthenticationService
+from alpha.services.user_lifecycle_management import UserLifecycleManagement
 from alpha.utils.is_attrs import is_attrs
 from alpha.utils.is_pydantic import is_pydantic
 from alpha.utils.logging_configurator import (
@@ -56,6 +57,7 @@ from alpha.utils.logging_configurator import (
     GunicornLogger,
 )
 from alpha.utils.logging_level_checker import logging_level_checker
+from alpha.utils.request_headers import Headers
 from alpha.utils.response_object import create_response_object
 from alpha.utils.verify_identity import verify_identity
 from alpha.utils.version_checker import minor_version_gte
@@ -126,11 +128,13 @@ __all__ = [
     "RestApiRepository",
     "SqlAlchemyRepository",
     "AuthenticationService",
+    "UserLifecycleManagement",
     "is_attrs",
     "is_pydantic",
     "LoggingConfigurator",
     "GunicornLogger",
     "logging_level_checker",
+    "Headers",
     "create_response_object",
     "verify_identity",
     "minor_version_gte",

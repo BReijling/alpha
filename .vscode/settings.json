@@ -16,7 +16,8 @@
     "conventionalCommits.scopes": [
         "license",
         "ApiRepository",
-        "AuthenticationService"
+        "AuthenticationService",
+        "UserLifecycleManagement"
     ],
     "peacock.color": "#42b883",
     "workbench.colorCustomizations": {

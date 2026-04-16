@@ -5,6 +5,7 @@ from alpha.utils.logging_configurator import (
     GunicornLogger,
 )
 from alpha.utils.logging_level_checker import logging_level_checker
+from alpha.utils.request_headers import Headers
 from alpha.utils.response_object import create_response_object
 from alpha.utils.verify_identity import verify_identity
 from alpha.utils.version_checker import minor_version_gte
@@ -18,4 +19,5 @@ __all__ = [
     "create_response_object",
     "verify_identity",
     "minor_version_gte",
+    "Headers",
 ]

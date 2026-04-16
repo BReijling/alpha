@@ -123,7 +123,7 @@ class Identity:
     username: str | None
     email: str | None
     display_name: str | None
-    groups: Sequence[str]
+    groups: Sequence[str | Group]
     permissions: Sequence[str]
     claims: Mapping[str, Any]
     issued_at: datetime
