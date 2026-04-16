@@ -43,8 +43,8 @@ class AuthenticationService:
         refresh_token_max_age: int = 3600 * 24 * 7,
         merge_with_database_users: bool = False,
         merge_with_database_groups: bool = False,
-        user_id_attribute: str = "username",
-        group_id_attribute: str = "name",
+        user_username_attribute: str = "username",
+        group_name_attribute: str = "name",
         uow: UnitOfWork | None = None,
         users_repository_name: str = "users",
         groups_repository_name: str = "groups",
@@ -106,10 +106,10 @@ class AuthenticationService:
         merge_with_database_groups, optional
             Whether to merge identity data with database group data,
             by default False
-        user_id_attribute, optional
+        user_username_attribute, optional
             Attribute name in the user database to use as the unique
             identifier, by default "username"
-        group_id_attribute, optional
+        group_name_attribute, optional
             Attribute name in the group database to use as the unique
             identifier, by default "name"
         uow, optional
@@ -176,8 +176,8 @@ class AuthenticationService:
         self._refresh_token_max_age = refresh_token_max_age
         self._merge_with_database_users = merge_with_database_users
         self._merge_with_database_groups = merge_with_database_groups
-        self._user_id_attribute = user_id_attribute
-        self._group_id_attribute = group_id_attribute
+        self._user_username_attribute = user_username_attribute
+        self._group_name_attribute = group_name_attribute
         self.uow = uow
         self._users_repository_name = users_repository_name
         self._groups_repository_name = groups_repository_name
@@ -368,8 +368,14 @@ class AuthenticationService:
                     "configured, cannot retrieve identity from auth token."
                 )
             try:
+                # Attempt to retrieve the identity from the auth token without
+                # validating the token, since it may be expired. The payload
+                # should still be retrievable if the token is expired, as long
+                # as the signature is valid. If the signature is invalid, an
+                # exception will be raised and caught, resulting in the
+                # identity remaining None.
                 payload = self._identity_provider.token_factory.get_payload(
-                    token=auth_token
+                    token=auth_token, options={"verify_exp": False}
                 )
                 identity = Identity.from_dict(payload)
             except Exception:
@@ -469,8 +475,8 @@ class AuthenticationService:
             )
 
             user = users.get_by_id(
-                value=getattr(identity, self._user_id_attribute),
-                attr=self._user_id_attribute,
+                value=getattr(identity, self._user_username_attribute),
+                attr=self._user_username_attribute,
             )
             if user:
                 identity.update_from_user(user)
@@ -502,18 +508,23 @@ class AuthenticationService:
             self._raise_no_uow()
 
         with self.uow:
-            groups: SqlRepository[Group] = getattr(
+            groups_repo: SqlRepository[Group] = getattr(
                 self.uow, self._groups_repository_name
             )
 
+            groups = list(identity.groups)
+            for i, group in enumerate(groups):
+                if isinstance(group, Group):
+                    groups[i] = getattr(group, self._group_name_attribute)
+
             filters = [
                 SearchFilter(
-                    field=self._group_id_attribute,
+                    field=self._group_name_attribute,
                     op=Operator.IN,
-                    value=identity.groups,
+                    value=groups,
                 )
             ]
-            user_groups = groups.select(filters=filters)
+            user_groups = groups_repo.select(filters=filters)
             identity.update_from_groups(user_groups)
 
         return identity

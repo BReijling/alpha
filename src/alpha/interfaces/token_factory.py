@@ -48,13 +48,18 @@ class TokenFactory(Protocol):
         """
         ...
 
-    def get_payload(self, token: str) -> dict[str, str]:
+    def get_payload(
+        self, token: str, options: dict[str, bool] | None
+    ) -> dict[str, str]:
         """Retrieve the payload from an authentication token.
 
         Parameters
         ----------
         token
             The authentication token from which to extract the payload.
+        options
+            A dictionary of options to customize the decoding behavior, such as
+            enabling or disabling signature verification.
 
         Returns
         -------
