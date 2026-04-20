@@ -62,6 +62,7 @@ dev = [
     "ipykernel>=7.2.0",
     "flask<2",
     "httpx>=0.28.1",
+    "tox>=4.53.0",
 ]
 
 [project.optional-dependencies]
@@ -98,6 +99,33 @@ addopts = "-v -p no:warnings --cov --cov-report=lcov:./coverage/lcov.info --cov-
 testpaths = [
     "tests"
 ]
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+min_version = 4.0
+env_list = py311,py312,py313,py314
+isolated_build = true
+
+[testenv]
+description = Run full test suite on {basepython}
+package = editable
+extras = flask,postgresql,mysql,ldap,api-generator
+deps =
+    pytest>=9.0.1
+    pytest-cov>=7.0.0
+    uv
+commands =
+    pytest {posargs}
+pass_env =
+    CI
+    TEST_PSQL_HOST
+    TEST_PSQL_PORT
+    TEST_PSQL_USERNAME
+    TEST_PSQL_PASSWORD
+    TEST_PSQL_DATABASE
+"""
+
 
 [tool.coverage.run]
 source = ["src"]

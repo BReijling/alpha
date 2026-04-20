@@ -16,6 +16,18 @@ jobs:
   test:
 
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - python-version: "3.11"
+            tox-env: py311
+          - python-version: "3.12"
+            tox-env: py312
+          - python-version: "3.13"
+            tox-env: py313
+          - python-version: "3.14"
+            tox-env: py314
 
     services:
 
@@ -49,19 +61,20 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
       with:
-        python-version: "3.11"
+        python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install uv
-        uv sync --dev --all-extras
+        pip install tox
     - name: Lint with ruff
+      if: matrix.python-version == '3.11'
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        uv run ruff check ./src
+        python -m pip install ruff
+        ruff check ./src
     - name: Test with pytest
       run: |
-        uv run pytest
+        tox -e ${{ matrix.tox-env }}

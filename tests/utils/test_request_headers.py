@@ -92,6 +92,9 @@ def test_has_auth_token():
     headers = Headers(auth_token="abc.def.ghi", auth_token_type="Basic")
     assert headers.has_auth_token is False
 
+    headers = Headers(auth_token="abc.def.ghi", auth_token_type=None)
+    assert headers.has_auth_token is False
+
     headers = Headers()
     assert headers.has_auth_token is False
 
@@ -129,3 +132,16 @@ def test_has_api_key():
     headers = Headers.from_headers({"X-API-Key": "apikey123"})
     assert headers.has_api_key is True
     assert headers.api_key == "apikey123"
+
+
+def test_headers_representation(headers: Headers):
+    representation = repr(headers)
+
+    assert "Headers(" in representation
+    assert "auth_token=***" in representation
+    assert "auth_token_type=Bearer" in representation
+    assert "refresh_token=***" in representation
+    assert "api_key=***" in representation
+    assert "cookie_auth123" not in representation
+    assert "cookie_refresh123" not in representation
+    assert "cookie_apikey123" not in representation
