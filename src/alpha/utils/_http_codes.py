@@ -45,6 +45,10 @@ http_codes_en: dict[int, tuple[str, str]] = {
     415: ('Unsupported Media Type', 'Entity body in unsupported format.'),
     416: ('Requested Range Not Satisfiable', 'Cannot satisfy request range.'),
     417: ('Expectation Failed', 'Expect condition could not be satisfied.'),
+    422: (
+        'Unprocessable Entity',
+        'Request well-formed but unable to be followed due to semantic errors.',
+    ),
     500: ('Internal Server Error', 'Server got itself in trouble'),
     501: ('Not Implemented', 'Server does not support this operation'),
     502: ('Bad Gateway', 'Invalid responses from another server/proxy.'),
@@ -130,6 +134,10 @@ http_codes_nl: dict[int, tuple[str, str]] = {
         'Kan het verzoeksbereik niet voldoen.',
     ),
     417: ('Verwachting Mislukt', 'Verwachting kan niet worden vervuld.'),
+    422: (
+        'Niet Verwerkbare Entiteit',
+        'Verzoek goed gevormd maar niet te volgen vanwege semantische fouten.',
+    ),
     500: ('Interne Serverfout', 'Server heeft problemen met zichzelf'),
     501: ('Niet Geïmplementeerd', 'Server ondersteunt deze bewerking niet'),
     502: (

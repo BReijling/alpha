@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum, auto
-from typing import Self, Sequence, cast
+from typing import Any, Self, Sequence, cast
 from uuid import UUID
 
 from alpha.domain.models.base_model import BaseDomainModel, DomainModel
@@ -106,6 +106,27 @@ class User(LifeCycleBase, BaseDomainModel):
             email=identity.email,
             display_name=identity.display_name,
         )
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert the User instance to a dictionary.
+
+        Returns
+        -------
+            A dictionary representation of the User instance.
+        """
+        return {
+            "id": self.id,
+            "username": self.username,
+            "password": self.password,
+            "role": self.role,
+            "email": self.email,
+            "phone": self.phone,
+            "display_name": self.display_name,
+            "permissions": self.permissions,
+            "groups": self.groups,
+            "is_active": self.is_active,
+            "admin": self.admin,
+        }
 
     def update(self, obj: DomainModel) -> DomainModel:
         """Update the User instance with data from another User instance.

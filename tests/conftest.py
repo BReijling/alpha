@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum, auto
 import json
+import os
 from typing import Any, Callable
 
 import pytest
@@ -13,6 +14,10 @@ from alpha.factories.jwt_factory import JWTFactory
 from alpha.factories.password_factory import PasswordFactory
 from alpha.factories.request_factory import RequestFactory
 from alpha.factories.response_factory import ResponseFactory
+from alpha.infra.connectors.ldap_connector import LDAPConnector
+from alpha.infra.databases.sql_alchemy import SqlAlchemyDatabase
+from alpha.providers.ldap_provider import LDAPProvider
+from alpha.providers.models.credentials import PasswordCredentials
 from alpha.providers.models.identity import Identity
 from tests.fixtures._api_classes import ApiTrack
 from tests.fixtures.fake_factory_classes import FakeTypeFactory
@@ -24,6 +29,7 @@ from tests.fixtures.fake_uow_repositories import (
     FakeRefreshTokenRepository,
     FakeUnitOfWork,
 )
+from tests.integration._classes import FakeMapper
 
 
 class PetType(Enum):
