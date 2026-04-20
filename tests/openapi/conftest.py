@@ -7,7 +7,7 @@ from alpha.infra.databases.sql_alchemy import SqlAlchemyDatabase
 from alpha.providers.models.credentials import PasswordCredentials
 from alpha.utils.openapi_test.orm import TestMapper
 
-os.environ['FLASK_ENV'] = 'production'
+os.environ["FLASK_ENV"] = "production"
 
 from pathlib import Path
 
@@ -18,12 +18,12 @@ PROJECT_ROOT = TEST_ROOT.parent
 
 
 def _run_test_pre_process() -> None:
-    script_path = PROJECT_ROOT / 'test_pre_process.sh'
+    script_path = PROJECT_ROOT / "test_pre_process.sh"
     if not script_path.exists():
-        raise FileNotFoundError(f'Missing pre-process script: {script_path}')
+        raise FileNotFoundError(f"Missing pre-process script: {script_path}")
 
     result = subprocess.run(
-        ['sh', str(script_path)],
+        ["sh", str(script_path)],
         cwd=str(PROJECT_ROOT),
         check=False,
         capture_output=True,
@@ -31,34 +31,39 @@ def _run_test_pre_process() -> None:
     )
     if result.returncode != 0:
         raise RuntimeError(
-            'Failed to run test_pre_process.sh before openapi tests.\n'
-            f'stdout:\n{result.stdout}\n\n'
-            f'stderr:\n{result.stderr}'
+            "Failed to run test_pre_process.sh before openapi tests.\n"
+            f"stdout:\n{result.stdout}\n\n"
+            f"stderr:\n{result.stderr}"
         )
 
 
-@pytest.fixture(autouse=True, scope='session')
+@pytest.fixture(autouse=True, scope="session")
 def flask_app():
-    resources_yaml = TEST_ROOT / 'openapi' / 'specification' / 'openapi.yaml'
+    resources_yaml = TEST_ROOT / "openapi" / "specification" / "openapi.yaml"
     api_yaml = (
-        PROJECT_ROOT / 'api' / 'alpha_test_api' / 'openapi' / 'openapi.yaml'
+        PROJECT_ROOT / "api" / "alpha_test_api" / "openapi" / "openapi.yaml"
     )
-    _run_test_pre_process()
 
-    # if not os.environ.get('CI', None):
-    #     if os.stat(resources_yaml).st_mtime > os.stat(api_yaml).st_mtime:
+    if (
+        not api_yaml.exists()
+        or os.stat(resources_yaml).st_mtime > os.stat(api_yaml).st_mtime
+    ):
+        _run_test_pre_process()
 
     try:
+        import sys
+
+        sys.path.insert(0, str(PROJECT_ROOT / "api"))
         from alpha_test_api._app import app
     except ImportError as exc:
         raise Exception(
-            'test api not found after running test_pre_process.sh'
+            "test api not found after running test_pre_process.sh"
         ) from exc
 
     yield app.app
 
 
-@pytest.fixture(autouse=True, scope='session')
+@pytest.fixture(autouse=True, scope="session")
 def client(flask_app):
     flask_app.testing = True
     yield flask_app.test_client()
@@ -68,7 +73,7 @@ def client(flask_app):
 def get(client):
     def _get(path, obj=None):
         if obj is not None:
-            return client.get(f'{path}/{obj}')
+            return client.get(f"{path}/{obj}")
         return client.get(path)
 
     return _get
@@ -90,47 +95,47 @@ def parse_response_json():
 @pytest.fixture
 def pet_dict():
     return {
-        'name': 'Pluto',
-        'pet_type': 'DOG',
-        'date_of_birth': '2000-01-01',
-        'good_boy': True,
+        "name": "Pluto",
+        "pet_type": "DOG",
+        "date_of_birth": "2000-01-01",
+        "good_boy": True,
     }
 
 
 @pytest.fixture
 def bad_pet_dict():
     return {
-        'name': 'Lassie',
-        'pet_type': 'DOG',
-        'date_of_birth': '2000-01-01',
-        'good_boy': False,
+        "name": "Lassie",
+        "pet_type": "DOG",
+        "date_of_birth": "2000-01-01",
+        "good_boy": False,
     }
 
 
 @pytest.fixture
 def cat_dict():
     return {
-        'name': 'Garfield',
-        'pet_type': 'CAT',
-        'date_of_birth': '2000-01-01',
-        'good_boy': True,
+        "name": "Garfield",
+        "pet_type": "CAT",
+        "date_of_birth": "2000-01-01",
+        "good_boy": True,
     }
 
 
 @pytest.fixture
 def invalid_pet_dict():
     return {
-        'name': 'Clifford',
-        'pet_type': 'DOG',
-        'date_of_birth': '2002-01-01',
-        'good_boy': True,
-        'weight': -12.9,
+        "name": "Clifford",
+        "pet_type": "DOG",
+        "date_of_birth": "2002-01-01",
+        "good_boy": True,
+        "weight": -12.9,
     }
 
 
 @pytest.fixture
 def auth_path():
-    return '/auth/login'
+    return "/auth/login"
 
 
 @pytest.fixture
@@ -150,11 +155,11 @@ def test_user(user_credentials) -> dict[str, Any]:
     return dict(
         username=user_credentials.username,
         password=user_credentials.password,
-        groups=['test_group'],
+        groups=["test_group"],
     )
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 def psql_database() -> Generator[SqlAlchemyDatabase, None, None]:
     db = SqlAlchemyDatabase(
         host=os.getenv("TEST_PSQL_HOST", "127.0.0.1"),
