@@ -118,7 +118,7 @@ deps =
 commands =
     pytest {posargs}
 pass_env =
-    CI
+    GITHUB_ACTIONS
     TEST_PSQL_HOST
     TEST_PSQL_PORT
     TEST_PSQL_USERNAME
