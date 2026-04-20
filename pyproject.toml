@@ -138,7 +138,7 @@ omit = [
 [tool.black]
 line-length = 79
 skip-string-normalization = true
-target-version = ['py311', 'py312', 'py313']
+target-version = ['py311', 'py312', 'py313', 'py314']
 
 [tool.isort]
 py_version = 311

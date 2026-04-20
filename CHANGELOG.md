@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-04-21
+
+### Added
+
+- `to_dict` method to Group model for easier serialization of Group objects.
+- `to_dict` method to User model for easier serialization of User objects.
+- Compatibility for Sequece and Mapping types to the GenericTypeFactory class to allow for more flexible type handling in the factories.
+- OpenAPI python-flask controller template:
+    - Support for file uploads by using the `x-alpha-filelist` parameterin the requestBody of the OpenAPI spec.
+    - Support for debug logging of the request parameters and body when the logging level is set to DEBUG.
+    - Support for debug logging of the response body when the logging level is set to DEBUG and `x-alpha-debug-response` parameter is set to `true` in the OpenAPI spec.
+    - Support for a custom function by using the `x-alpha-custom-function` parameter. Only when not using the `x-alpha-service-name` parameter.
+    - Support for using `x-alpha-cookie-support` when not returning data (204 status code). In this case, the response object will be created with the `create_response_object` function which supports setting and deleting cookies in the response. This can be used for example for a logout endpoint which needs to delete the authentication cookies.
+    - Extended exception handling to also catch 405, 501, 502, 503 and 504 status codes and return a proper response with the correct status code and error message.
+- Additional unit and integration tests for the API templates and the generated code.
+- Support for python 3.14 by patching an issue with the `ast` library. This allows the generated API code to be compatible with python 3.14.
+
+### Changed
+
+- controller template only adds inject decorator if there are actually dependencies to inject.
+- Removed dependencies for the generated API library. The dependencies are managed separately by the alpha library by specifying the `flask` extra for the `python-flask` generator.
+- `logout` method of the AuthenticationService class now also deletes the refresh token cookie if it exists.
+- The tests run for each supported python version with tox instead of only one version. This allows for better testing of the compatibility of the library with different python versions.
+
+### Fixed
+
+- OpenAPI python-flask model template created models which were unable to be instantiated without passing all parameters as arguments. This has been fixed by renaming the class variables to have a leading underscore.
+- `update_user` & `update_group` methods in the UserLifecycleManagement service were not correctly updating the user and group objects in the database. The update logic has been fixed and now properly updates the user and group objects in the database.
+
+
+
 ## [0.5.1] - 2026-04-16
 
 ### Added
