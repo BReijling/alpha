@@ -6,7 +6,7 @@
 """
 
 import datetime
-from typing import Any, Iterable, Sequence
+from typing import Any, Iterable
 
 import pandas as pd
 

@@ -8,12 +8,10 @@ from alpha.providers.database_provider import DatabaseProvider
 from .models import TestGroup
 from .models import TestUser
 from .models import TestToken
-from alpha.infra.connectors.ldap_connector import LDAPConnector
 from alpha.factories.jwt_factory import JWTFactory
 from alpha.infra.databases.sql_alchemy import SqlAlchemyDatabase
 from alpha.interfaces.sql_repository import SqlRepository
 from alpha.interfaces.token_factory import TokenFactory
-from alpha.providers.ldap_provider import LDAPProvider
 from alpha.repositories.models.repository_model import RepositoryModel
 from alpha.repositories.sql_alchemy_repository import SqlAlchemyRepository
 from alpha.services.authentication_service import AuthenticationService
@@ -135,43 +133,43 @@ def init_container():
 
     container.config.from_dict(
         {
-            'database': {
-                'host': os.getenv("TEST_PSQL_HOST", "127.0.0.1"),
-                'port': int(os.getenv("TEST_PSQL_PORT", "5432")),
-                'username': os.getenv("TEST_PSQL_USERNAME", "postgres"),
-                'password': os.getenv("TEST_PSQL_PASSWORD", "postgres"),
-                'db_name': os.getenv("TEST_PSQL_DB_NAME", "postgres"),
-                'db_type': os.getenv("TEST_PSQL_DB_TYPE", "postgresql"),
+            "database": {
+                "host": os.getenv("TEST_PSQL_HOST", "127.0.0.1"),
+                "port": int(os.getenv("TEST_PSQL_PORT", "5432")),
+                "username": os.getenv("TEST_PSQL_USERNAME", "postgres"),
+                "password": os.getenv("TEST_PSQL_PASSWORD", "postgres"),
+                "db_name": os.getenv("TEST_PSQL_DB_NAME", "postgres"),
+                "db_type": os.getenv("TEST_PSQL_DB_TYPE", "postgresql"),
             },
-            'ldap': {
-                'server_url': os.getenv(
+            "ldap": {
+                "server_url": os.getenv(
                     "TEST_LDAP_SERVER_URL", "ldap://localhost"
                 ),
-                'server_port': int(os.getenv("TEST_LDAP_SERVER_PORT", "389")),
-                'use_tls': False,
-                'bind_dn': os.getenv(
+                "server_port": int(os.getenv("TEST_LDAP_SERVER_PORT", "389")),
+                "use_tls": False,
+                "bind_dn": os.getenv(
                     "TEST_LDAP_SERVER_BIND_DN", "cn=admin,dc=example,dc=org"
                 ),
-                'bind_password': os.getenv(
+                "bind_password": os.getenv(
                     "TEST_LDAP_SERVER_BIND_PASSWORD", "test_password"
                 ),
-                'search_base': os.getenv(
+                "search_base": os.getenv(
                     "TEST_LDAP_SERVER_SEARCH_BASE", "dc=example,dc=org"
                 ),
             },
-            'authentication': {
-                'use_cookies': True,
-                'use_refresh_tokens': True,
-                'cookie_path': '/',
-                'static_user': {
-                    'username': os.getenv(
+            "authentication": {
+                "use_cookies": True,
+                "use_refresh_tokens": True,
+                "cookie_path": "/",
+                "static_user": {
+                    "username": os.getenv(
                         "TEST_STATIC_USER_USERNAME", "admin"
                     ),
-                    'password': os.getenv(
+                    "password": os.getenv(
                         "TEST_STATIC_USER_PASSWORD", "admin123"
                     ),
-                    'role': os.getenv("TEST_STATIC_USER_ROLE", "ADMIN"),
-                    'permissions': [
+                    "role": os.getenv("TEST_STATIC_USER_ROLE", "ADMIN"),
+                    "permissions": [
                         "CREATE",
                         "READ",
                         "UPDATE",
@@ -180,18 +178,18 @@ def init_container():
                         "MANAGE_SETTINGS",
                         "ALL",
                     ],
-                    'admin': True,
+                    "admin": True,
                 },
             },
-            'cors': {
-                'origins': ["*"],
+            "cors": {
+                "origins": ["*"],
             },
-            'jwt': {
-                'secret': 'supersecretkey0123456789',
-                'lifetime_hours': 1,
+            "jwt": {
+                "secret": "supersecretkey0123456789",
+                "lifetime_hours": 1,
             },
-            'logging': {
-                'level': 'DEBUG',
+            "logging": {
+                "level": "DEBUG",
             },
         }
     )

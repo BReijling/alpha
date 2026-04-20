@@ -31,9 +31,6 @@ class TestGroup(LifeCycleBase, BaseDomainModel):
         obj
             Group object to update from.
         """
-        if not isinstance(obj, Group):
-            raise TypeError("Group.update expects a Group instance.")
-
         self.name = obj.name
         self.description = obj.description
         self.permissions = obj.permissions
@@ -110,10 +107,10 @@ class TestToken(BaseDomainModel):
         return self.value
 
     def __repr__(self) -> str:
-        return f"Token(value='<redacted>', token_type='{self.token_type}')"
+        return f"TestToken(value='<redacted>', token_type='{self.token_type}')"
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "Token":
+    def from_dict(cls, data: dict[str, Any]) -> "TestToken":
         return cls(
             id=UUID(data["id"]) if data.get("id") else None,
             value=data["value"],
