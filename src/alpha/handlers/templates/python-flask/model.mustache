@@ -18,6 +18,7 @@ from {{packageName}} import util
 {{#imports}}
 {{{import}}}  # noqa: E501
 {{/imports}}
+file = bytes
 
 {{#models}}
 {{#model}}
@@ -39,7 +40,12 @@ class {{classname}}(Model):
 
     openapi_types = {
 {{#vars}}
+{{^isBinary}}
         '{{name}}': {{dataType}}{{^-last}},{{/-last}}
+{{/isBinary}}
+{{#isBinary}}
+        '{{name}}': bytes{{^-last}},{{/-last}}
+{{/isBinary}}
 {{/vars}}
     }
 
@@ -59,7 +65,7 @@ class {{classname}}(Model):
         """
 {{#vars}}{{#-first}}
 {{/-first}}
-        self.{{name}} = {{name}}
+        self._{{name}} = {{name}}
 {{/vars}}
 
     @classmethod

@@ -19,6 +19,8 @@ class UserLifecycleManagement:
         uow: UnitOfWork,
         users_repository_name: str = "users",
         groups_repository_name: str = "groups",
+        user_model: type[User] = User,
+        group_model: type[Group] = Group,
         password_support: bool = False,
         password_factory: PasswordFactory | None = None,
         user_username_attribute: str = "username",
@@ -39,6 +41,10 @@ class UserLifecycleManagement:
             Name of the users repository, by default "users"
         groups_repository_name, optional
             Name of the groups repository, by default "groups"
+        user_model, optional
+            User model class, by default User
+        group_model, optional
+            Group model class, by default Group
         password_support, optional
             Whether password support is enabled, by default False
         password_factory, optional
@@ -52,6 +58,8 @@ class UserLifecycleManagement:
         self.uow = uow
         self._users_repository_name = users_repository_name
         self._groups_repository_name = groups_repository_name
+        self._user_model = user_model
+        self._group_model = group_model
         self._password_support = password_support
         self._password_factory = password_factory or PasswordFactory()
         self._user_username_attribute = user_username_attribute
@@ -73,6 +81,8 @@ class UserLifecycleManagement:
         -------
             Created user object
         """
+        user = self._user_model(**user.to_dict())
+
         if not hasattr(user, self._user_username_attribute) or not getattr(
             user, self._user_username_attribute
         ):
@@ -123,6 +133,8 @@ class UserLifecycleManagement:
         -------
             Created group object
         """
+        group = self._group_model(**group.to_dict())
+
         if identity:
             group.created_by = identity.username
 
@@ -281,13 +293,20 @@ class UserLifecycleManagement:
         -------
             Updated user object
         """
-        original_user = self.get_user(user_id=user_id)
+        user = self._user_model(**user.to_dict())
 
         with self.uow:
             users: SqlRepository[User] = getattr(
                 self.uow, self._users_repository_name
             )
-            updated_user = users.update(original_user, user)
+            original_user = users.get_by_id(user_id)
+
+            if not original_user:
+                raise NotFoundException(
+                    f"User with id '{user_id}' is not found"
+                )
+
+            updated_user = original_user.update(user)
             if identity:
                 updated_user.modified_by = identity.username
             self.uow.commit()
@@ -317,13 +336,20 @@ class UserLifecycleManagement:
         -------
             Updated group object
         """
-        original_group = self.get_group(group_id=group_id)
+        group = self._group_model(**group.to_dict())
 
         with self.uow:
             groups: SqlRepository[Group] = getattr(
                 self.uow, self._groups_repository_name
             )
-            updated_group = groups.update(original_group, group)
+            original_group = groups.get_by_id(group_id)
+
+            if not original_group:
+                raise NotFoundException(
+                    f"Group with id '{group_id}' is not found"
+                )
+
+            updated_group = original_group.update(group)
             if identity:
                 updated_group.modified_by = identity.username
             self.uow.commit()

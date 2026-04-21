@@ -106,3 +106,11 @@ class Headers:
     @property
     def has_api_key(self) -> bool:
         return True if self.api_key else False
+
+    def __repr__(self) -> str:
+        return (
+            f"Headers(auth_token={'***' if self.auth_token else None}, "
+            f"auth_token_type={self.auth_token_type}, "
+            f"refresh_token={'***' if self.refresh_token else None}, "
+            f"api_key={'***' if self.api_key else None})"
+        )

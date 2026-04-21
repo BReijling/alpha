@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Sequence, cast
+from typing import Any, Sequence, cast
 from uuid import UUID
 
 from alpha.domain.models.base_model import BaseDomainModel, DomainModel
@@ -14,6 +14,21 @@ class Group(LifeCycleBase, BaseDomainModel):
     description: str | None = None
     permissions: Sequence[str] | None = None
     is_active: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert the Group instance to a dictionary.
+
+        Returns
+        -------
+            A dictionary representation of the Group instance.
+        """
+        return {
+            "id": self.id,
+            "name": self.name,
+            "description": self.description,
+            "permissions": self.permissions,
+            "is_active": self.is_active,
+        }
 
     def update(self, obj: DomainModel) -> DomainModel:
         """Update the Group instance with data from another Group instance.

@@ -374,6 +374,16 @@ def jwt_factory():
 
 # LDAP fixtures
 @pytest.fixture
+def subject():
+    return "jdoe"
+
+
+@pytest.fixture
+def credentials(subject):
+    return PasswordCredentials(username=subject, password="test123")
+
+
+@pytest.fixture
 def ldap_server() -> LDAPConnector:
     return LDAPConnector(
         server_url=os.getenv("TEST_LDAP_SERVER_URL", "ldap://localhost"),
@@ -398,16 +408,6 @@ def ldap_provider(
         search_filter_key="uid",
         search_base="ou=users,dc=example,dc=org",
     )
-
-
-@pytest.fixture
-def subject():
-    return "jdoe"
-
-
-@pytest.fixture
-def credentials(subject):
-    return PasswordCredentials(username=subject, password="test123")
 
 
 @pytest.fixture

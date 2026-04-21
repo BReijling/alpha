@@ -1,4 +1,5 @@
 import connexion
+import json
 import six
 import traceback
 import logging
@@ -10,6 +11,8 @@ from typing import List
 {{containerImport}}
 from alpha.factories.request_factory import RequestFactory
 from alpha.factories.response_factory import ResponseFactory
+from alpha.encoder import JSONEncoder
+from alpha.utils.logging_level_checker import logging_level_checker
 from alpha.utils.response_object import create_response_object
 from alpha.utils.request_headers import Headers
 from alpha.utils.verify_identity import verify_identity
@@ -19,11 +22,17 @@ from alpha.exceptions import (
     UnauthorizedException,
     ForbiddenException,
     NotFoundException,
+    MethodNotAllowedException,
     NotAcceptableException,
     ConflictException,
     PayloadTooLargeException,
     UnprocessableContentException,
-    ServerErrorException
+    ServerErrorException,
+    InternalServerErrorException,
+    NotImplementedException,
+    BadGatewayException,
+    ServiceUnavailableException,
+    GatewayTimeoutException
 )
 from dependency_injector.wiring import inject, Provide
 
@@ -34,7 +43,9 @@ from {{packageName}} import models as api_models
 
 {{#operations}}
 {{#operation}}
-@inject
+{{#authMethods}}{{#vendorExtensions.x-alpha-service-name}}@inject{{/vendorExtensions.x-alpha-service-name}}{{/authMethods}}
+{{^authMethods}}{{#vendorExtensions.x-alpha-service-name}}@inject{{/vendorExtensions.x-alpha-service-name}}{{/authMethods}}
+{{#authMethods}}{{^vendorExtensions.x-alpha-service-name}}@inject{{/vendorExtensions.x-alpha-service-name}}{{/authMethods}}
 def {{operationId}}(
     {{#allParams}}{{^isBodyParam}}{{paramName}}{{^required}}=None{{/required}},{{/isBodyParam}}{{/allParams}}
     {{#authMethods}}{{#isBasicBearer}}token_factory=Provide[Container.token_factory],{{/isBasicBearer}}{{/authMethods}}
@@ -103,8 +114,17 @@ def {{operationId}}(
             {{^isPrimitiveType}}
                 {{^isFile}}
                     {{^isUuid}}
+                        {{^vendorExtensions.x-alpha-filelist}}
     if connexion.request.is_json:
         {{paramName}} = {{baseType}}{{^baseType}}{{#dataType}} {{.}}{{/dataType}}{{/baseType}}.from_dict(connexion.request.get_json())  # noqa: E501
+                        {{/vendorExtensions.x-alpha-filelist}}
+                        {{#vendorExtensions.x-alpha-filelist}}
+    if connexion.request.files:
+        {{paramName}} = []
+        for file_list in connexion.request.files:
+            for f in connexion.request.files.getlist(file_list):
+                {{paramName}}.append(f)
+                        {{/vendorExtensions.x-alpha-filelist}}
                     {{/isUuid}}
                 {{/isFile}}
             {{/isPrimitiveType}}
@@ -145,11 +165,54 @@ def {{operationId}}(
             {{response}}
         {{/isContainer}}
     {{/allParams}}
+
+    if logging_level_checker("debug"):
+        payload = json.dumps(
+            dict(
+                {{#allParams}}
+                {{#vendorExtensions.x-alpha-filelist}}
+                {{paramName}}="binary-file-object",
+                {{/vendorExtensions.x-alpha-filelist}}
+                {{^vendorExtensions.x-alpha-filelist}}
+                {{^isBinary}}
+                {{#isBodyParam}}
+                {{^isArray}}
+                {{paramName}}={{paramName}}.to_dict(),
+                {{/isArray}}
+                {{#isArray}}
+                {{paramName}}=[obj.to_dict() for obj in {{paramName}}],
+                {{/isArray}}
+                {{/isBodyParam}}
+                {{^isBodyParam}}
+                {{paramName}}={{paramName}},
+                {{/isBodyParam}}
+                {{/isBinary}}
+                {{/vendorExtensions.x-alpha-filelist}}
+                {{/allParams}}
+            ),
+            cls=JSONEncoder
+        )
+        logging.debug(f"using these parameters: {payload}")
+
     headers = Headers.from_headers(connexion.request.headers)
 
     auth_token = headers.auth_token if headers.has_auth_token else None
     refresh_token = headers.refresh_token
     api_key = headers.api_key
+
+    {{#vendorExtensions.x-alpha-factory}}
+    factory = {{vendorExtensions.x-alpha-factory}}
+    {{#allParams}}
+    {{#isBodyParam}}
+    {{^isArray}}
+    {{paramName}} = factory(**{{paramName}}.to_dict())
+    {{/isArray}}
+    {{#isArray}}
+    {{paramName}} = [factory(**obj.to_dict()) for obj in {{paramName}}]
+    {{/isArray}}
+    {{/isBodyParam}}
+    {{/allParams}}
+    {{/vendorExtensions.x-alpha-factory}}
 
     try:
         # Objects used for authorization
@@ -161,9 +224,9 @@ def {{operationId}}(
         # Validate authentication token
         if auth_token is None:
             raise UnauthorizedException('Missing authentication token')
-        
         token_factory.validate(auth_token)
 
+        # Get auth token payload and verify identity
         identity = token_factory.get_payload(auth_token)
         verify_identity(identity,
             roles=roles,
@@ -175,6 +238,7 @@ def {{operationId}}(
         # This needs to be replaced by code to authenticate with an API key
         {{/isApiKey}}
         {{/authMethods}}
+        
         # Call method or use variable
         {{#vendorExtensions.x-alpha-request-factory}}
             {{#vendorExtensions.x-alpha-service-name}}
@@ -189,21 +253,25 @@ def {{operationId}}(
                 {{/vendorExtensions.x-alpha-service-method}}
             {{/vendorExtensions.x-alpha-service-name}}
             {{^vendorExtensions.x-alpha-service-name}}
-                {{#vendorExtensions.x-alpha-custom-response}}
-        result = {{vendorExtensions.x-alpha-custom-response}}
-                {{/vendorExtensions.x-alpha-custom-response}}
+                {{#vendorExtensions.x-alpha-custom-function}}
+        result = {{vendorExtensions.x-alpha-custom-function}}
+                {{/vendorExtensions.x-alpha-custom-function}}
             {{/vendorExtensions.x-alpha-service-name}}
         {{/vendorExtensions.x-alpha-request-factory}}
+
         {{^vendorExtensions.x-alpha-request-factory}}
             {{^vendorExtensions.x-alpha-service-name}}
-                {{^vendorExtensions.x-alpha-custom-response}}
+                {{^vendorExtensions.x-alpha-custom-function}}
         raise ServerErrorException('Missing x-alpha-service-name in API specification')
-                {{/vendorExtensions.x-alpha-custom-response}}
+                {{/vendorExtensions.x-alpha-custom-function}}
                 {{^vendorExtensions.x-alpha-service-method}}
-                    {{^vendorExtensions.x-alpha-custom-response}}
+                    {{^vendorExtensions.x-alpha-custom-function}}
         raise ServerErrorException('Missing x-alpha-service-method in API specification')
-                    {{/vendorExtensions.x-alpha-custom-response}}
+                    {{/vendorExtensions.x-alpha-custom-function}}
                 {{/vendorExtensions.x-alpha-service-method}}
+                {{#vendorExtensions.x-alpha-custom-function}}
+        result = {{vendorExtensions.x-alpha-custom-function}}
+                {{/vendorExtensions.x-alpha-custom-function}}
             {{/vendorExtensions.x-alpha-service-name}}
             {{#vendorExtensions.x-alpha-service-name}}
                 {{#vendorExtensions.x-alpha-service-method}}
@@ -213,11 +281,6 @@ def {{operationId}}(
         )
                 {{/vendorExtensions.x-alpha-service-method}}
             {{/vendorExtensions.x-alpha-service-name}}
-            {{^vendorExtensions.x-alpha-service-name}}
-                {{#vendorExtensions.x-alpha-custom-response}}
-        result = {{vendorExtensions.x-alpha-custom-response}}
-                {{/vendorExtensions.x-alpha-custom-response}}
-            {{/vendorExtensions.x-alpha-service-name}}
         {{/vendorExtensions.x-alpha-request-factory}}
     
     {{#responses}}
@@ -226,6 +289,12 @@ def {{operationId}}(
         return result
         {{/vendorExtensions.x-alpha-raw-response}}
         {{^vendorExtensions.x-alpha-raw-response}}
+        {{#vendorExtensions.x-alpha-debug-response}}
+
+        if logging_level_checker("debug"):
+            logging.debug(f"returning response: {json.dumps(result, cls=JSONEncoder)}")
+
+        {{/vendorExtensions.x-alpha-debug-response}}
         {{#returnType}}
         {{#vendorExtensions.x-alpha-response-factory}}
         result = ResponseFactory().process(
@@ -248,6 +317,7 @@ def {{operationId}}(
             http_codes=http_codes,
             status_code=204,
             status_message='{{message}}',
+            {{#vendorExtensions.x-alpha-cookie-support}}data=result, response_type='flask'{{/vendorExtensions.x-alpha-cookie-support}}
         )
         {{/returnType}}
         {{/vendorExtensions.x-alpha-raw-response}}
@@ -298,6 +368,12 @@ def {{operationId}}(
             status_code=404,
             status_message=f'{exc}'
         )
+    except MethodNotAllowedException as exc:
+        return create_response_object(
+            http_codes=http_codes,
+            status_code=405,
+            status_message=f'{exc}'
+        )
     except NotAcceptableException as exc:
         return create_response_object(
             http_codes=http_codes,
@@ -320,6 +396,30 @@ def {{operationId}}(
         return create_response_object(
             http_codes=http_codes,
             status_code=422,
+            status_message=f'{exc}'
+        )
+    except NotImplementedException as exc:
+        return create_response_object(
+            http_codes=http_codes,
+            status_code=501,
+            status_message=f'{exc}'
+        )
+    except BadGatewayException as exc:
+        return create_response_object(
+            http_codes=http_codes,
+            status_code=502,
+            status_message=f'{exc}'
+        )
+    except ServiceUnavailableException as exc:
+        return create_response_object(
+            http_codes=http_codes,
+            status_code=503,
+            status_message=f'{exc}'
+        )
+    except GatewayTimeoutException as exc:
+        return create_response_object(
+            http_codes=http_codes,
+            status_code=504,
             status_message=f'{exc}'
         )
     except ServerErrorException as exc:

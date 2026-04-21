@@ -151,3 +151,27 @@ if _LDAP_AVAILABLE:
             "ADProvider",
         ]
     )
+
+
+def _ensure_ast_str_compat() -> None:
+    """Provide ast.Str compatibility for Python 3.14+.
+
+    Older Werkzeug versions (used by Flask 1.x) still instantiate ast.Str.
+    Python 3.14 removed that alias, so we recreate it with ast.Constant.
+    """
+    if hasattr(ast, "Str"):
+        return
+
+    class _StrCompat(ast.Constant):
+        def __new__(cls, s: str = "", **kwargs):  # noqa: N804
+            return ast.Constant(value=s, **kwargs)
+
+    setattr(ast, "Str", _StrCompat)
+
+
+try:
+    import ast
+
+    _ensure_ast_str_compat()
+except ImportError:
+    pass

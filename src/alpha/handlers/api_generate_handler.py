@@ -27,7 +27,7 @@ class ApiGenerateHandler(BaseHandler):
                 "- uv add --dev alpha-python --extra api-generator"
             )
             exit(1)
-        
+
         self.spec_file = None
         self.api_package = None
         self.service_package = None
@@ -36,7 +36,6 @@ class ApiGenerateHandler(BaseHandler):
         self.init_container_function = None
         self.post_process_file = None
         self.no_watch = False
-        self.no_docker = False
         self.permissions_only = False
         self.templates_only = False
         self.templates_folder = 'templates'

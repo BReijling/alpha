@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from enum import Enum, auto
 import json
 from typing import Any, Callable
+from types import SimpleNamespace
 
 import pytest
 from alpha.domain.models.base_model import BaseDomainModel
@@ -13,6 +14,9 @@ from alpha.factories.jwt_factory import JWTFactory
 from alpha.factories.password_factory import PasswordFactory
 from alpha.factories.request_factory import RequestFactory
 from alpha.factories.response_factory import ResponseFactory
+from alpha.handlers.models.argument import Argument
+from alpha.handlers.models.command import Command
+from alpha.handlers.models.section import Section
 from alpha.providers.models.identity import Identity
 from tests.fixtures._api_classes import ApiTrack
 from tests.fixtures.fake_factory_classes import FakeTypeFactory
@@ -248,3 +252,75 @@ def jwt_factory_factory() -> Callable[[str, str, int], JWTFactory]:
         )
 
     return factory
+
+
+# CLI fixtures
+class FakeHandler:
+    def __init__(self) -> None:
+        self.kwargs = None
+        self.called = False
+
+    def set_arguments(self, **kwargs) -> None:
+        self.kwargs = kwargs
+
+    def handle_command(self) -> None:
+        self.called = True
+
+
+class ConfigField:
+    def __init__(self) -> None:
+        self.value = None
+
+    def from_value(self, value) -> None:
+        self.value = value
+
+
+class FakeContainer:
+    def __init__(self) -> None:
+        self.config = SimpleNamespace(
+            api_package_name=ConfigField(),
+            service_package_name=ConfigField(),
+            container_import=ConfigField(),
+            init_container_from=ConfigField(),
+            init_container_function=ConfigField(),
+        )
+        self.wire_called_with = None
+
+    def wire(self, modules) -> None:
+        self.wire_called_with = modules
+
+
+@pytest.fixture
+def fake_handler():
+    return FakeHandler()
+
+
+@pytest.fixture
+def fake_container():
+    return FakeContainer()
+
+
+@pytest.fixture
+def sections(fake_handler: FakeHandler) -> list[Section]:
+    return [
+        Section(
+            name="api",
+            help="API commands",
+            description="API commands",
+            commands=[
+                Command(
+                    name="gen",
+                    help="Generate API",
+                    handler=fake_handler,
+                    arguments=[
+                        Argument(
+                            name="--spec-file",
+                            help="Spec file path",
+                            args={"type": str, "nargs": "?"},
+                            default="specification/openapi.yaml",
+                        )
+                    ],
+                )
+            ],
+        )
+    ]

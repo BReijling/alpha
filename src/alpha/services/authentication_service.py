@@ -46,6 +46,9 @@ class AuthenticationService:
         user_username_attribute: str = "username",
         group_name_attribute: str = "name",
         uow: UnitOfWork | None = None,
+        user_model: type[User] = User,
+        group_model: type[Group] = Group,
+        token_model: type[Token] = Token,
         users_repository_name: str = "users",
         groups_repository_name: str = "groups",
         refresh_token_storage: Literal[
@@ -114,6 +117,12 @@ class AuthenticationService:
             identifier, by default "name"
         uow, optional
             UnitOfWork instance for database operations, by default None
+        user_model, optional
+            User model class to use for database operations, by default User
+        group_model, optional
+            Group model class to use for database operations, by default Group
+        token_model, optional
+            Token model class to use for database operations, by default Token
         users_repository_name, optional
             Name of the user repository in the UnitOfWork, by default "users"
         groups_repository_name, optional
@@ -179,6 +188,9 @@ class AuthenticationService:
         self._user_username_attribute = user_username_attribute
         self._group_name_attribute = group_name_attribute
         self.uow = uow
+        self._user_model = user_model
+        self._group_model = group_model
+        self._token_model = token_model
         self._users_repository_name = users_repository_name
         self._groups_repository_name = groups_repository_name
         self._refresh_token_storage = refresh_token_storage
@@ -266,13 +278,16 @@ class AuthenticationService:
         )
         return auth_cookie, refresh_cookie, str(token)
 
-    def logout(self, token: str) -> tuple[Cookie, str]:
+    def logout(
+        self, refresh_token: str | None = None
+    ) -> tuple[Cookie, str] | tuple[Cookie, Cookie, str]:
         """Logout a user by invalidating their token.
 
         Parameters
         ----------
-        token
-            Authentication token.
+        refresh_token, optional
+            Optional refresh token to invalidate along with the authentication
+            token. This is only applicable if using refresh tokens.
 
         Returns
         -------
@@ -285,12 +300,29 @@ class AuthenticationService:
             If token invalidation is not implemented for non-cookie
             authentication.
         """
-        if self._use_cookies:
-            return self._create_logout_cookie(), "Logout successful"
+        if not self._use_cookies:
+            raise NotImplementedError(
+                "Token invalidation is not implemented for non-cookie "
+                "authentication"
+            )
 
-        raise NotImplementedError(
-            "Token invalidation is not implemented for non-cookie"
-            " authentication"
+        logout_auth_cookie = self._create_logout_cookie(
+            self._cookie_auth_token_name
+        )
+        if not self._use_refresh_tokens:
+            return logout_auth_cookie, "Logout successful"
+
+        logout_refresh_cookie = self._create_logout_cookie(
+            self._cookie_refresh_token_name
+        )
+
+        if refresh_token:
+            self._delete_refresh_token(refresh_token)
+
+        return (
+            logout_auth_cookie,
+            logout_refresh_cookie,
+            "Logout successful",
         )
 
     def verify(self, token: str) -> Identity:
@@ -483,7 +515,7 @@ class AuthenticationService:
 
             else:
                 # Create new user from identity if not found in database
-                user = User.from_identity(identity)
+                user = self._user_model.from_identity(identity)
                 users.add(user)
                 self.uow.commit()
 
@@ -514,7 +546,7 @@ class AuthenticationService:
 
             groups = list(identity.groups)
             for i, group in enumerate(groups):
-                if isinstance(group, Group):
+                if isinstance(group, self._group_model):
                     groups[i] = getattr(group, self._group_name_attribute)
 
             filters = [
@@ -570,7 +602,7 @@ class AuthenticationService:
         -------
             Token object representing the refresh token.
         """
-        token = Token(
+        token = self._token_model(
             value=generate_secret(self._refresh_token_length),
             token_type="Refresh",
             subject=subject,
@@ -601,6 +633,36 @@ class AuthenticationService:
             )
 
         return token
+
+    def _delete_refresh_token(self, refresh_token: str) -> None:
+        """Delete a refresh token from the configured storage mechanism.
+
+        Parameters
+        ----------
+        refresh_token
+            The refresh token to delete.
+        """
+        if self._refresh_token_storage == "database":
+            self._delete_refresh_token_from_database(refresh_token)
+
+        elif self._refresh_token_storage == "file":
+            self._delete_refresh_token_from_file(refresh_token)
+
+        elif self._refresh_token_storage == "memory":
+            self._delete_refresh_token_from_memory(refresh_token)
+
+        elif self._refresh_token_storage == "cache":
+            # Implement cache deletion for refresh tokens if needed
+            raise NotImplementedError(
+                "Cache refresh token storage is not implemented yet"
+            )
+
+        else:
+            raise exceptions.InvalidAttributeError(
+                "Invalid refresh token storage mechanism. Configured storage "
+                "mechanism is not supported. Check the configuration of the "
+                "AuthenticationService."
+            )
 
     def _store_refresh_token_to_database(self, token: Token) -> Token:
         """Store a refresh token in the database.
@@ -670,15 +732,85 @@ class AuthenticationService:
         """
         self._in_memory_refresh_tokens[token.value] = token
 
-    def _create_logout_cookie(self) -> Cookie:
+    def _delete_refresh_token_from_database(self, refresh_token: str) -> None:
+        """Delete a refresh token from the database.
+
+        Parameters
+        ----------
+        refresh_token
+            The refresh token string to delete.
+
+        Raises
+        ------
+        exceptions.MissingDependencyException
+            If the UnitOfWork is not configured for the AuthenticationService.
+        """
+        if self.uow is None:
+            self._raise_no_uow()
+
+        with self.uow:
+            refresh_tokens: SqlRepository[Token] = getattr(
+                self.uow, self._refresh_token_repository_name
+            )
+            token = refresh_tokens.get_one_or_none(
+                attr="value", value=refresh_token
+            )
+            if token:
+                refresh_tokens.remove(token)
+                self.uow.commit()
+
+    def _delete_refresh_token_from_file(self, refresh_token: str) -> None:
+        """Delete a refresh token from a file.
+
+        Parameters
+        ----------
+        refresh_token
+            The refresh token string to delete.
+
+        Raises
+        ------
+        exceptions.ServerErrorException
+            If the refresh token storage file is not found.
+        """
+        if not os.path.exists(self._refresh_token_storage_file_path):
+            raise exceptions.ServerErrorException(
+                "Refresh token storage file not found"
+            )
+
+        with open(self._refresh_token_storage_file_path, "r") as f:
+            tokens_data = json.load(f)
+
+        if refresh_token in tokens_data:
+            del tokens_data[refresh_token]
+
+            with open(self._refresh_token_storage_file_path, "w") as f:
+                json.dump(tokens_data, f, indent=4)
+
+    def _delete_refresh_token_from_memory(self, refresh_token: str) -> None:
+        """Delete a refresh token from in-memory storage.
+
+        Parameters
+        ----------
+        refresh_token
+            The refresh token string to delete.
+        """
+        if refresh_token in self._in_memory_refresh_tokens:
+            del self._in_memory_refresh_tokens[refresh_token]
+
+    def _create_logout_cookie(self, cookie_name: str) -> Cookie:
         """Create a cookie to clear the authentication cookie on logout.
+
+        Parameters
+        ----------
+        cookie_name
+            The name of the cookie to clear.
 
         Returns
         -------
             Cookie object representing the logout cookie.
         """
         return Cookie(
-            key=self._cookie_auth_token_name,
+            key=cookie_name,
             operation="delete",
             path=self._cookie_path,
             domain=self._cookie_domain,

@@ -1,6 +1,7 @@
 import pytest
 
 from alpha.services.models.cookie import Cookie
+from alpha.utils.request_headers import Headers
 
 
 @pytest.fixture
@@ -23,4 +24,14 @@ def example_delete_cookie():
         key="test_cookie1",
         operation="delete",
         path="/",
+    )
+
+
+@pytest.fixture
+def headers() -> Headers:
+    return Headers(
+        auth_token="cookie_auth123",
+        auth_token_type="Bearer",
+        refresh_token="cookie_refresh123",
+        api_key="cookie_apikey123",
     )

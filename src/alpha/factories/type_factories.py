@@ -6,7 +6,7 @@
 """
 
 import datetime
-from typing import Any, Iterable
+from typing import Any, Iterable, get_origin
 
 import pandas as pd
 
@@ -50,12 +50,22 @@ class GenericTypeFactory:
         """
         from_type: Any = type(value)
 
+        # Handle the case where cls is a Sequence or Mapping, since these are
+        # not real types and cannot be used for lookup in the conversion matrix
+        cls_origin = get_origin(cls)
+        if cls_origin is not None:
+            cls = cls_origin
+        if cls.__name__ == "Sequence":
+            cls = list
+        if cls.__name__ == "Mapping":
+            cls = dict
+
         try:
             allowed: bool = TYPE_CONVERSION_MATRIX[from_type][cls]
         except KeyError as exc:
             raise exceptions.ObjectConversionNotSupported(
                 "Unable to convert an object, because the source "
-                f" ({from_type.__name__}) or target ({cls.__name__}) type "
+                f"({from_type.__name__}) or target ({cls.__name__}) type "
                 "is not supported"
             ) from exc
 

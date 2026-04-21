@@ -1,0 +1,1251 @@
+openapi: 3.0.0
+info:
+  title: alpha-test-api
+  description: "This is an API specification for testing the OpenAPI specification parser"
+  version: 0.0.1
+  contact:
+    name: Bart Reijling
+    email: bart@reijling.eu
+servers:
+  - url: http://localhost:8080
+    description: local server used for testing
+paths:
+  /:
+    get:
+      description: Use the hello method to return the example string
+      operationId: hello
+      tags:
+        - Test
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: API is running
+      x-alpha-import:
+        - from alpha.utils.openapi_test.service import TestService
+      x-alpha-custom-function: TestService.hello()
+      x-alpha-service-method: hello
+  /raw_response:
+    get:
+      description: |
+        This endpoint is intended to check:
+          - If the 'x-alpha-custom-function' value is used to bypass all code
+          - If the 'x-alpha-raw-response' extension is used to return a raw response
+      operationId: raw_response
+      tags:
+        - Test
+      responses:
+        "200":
+          description: OK
+          x-alpha-raw-response: true
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "123"
+      x-alpha-custom-function: str(123)
+  /verify_string/{obj}:
+    get:
+      description: |
+        This endpoint is intended to check:
+          - If the minLength of a string is checked
+          - If the maxLength of a string is checked
+          - If the pattern of a string is checked
+          - If the 'x-alpha-custom-function' value is used to bypass all code
+      operationId: verify_string
+      tags:
+        - Test
+      parameters:
+        - name: obj
+          in: path
+          schema:
+            type: string
+            minLength: 5
+            maxLength: 5
+            pattern: "^[A-Z]*$"
+            example: "ALPHA"
+          required: true
+      responses:
+        "204":
+          description: Accepted
+      x-alpha-custom-function: None
+  /is_date/{obj}:
+    get:
+      description: |
+        This endpoint is intended to check:
+          - if a date parameter will be parsed correctly
+      operationId: is_date
+      tags:
+        - Test
+      parameters:
+        - name: obj
+          in: path
+          schema:
+            type: string
+            format: date
+            example: "2000-01-01"
+          required: true
+      responses:
+        "200":
+          description: Success
+          content:
+            text/plain:
+              schema:
+                type: boolean
+      x-alpha-service-name: test_service
+      x-alpha-service-method: is_date
+  /is_datetime/{obj}:
+    get:
+      description: |
+        This endpoint is intended to check:
+          - if a date-time parameter will be parsed correctly
+      operationId: is_datetime
+      tags:
+        - Test
+      parameters:
+        - name: obj
+          in: path
+          schema:
+            type: string
+            format: date-time
+            example: "2000-01-01T01:01:01Z"
+          required: true
+      responses:
+        "200":
+          description: Success
+          content:
+            text/plain:
+              schema:
+                type: boolean
+      x-alpha-service-name: test_service
+      x-alpha-service-method: is_datetime
+  /is_integer/{obj}:
+    get:
+      description: |
+        This endpoint is intended to check:
+          - if value will be parsed correctly into a integer object
+      operationId: is_integer
+      tags:
+        - Test
+      parameters:
+        - name: obj
+          in: path
+          schema:
+            type: integer
+            example: 1
+          required: true
+      responses:
+        "200":
+          description: Success
+          content:
+            text/plain:
+              schema:
+                type: boolean
+      x-alpha-service-name: test_service
+      x-alpha-service-method: is_integer
+  /is_float/{obj}:
+    get:
+      description: |
+        This endpoint is intended to check:
+          - if value will be parsed correctly into a float object
+      operationId: is_float
+      tags:
+        - Test
+      parameters:
+        - name: obj
+          in: path
+          schema:
+            type: number
+            example: 1
+          required: true
+      responses:
+        "200":
+          description: Success
+          content:
+            text/plain:
+              schema:
+                type: boolean
+      x-alpha-service-name: test_service
+      x-alpha-service-method: is_float
+  /is_array/{obj}:
+    get:
+      description: |
+        This endpoint is intended to check:
+          - if comma separated values will be parsed correctly into a list
+      operationId: is_array
+      tags:
+        - Test
+      parameters:
+        - name: obj
+          in: path
+          schema:
+            type: array
+            items:
+              type: integer
+            minItems: 2
+            maxItems: 3
+          required: true
+          example:
+            - 1
+            - 1
+            - 1
+      responses:
+        "200":
+          description: Success
+          content:
+            text/plain:
+              schema:
+                type: boolean
+        "400":
+          description: When the min or max amount of items is not respected
+      x-alpha-service-name: test_service
+      x-alpha-service-method: is_list
+  /check_datetime_tz_utc/{obj}:
+    get:
+      description: |
+        This endpoint is intended to check:
+          - if the timezone from a date-time parameter will be parsed correctly
+      operationId: check_datetime_tz_utc
+      tags:
+        - Test
+      parameters:
+        - name: obj
+          in: path
+          schema:
+            type: string
+            format: date-time
+            example: "2000-01-01T01:01:01Z"
+          required: true
+      responses:
+        "200":
+          description: Success
+          content:
+            text/plain:
+              schema:
+                type: boolean
+      x-alpha-service-name: test_service
+      x-alpha-service-method: check_datetime_tz_utc
+  /check_datetime_tz_offset/{obj}:
+    get:
+      description: |
+        This endpoint is intended to check:
+          - if the timezone from a date-time parameter will be parsed correctly
+      operationId: check_datetime_tz_offset
+      tags:
+        - Test
+      parameters:
+        - name: obj
+          in: path
+          schema:
+            type: string
+            format: date-time
+            example: "2000-01-01T01:01:01+02:00"
+          required: true
+      responses:
+        "200":
+          description: Success
+          content:
+            text/plain:
+              schema:
+                type: boolean
+      x-alpha-service-name: test_service
+      x-alpha-service-method: check_datetime_tz_offset
+  /dataclass/factory_response:
+    post:
+      description: |
+        This endpoint is intended to check/validate:
+          - The use of the `x-alpha-response-factory` vendor extension
+      operationId: response_model
+      tags:
+        - Test
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Pet"
+        required: true
+      responses:
+        "201":
+          description: Success
+          x-alpha-response-factory: api_models.Pet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResponsePet"
+      x-alpha-service-name: test_service
+      x-alpha-service-method: check_dataclass
+      x-alpha-import:
+        - from alpha.utils.openapi_test.service import Pet as PetModel
+      x-alpha-factory: PetModel.factory
+  /dataclass/factory:
+    post:
+      description: |
+        This endpoint is intended to check/validate:
+          - The use of the `x-alpha-factory` vendor extension
+      operationId: use_factory
+      tags:
+        - Test
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Pet"
+        required: true
+      responses:
+        "201":
+          description: Success
+          x-alpha-response-factory: api_models.Pet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+      x-alpha-service-name: test_service
+      x-alpha-service-method: check_dataclass
+      x-alpha-import:
+        - from alpha.utils.openapi_test.service import Pet as PetModel
+      x-alpha-factory: PetModel.factory
+  /dataclass/valid:
+    post:
+      description: |
+        This endpoint is intended to check/validate:
+          - if the Pet schema is used to validate the object in the requestBody
+          - if the request-factory is able to map the object to a Pet instance
+          - if the response object does not contain writeOnly keys
+          - if the response object will be logged when using 'x-alpha-debug-response'
+      operationId: dataclass_valid
+      tags:
+        - Test
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Pet"
+        required: true
+      responses:
+        "201":
+          description: Success
+          x-alpha-response-factory: api_models.Pet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+          x-alpha-debug-response: true
+      x-alpha-service-name: test_service
+      x-alpha-service-method: check_dataclass
+      x-alpha-request-factory: true
+  /dataclass/invalid:
+    post:
+      description: |
+        This endpoint is intended to check:
+          - if a 400 status code will be returned because a factory or
+            the default-factory has not been used to map the object to
+            a Pet instance
+          - if the exception defined in 'x-alpha-exception' will be raised when the validation fails
+      operationId: dataclass_invalid
+      tags:
+        - Test
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Pet"
+        required: true
+      responses:
+        "201":
+          description: Success
+          x-alpha-response-factory: api_models.Pet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+        "400":
+          description: Pet object is invalid
+          x-alpha-exception: InvalidInstance
+      x-alpha-import: from alpha.utils.openapi_test.exceptions import InvalidInstance
+      x-alpha-service-name: test_service
+      x-alpha-service-method: check_dataclass
+      x-alpha-request-factory: false
+  /dataclass/request_response_factory:
+    post:
+      description: |
+        This endpoint is intended to check/validate:
+          - if the request-factory is able to map the object to a Pet instance
+          - if the response-factory is able to map the Pet instance to a OpenApi model
+      operationId: dataclass_request_response_factory
+      tags:
+        - Test
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Pet"
+        required: true
+      responses:
+        "201":
+          description: Success
+          x-alpha-response-factory: api_models.MiniPet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MiniPet"
+      x-alpha-service-name: test_service
+      x-alpha-service-method: check_dataclass
+      x-alpha-request-factory: true
+  /dataclass/response_factory_list:
+    post:
+      description: |
+        This endpoint is intended to check/validate:
+          - if the response-factory is able to map the Pet instance to a list of MiniPet models
+      operationId: dataclass_response_factory_list
+      tags:
+        - Test
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Pet"
+        required: true
+      responses:
+        "201":
+          description: Success
+          x-alpha-response-factory: list[MiniPet]
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MiniPet"
+      x-alpha-service-name: test_service
+      x-alpha-service-method: check_dataclass_return_list
+      x-alpha-request-factory: true
+  /exceptions:
+    post:
+      description: |
+        This endpoint is intended to check:
+          - if a 400 status code is returned because we raise a generic alpha
+            BadRequestException when we enter an invalid dict.
+          - if a 403 status code is returned because we try to put a cat in this
+          dogs-only request.
+          - if a 422 status code is returned because we try to allow a bad boy in
+          this good boys-only method.
+      operationId: test_bad_request_exception
+      tags:
+        - Test
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Pet"
+        required: true
+      responses:
+        "201":
+          description: Success
+          x-alpha-response-factory: api_models.Pet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+        "400":
+          description: Pet object is invalid
+        "403":
+          description: No cats allowed
+        "422":
+          description: Good boys only
+      x-alpha-service-name: test_service
+      x-alpha-service-method: handle4xx
+      x-alpha-request-factory: false
+  /raise/{code}:
+    get:
+      description: |
+        This endpoint is intended to check:
+          - if the correct exception is raised for a given status code
+      operationId: test_exceptions
+      tags:
+        - Test
+      parameters:
+        - name: code
+          in: path
+          schema:
+            type: integer
+          required: true
+          example: 400
+      responses:
+        "400":
+          description: Bad Request Exception raised
+        "401":
+          description: Unauthorized Exception raised
+        "403":
+          description: Forbidden Exception raised
+        "404":
+          description: Not Found Exception raised
+        "405":
+          description: Method Not Allowed Exception raised
+        "406":
+          description: Not Acceptable Exception raised
+        "409":
+          description: Conflict Exception raised
+        "413":
+          description: Payload Too Large Exception raised
+        "422":
+          description: Unprocessable Entity Exception raised
+        "500":
+          description: Internal Server Error Exception raised
+        "501":
+          description: Not Implemented Exception raised
+        "502":
+          description: Bad Gateway Exception raised
+        "503":
+          description: Service Unavailable Exception raised
+        "504":
+          description: Gateway Timeout Exception raised
+      x-alpha-service-name: test_service
+      x-alpha-service-method: raise_exception
+  /permissions:
+    get:
+      description: |
+        This endpoint is intended to check:
+          - if the 'x-alpha-verify-permissions' extension is used to check permissions before 
+          executing the method
+      operationId: test_permissions
+      tags:
+        - Test
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StringResponse"
+        "403":
+          description: Forbidden
+      x-alpha-custom-function: permissions
+      x-alpha-verify-permissions:
+        - TEST_PERMISSION
+      security:
+        - bearerAuth: []
+  /upload-document:
+    post:
+      description: |
+        This endpoint is intended to check:
+          - If the 'x-alpha-filelist' value is used to build a list of files
+      operationId: filelist
+      requestBody:
+        content:
+          mulipart/form-data:
+            schema:
+              $ref: "#/components/schemas/Files"
+        x-alpha-filelist: true
+        required: true
+      responses:
+        "200":
+          description: Success
+          content:
+            text/plain:
+              schema:
+                type: string
+      tags:
+        - Test
+      x-alpha-service-name: test_service
+      x-alpha-service-method: upload_document
+
+  /users:
+    get:
+      description: Get users
+      operationId: get_users
+      responses:
+        '200':
+          description: OK
+          x-alpha-response-factory: list[api_models.User]
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersResponse'
+      tags: [User]
+      x-alpha-service-name: user_management_service
+      x-alpha-service-method: get_users
+      x-alpha-verify-permissions:
+        - MANAGE_USERS
+      security:
+        - bearerAuth: []
+    post:
+      description: Add user
+      operationId: add_user
+      requestBody:
+        description: 'User object'
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        '201':
+          description: Created
+          x-alpha-response-factory: api_models.User
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+      tags: [User]
+      x-alpha-service-name: user_management_service
+      x-alpha-service-method: add_user
+      x-alpha-request-factory: true
+      x-alpha-verify-permissions:
+        - MANAGE_USERS
+      security:
+        - bearerAuth: []
+  /users/{user_id}:
+    get:
+      description: Get user
+      operationId: get_user
+      parameters:
+        - $ref: '#/components/parameters/user_id'
+      responses:
+        '200':
+          description: OK
+          x-alpha-response-factory: api_models.User
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+      tags: [User]
+      x-alpha-service-name: user_management_service
+      x-alpha-service-method: get_user
+      x-alpha-verify-permissions:
+        - MANAGE_USERS
+      security:
+        - bearerAuth: []
+    put:
+      description: Update user
+      operationId: update_user
+      parameters:
+        - $ref: '#/components/parameters/user_id'
+      requestBody:
+        description: 'User object'
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        '200':
+          description: OK
+          x-alpha-response-factory: api_models.User
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+      tags: [User]
+      x-alpha-service-name: user_management_service
+      x-alpha-service-method: update_user
+      x-alpha-request-factory: true
+      x-alpha-verify-permissions:
+        - MANAGE_USERS
+      security:
+        - bearerAuth: []
+    delete:
+      description: Delete user
+      operationId: delete_user
+      parameters:
+        - $ref: '#/components/parameters/user_id'
+      responses:
+        '204':
+          description: No content
+      tags: [User]
+      x-alpha-service-name: user_management_service
+      x-alpha-service-method: delete_user
+      x-alpha-request-factory: true
+      x-alpha-verify-permissions:
+        - MANAGE_USERS
+      security:
+        - bearerAuth: []
+  /groups:
+    get:
+      description: Get groups
+      operationId: get_groups
+      responses:
+        '200':
+          description: OK
+          x-alpha-response-factory: list[api_models.Group]
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupsResponse'
+      tags: [Group]
+      x-alpha-service-name: user_management_service
+      x-alpha-service-method: get_groups
+      x-alpha-verify-permissions:
+        - MANAGE_USERS
+      security:
+        - bearerAuth: []
+    post:
+      description: Add group
+      operationId: add_group
+      requestBody:
+        description: 'Group object'
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Group"
+      responses:
+        '201':
+          description: Created
+          x-alpha-response-factory: api_models.Group
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupResponse'
+      tags: [Group]
+      x-alpha-service-name: user_management_service
+      x-alpha-service-method: add_group
+      x-alpha-request-factory: true
+      x-alpha-verify-permissions:
+        - MANAGE_USERS
+      security:
+        - bearerAuth: []
+  /groups/{group_id}:
+    get:
+      description: Get group
+      operationId: get_group
+      parameters:
+        - $ref: '#/components/parameters/group_id'
+      responses:
+        '200':
+          description: OK
+          x-alpha-response-factory: api_models.Group
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupResponse'
+      tags: [Group]
+      x-alpha-service-name: user_management_service
+      x-alpha-service-method: get_group
+      x-alpha-verify-permissions:
+        - MANAGE_USERS
+      security:
+        - bearerAuth: []
+    put:
+      description: Update group
+      operationId: update_group
+      parameters:
+        - $ref: '#/components/parameters/group_id'
+      requestBody:
+        description: 'Group object'
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Group"
+      responses:
+        '200':
+          description: OK
+          x-alpha-response-factory: api_models.Group
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupResponse'
+      tags: [Group]
+      x-alpha-service-name: user_management_service
+      x-alpha-service-method: update_group
+      x-alpha-request-factory: true
+      x-alpha-verify-permissions:
+        - MANAGE_USERS
+      security:
+        - bearerAuth: []
+    delete:
+      description: Delete group
+      operationId: delete_group
+      parameters:
+        - $ref: '#/components/parameters/group_id'
+      responses:
+        '204':
+          description: No content
+      tags: [Group]
+      x-alpha-service-name: user_management_service
+      x-alpha-service-method: delete_group
+      x-alpha-request-factory: true
+      x-alpha-verify-permissions:
+        - MANAGE_USERS
+      security:
+        - bearerAuth: []
+  /auth/login:
+    post:
+      description: Authenticate user and generate access token
+      operationId: login
+      requestBody:
+        description: Password credentials
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Credentials"
+      responses:
+        '201':
+          description: Created
+          x-alpha-cookie-support: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StringResponse'
+                description: Generated access token
+      tags: [Authentication]
+      x-alpha-service-name: authentication_service
+      x-alpha-service-method: login
+      x-alpha-request-factory: true
+  /auth/password:
+    patch:
+      description: Update user password
+      operationId: update_user_password
+      parameters:
+        - $ref: '#/components/parameters/new_password'
+      requestBody:
+        description: Password credentials
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Credentials"
+      responses:
+        '204':
+          description: Updated password
+      tags: [Authentication]
+      x-alpha-service-name: authentication_service
+      x-alpha-service-method: change_password
+      x-alpha-request-factory: true
+  /auth/refresh:
+    get:
+      description: Refresh authentication token
+      operationId: refresh_auth_token
+      responses:
+        '201':
+          description: Created new authentication token
+          x-alpha-cookie-support: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StringResponse'
+      tags: [Authentication]
+      x-alpha-service-name: authentication_service
+      x-alpha-service-method: refresh_token
+      x-alpha-service-additional-parameters:
+        - auth_token
+        - refresh_token
+  /auth/verify:
+    get:
+      description: Verify user from access token
+      operationId: verify_user
+      responses:
+        '200':
+          description: OK
+          x-alpha-response-factory: api_models.Identity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityResponse'
+      tags: [Authentication]
+      x-alpha-custom-function: identity
+      security:
+        - bearerAuth: []
+  /auth/logout:
+    post:
+      description: Logout user and invalidate tokens
+      operationId: logout
+      responses:
+        '204':
+          description: Successfully logged out
+          x-alpha-cookie-support: true
+      tags: [Authentication]
+      x-alpha-service-name: authentication_service
+      x-alpha-service-method: logout
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    user_id:
+      name: user_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      example: acc1485b-2909-4535-8299-1bc6913d6f5b
+    group_id:
+      name: group_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      example: bcc1485b-2909-4535-8299-1bc6913d6f5b
+    new_password:
+      name: new_password
+      in: query
+      required: true
+      schema:
+        type: string
+        format: password
+      example: welkom123
+
+  schemas:
+    Identity:
+      type: object
+      properties:
+        subject:
+          type: string
+          example: abc123
+        username:
+          type: string
+          nullable: true
+          example: Gebruiker1
+        role:
+          type: string
+          nullable: true
+        email:
+          type: string
+          format: email
+          nullable: true
+          example: name@example.org
+        display_name:
+          type: string
+          nullable: true
+          example: John Doe
+        groups:
+          type: array
+          items:
+            type: string
+        permissions:
+          type: array
+          items:
+            type: string
+        claims:
+          type: object
+        issued_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          nullable: true
+          format: date-time
+        audience:
+          type: array
+          nullable: true
+          items:
+            type: string
+        admin:
+          type: boolean
+        pretend_identity:
+          type: object
+          nullable: true
+    Credentials:
+      type: object
+      properties:
+        username:
+          type: string
+          example: abc123
+        password:
+          type: string
+          format: password
+          example: welcome123
+    LifeCycleBase:
+      type: object
+      properties:
+        created_by:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        modified_by:
+          type: string
+          readOnly: true
+        modified_at:
+          type: string
+          format: date-time
+          readOnly: true
+    User:
+      allOf:
+        - $ref: '#/components/schemas/LifeCycleBase'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              example: acc1485b-2909-4535-8299-1bc6913d6f5b
+              readOnly: true
+            username:
+              type: string
+              example: user1
+            password:
+              type: string
+              format: password
+              writeOnly: true
+            role:
+              type: string
+              example: admin
+            email:
+              type: string
+              nullable: true
+              format: email
+              example: user1@test.nl
+            display_name:
+              type: string
+              nullable: true
+              example: User One
+            permissions:
+              type: array
+              nullable: true
+              items:
+                type: string
+            groups:
+              type: array
+              nullable: true
+              items:
+                type: string
+            admin:
+              type: boolean
+              example: false
+    Group:
+      allOf:
+        - $ref: '#/components/schemas/LifeCycleBase'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              example: bcc1485b-2909-4535-8299-1bc6913d6f5b
+              readOnly: true
+            name:
+              type: string
+              example: Group1
+            description:
+              type: string
+              nullable: true
+              example: This is a group for testing purposes.
+            permissions:
+              type: array
+              nullable: true
+              items:
+                type: string
+    Feature:
+      title: Feature
+      type: object
+      properties:
+        id:
+          type: string
+          example: job_title
+        label:
+          type: string
+          example: Job title
+        min:
+          type: integer
+          example: 1
+          nullable: true
+        max:
+          type: integer
+          example: 40
+          nullable: true
+        dtype:
+          type: string
+          example: string
+        category:
+          type: string
+          example: generic_features
+        required:
+          type: boolean
+          example: true
+          nullable: true
+        readonly:
+          type: boolean
+          example: false
+          nullable: true
+        value:
+          type: boolean
+          example: null
+          nullable: true
+        multiple:
+          type: boolean
+          example: true
+          nullable: true
+        options:
+          type: array
+          items:
+            type: object
+          nullable: true
+          example: [option1, option2, option3]
+
+    Files:
+      type: object
+      properties:
+        filename:
+          type: array
+          items:
+            type: string
+            format: binary
+
+    SearchFilter:
+      type: object
+      properties:
+        op:
+          description: Search operator
+          type: string
+          enum:
+            - LT
+            - LTE
+            - EQ
+            - NEQ
+            - GT
+            - GTE
+            - IN
+            - NIN
+            - LIKE
+            - NLIKE
+            - ILIKE
+            - INLIKE
+            - STARTSWITH
+            - ISTARTSWITH
+            - NSTARTSWITH
+            - INSTARTSWITH
+            - ENDSWITH
+            - IENDSWITH
+            - NENDSWITH
+            - INENDSWITH
+            - CONTAINS
+            - ICONTAINS
+            - NCONTAINS
+            - INCONTAINS
+        field:
+          description: The attribute of an object
+          type: string
+        value:
+          description: Any simple type
+          oneOf:
+            - type: string
+            - type: number
+
+    Pet:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+        pet_type:
+          type: string
+          nullable: true
+          enum:
+            - DOG
+            - CAT
+            - RABBIT
+        date_of_birth:
+          type: string
+          format: date
+          writeOnly: true
+        age:
+          type: integer
+          readOnly: true
+        weight:
+          type: number
+          nullable: true
+        good_boy:
+          type: boolean
+          nullable: true
+      required:
+        - name
+        - date_of_birth
+      example:
+        name: Pluto
+        pet_type: DOG
+        date_of_birth: "2000-01-01"
+        good_boy: true
+    MiniPet:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+      required:
+        - name
+    ResponsePet:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+    # Response schemas
+    Response:
+      type: object
+      properties:
+        detail:
+          type: string
+          example: OK
+        status:
+          type: integer
+          example: 200
+        title:
+          type: string
+          example: OK
+        type:
+          type: string
+          example: 'application/json'
+        data: {}
+    StringResponse:
+      allOf:
+        - $ref: '#/components/schemas/Response'
+        - type: object
+          properties:
+            data:
+              type: string
+    StringArrayResponse:
+      allOf:
+        - $ref: '#/components/schemas/Response'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                type: string
+    IdentityResponse:
+      allOf:
+        - $ref: '#/components/schemas/Response'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Identity'
+    UserResponse:
+      allOf:
+        - $ref: '#/components/schemas/Response'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/User'
+    UsersResponse:
+      allOf:
+        - $ref: '#/components/schemas/Response'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/User'
+    GroupResponse:
+      allOf:
+        - $ref: '#/components/schemas/Response'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Group'
+    GroupsResponse:
+      allOf:
+        - $ref: '#/components/schemas/Response'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Group'
