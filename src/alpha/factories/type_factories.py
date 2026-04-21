@@ -6,7 +6,7 @@
 """
 
 import datetime
-from typing import Any, Iterable
+from typing import Any, Iterable, get_origin
 
 import pandas as pd
 
@@ -52,6 +52,9 @@ class GenericTypeFactory:
 
         # Handle the case where cls is a Sequence or Mapping, since these are
         # not real types and cannot be used for lookup in the conversion matrix
+        cls_origin = get_origin(cls)
+        if cls_origin is not None:
+            cls = cls_origin
         if cls.__name__ == "Sequence":
             cls = list
         if cls.__name__ == "Mapping":

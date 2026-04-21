@@ -67,7 +67,7 @@ dev = [
 
 [project.optional-dependencies]
 api-generator = [
-    "openapi-generator-cli==7.14.0 ; python_version >= '3.11' and python_version < '4.0'",
+    "openapi-generator-cli==7.14.0",
     "jdk4py"
 ]
 flask = [
