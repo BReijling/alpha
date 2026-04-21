@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `to_dict` method to User model for easier serialization of User objects.
 - Compatibility for Sequence and Mapping types to the GenericTypeFactory class to allow for more flexible type handling in the factories.
 - OpenAPI python-flask controller template:
-    - Support for file uploads by using the `x-alpha-filelist` parameterin the requestBody of the OpenAPI spec.
+    - Support for file uploads by using the `x-alpha-filelist` parameter in the requestBody of the OpenAPI spec.
     - Support for debug logging of the request parameters and body when the logging level is set to DEBUG.
     - Support for debug logging of the response body when the logging level is set to DEBUG and `x-alpha-debug-response` parameter is set to `true` in the OpenAPI spec.
     - Support for a custom function by using the `x-alpha-custom-function` parameter. Only when not using the `x-alpha-service-name` parameter.
