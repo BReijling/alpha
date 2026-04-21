@@ -167,32 +167,32 @@ def {{operationId}}(
     {{/allParams}}
 
     if logging_level_checker("debug"):
-        logging.debug(
-            f"""using these parameters: {
-                json.dumps(dict(
-                    {{#allParams}}
-                    {{#vendorExtensions.x-alpha-filelist}}
-                    {{paramName}}="binary-file-object",
-                    {{/vendorExtensions.x-alpha-filelist}}
-                    {{^vendorExtensions.x-alpha-filelist}}
-                    {{^isBinary}}
-                    {{#isBodyParam}}
-                    {{^isArray}}
-                    {{paramName}}={{paramName}}.to_dict(),
-                    {{/isArray}}
-                    {{#isArray}}
-                    {{paramName}}=[obj.to_dict() for obj in {{paramName}}],
-                    {{/isArray}}
-                    {{/isBodyParam}}
-                    {{^isBodyParam}}
-                    {{paramName}}={{paramName}},
-                    {{/isBodyParam}}
-                    {{/isBinary}}
-                    {{/vendorExtensions.x-alpha-filelist}}
-                    {{/allParams}}
-                ), cls=JSONEncoder)
-            }"""
+        payload = json.dumps(
+            dict(
+                {{#allParams}}
+                {{#vendorExtensions.x-alpha-filelist}}
+                {{paramName}}="binary-file-object",
+                {{/vendorExtensions.x-alpha-filelist}}
+                {{^vendorExtensions.x-alpha-filelist}}
+                {{^isBinary}}
+                {{#isBodyParam}}
+                {{^isArray}}
+                {{paramName}}={{paramName}}.to_dict(),
+                {{/isArray}}
+                {{#isArray}}
+                {{paramName}}=[obj.to_dict() for obj in {{paramName}}],
+                {{/isArray}}
+                {{/isBodyParam}}
+                {{^isBodyParam}}
+                {{paramName}}={{paramName}},
+                {{/isBodyParam}}
+                {{/isBinary}}
+                {{/vendorExtensions.x-alpha-filelist}}
+                {{/allParams}}
+            ),
+            cls=JSONEncoder
         )
+        logging.debug(f"using these parameters: {payload}")
 
     headers = Headers.from_headers(connexion.request.headers)
 
