@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `to_dict` method to Group model for easier serialization of Group objects.
 - `to_dict` method to User model for easier serialization of User objects.
-- Compatibility for Sequece and Mapping types to the GenericTypeFactory class to allow for more flexible type handling in the factories.
+- Compatibility for Sequence and Mapping types to the GenericTypeFactory class to allow for more flexible type handling in the factories.
 - OpenAPI python-flask controller template:
     - Support for file uploads by using the `x-alpha-filelist` parameterin the requestBody of the OpenAPI spec.
     - Support for debug logging of the request parameters and body when the logging level is set to DEBUG.
