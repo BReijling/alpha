@@ -1,0 +1,100 @@
+site_name: alpha-python
+site_description: A foundational Python library providing standard building blocks for Python applications that use APIs and/or database interactions.
+site_author: Bart Reijling
+site_url: https://alpha-python.readthedocs.io/
+
+repo_name: breijling/alpha
+repo_url: https://github.com/breijling/alpha
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search
+  - mermaid2
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: numpy
+            show_source: true
+            show_root_heading: true
+            show_root_full_path: false
+            show_category_heading: true
+            members_order: source
+            separate_signature: true
+            merge_init_into_class: true
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets:
+      base_path: ['.']
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+  - tables
+  - attr_list
+  - md_in_html
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Quickstart: quickstart.md
+  - Concepts:
+    - Overview: concepts/index.md
+    - Repository Pattern: concepts/repository-pattern.md
+    - Dependency Injection: concepts/dependency-injection.md
+  - Guides:
+    - Database: guides/database.md
+    - Authentication: guides/authentication.md
+    - API Generation: guides/api-generation.md
+    - Flask Integration: guides/flask-integration.md
+  - API Reference:
+    - Overview: reference/index.md
+    - JSON Encoder: reference/encoder.md
+    - Domain Models: reference/domain-models.md
+    - Repositories: reference/repositories.md
+    - Adapters: reference/adapters.md
+    - Factories: reference/factories.md
+    - Providers: reference/providers.md
+    - Services: reference/services.md
+    - Interfaces: reference/interfaces.md
+    - Utilities: reference/utils.md
+  - Changelog: changelog.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/breijling/alpha
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/alpha-python/

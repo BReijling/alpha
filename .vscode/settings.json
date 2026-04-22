@@ -18,7 +18,8 @@
         "ApiRepository",
         "AuthenticationService",
         "UserLifecycleManagement",
-        "OpenAPI"
+        "OpenAPI",
+        "Docs"
     ],
     "peacock.color": "#42b883",
     "workbench.colorCustomizations": {
