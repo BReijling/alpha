@@ -65,7 +65,7 @@ sequenceDiagram
     🖥️ Endpoint->>+🧩 Controller: call (arguments)
 
     %% request parsing
-    opt request headers
+    opt Request headers
     🧩 Controller->>+🖥️ Endpoint: request.headers
     🖥️ Endpoint-->>-🧩 Controller: return (dictionary)
     🧩 Controller->>🧩 Controller: 🔐 verify Identity
@@ -77,45 +77,57 @@ sequenceDiagram
     🧩 Controller->>🖥️ Endpoint: ❌ failed<br>Authorization
     end
     end
-    opt request body
+    opt Request body
     🧩 Controller->>+🖥️ Endpoint: request.json()
     🖥️ Endpoint-->>-🧩 Controller: return<br>(dictionary)
     🧩 Controller-->>🧩 Controller: 👷🏽‍♂️ create<br>(API model)
     end
 
     %% mapping to domain model
-    opt
+    alt
+    🧩 Controller->>+🧠 Service: call
+    else 
+    opt Factory for Domain Model
     🧩 Controller->>+🏭 Factory: call
-    Note over 🏭 Factory: RequestFactory
+    Note over 🏭 Factory: Model factory
     🏭 Factory-->>-🧩 Controller: return<br>(Domain model)
+    🧩 Controller->>🧠 Service: call<br>(Domain Model)
+    end
+    else 
+    opt Handled by RequestFactory
+    🧩 Controller->>+🏭 Factory: call
+    Note over 🏭 Factory: RequestFactory()
+    🏭 Factory-->>-🧠 Service: call<br>(Domain model)
+    end
     end
 
     %% service call
-    🧩 Controller->>+🧠 Service: call<br>(Domain Model)
 
     %% repository call
-    🧠 Service->>📦 Repository: call<br>(Domain Model)
+    🧠 Service->>+📦 Repository: call<br>(Domain Model)
 
     %% database query
     📦 Repository->>🗄️ Database: 🔍 Query
     🗄️ Database-->>📦 Repository: 📥 Result
 
     %% return with mapped data
-    📦 Repository-->>🧠 Service: return<br>(Domain Model)
+    📦 Repository-->>-🧠 Service: return<br>(Domain Model)
+
+    alt ❌ Raised exception
+    🧠 Service-->>🧩 Controller: raise<br>(Exception)
+    else ✅ Successful service return
     🧠 Service-->>-🧩 Controller: return<br>(Domain Model)
+    end
 
     %% response mapping
-    alt
-    🧩 Controller-->>🖥️ Endpoint: return<br>(simple value)
-    else
     %% mapping to API model
-    opt
+    opt Factory for API Model
     🧩 Controller->>+🏭 Factory: call
-    Note over 🏭 Factory: ResponseFactory
+    Note over 🏭 Factory: ResponseFactory()
     🏭 Factory-->>-🧩 Controller: return<br>(API Model)
     end
-    🧩 Controller-->>-🖥️ Endpoint: return<br>(API Model)
-    end
+    🧩 Controller-->>🧩 Controller: create_response_object()
+    🧩 Controller-->>-🖥️ Endpoint: return<br>(dictionary)
 
     %% response encoding
     🖥️ Endpoint->>🖥️ Endpoint: Encode<br>(serialize to JSON)
