@@ -26,28 +26,28 @@ class LDAPProvider(JWTProviderMixin):
     ----------
     connector
         Connector to use for LDAP operations
-    search_filter_key, optional
+    search_filter_key
         Key to use for LDAP search filter, by default "uid"
-    search_base, optional
+    search_base
         Base DN for LDAP search, by default "cn=users,dc=example,dc=com"
-    search_attributes, optional
+    search_attributes
         Attributes to retrieve during LDAP search, by default
         [ALL_ATTRIBUTES]
-    identity_mappings, optional
+    identity_mappings
         Mappings from LDAP attributes to Identity fields, by default
         DEFAULT_LDAP_MAPPINGS
-    populate_groups, optional
+    populate_groups
         Whether to populate groups in the Identity, by default True
-    populate_permissions, optional
+    populate_permissions
         Whether to populate permissions in the Identity, by default False
-    populate_claims, optional
+    populate_claims
         Whether to populate claims in the Identity, by default True
-    auto_connect, optional
+    auto_connect
         Whether to automatically connect using the connector, by default
         True
-    change_password_supported, optional
+    change_password_supported
         Whether the provider supports changing passwords, by default False
-    additional_connector_params, optional
+    additional_connector_params
         Additional parameters to pass to the LDAP connection, by default
         {"receive_timeout": 5}
     """
@@ -301,33 +301,33 @@ class ADProvider(LDAPProvider):
     ----------
     connector
         Connector to use for LDAP operations.
-    token_factory, optional
+    token_factory
         Factory used to create tokens, by default ``None``.
-    search_filter_key, optional
+    search_filter_key
         Key to use for Active Directory search filter, by default
         ``"sAMAccountName"``.
-    search_base, optional
+    search_base
         Base distinguished name (DN) for Active Directory searches, by default
         ``"CN=users,DC=example,DC=com"``.
-    search_attributes, optional
+    search_attributes
         Attributes to retrieve during Active Directory searches, by default
         ``AD_SEARCH_ATTRIBUTES``.
-    identity_mappings, optional
+    identity_mappings
         Mapping of Active Directory attributes to :class:`Identity` fields, by
         default ``DEFAULT_AD_MAPPINGS``.
-    populate_groups, optional
+    populate_groups
         Whether to populate group memberships on the :class:`Identity`, by
         default ``True``.
-    populate_permissions, optional
+    populate_permissions
         Whether to populate permissions on the :class:`Identity`, by default
         ``False``.
-    populate_claims, optional
+    populate_claims
         Whether to populate claims on the :class:`Identity`, by default
         ``True``.
-    auto_connect, optional
+    auto_connect
         Whether to automatically open the LDAP connection on first use, by
         default ``True``.
-    change_password_supported, optional
+    change_password_supported
         Whether this provider supports changing passwords, by default
         ``False``.
     """

@@ -37,22 +37,22 @@ class UserLifecycleManagement:
         ----------
         uow
             Unit of Work instance for managing transactions
-        users_repository_name, optional
+        users_repository_name
             Name of the users repository, by default "users"
-        groups_repository_name, optional
+        groups_repository_name
             Name of the groups repository, by default "groups"
-        user_model, optional
+        user_model
             User model class, by default User
-        group_model, optional
+        group_model
             Group model class, by default Group
-        password_support, optional
+        password_support
             Whether password support is enabled, by default False
-        password_factory, optional
+        password_factory
             Factory for creating password hashes, by default None. If None, a
             default PasswordFactory will be used.
-        user_username_attribute, optional
+        user_username_attribute
             Attribute name for the username, by default "username"
-        user_password_attribute, optional
+        user_password_attribute
             Attribute name for the password, by default "password"
         """
         self.uow = uow

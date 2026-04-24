@@ -1,4 +1,5 @@
-"""_summary_
+"""Contains the SqlMapper protocol, which defines the interface for SQLAlchemy 
+ORM mapping.
 """
 from typing import Any, ClassVar, Protocol, runtime_checkable
 
@@ -8,7 +9,7 @@ from sqlalchemy.orm import registry
 
 @runtime_checkable
 class SqlMapper(Protocol):
-    """_summary_"""
+    """Mapper interface for SQLAlchemy ORM mapping."""
 
     convention: ClassVar[dict[str, Any]]
     started: ClassVar[bool]
@@ -20,4 +21,4 @@ class SqlMapper(Protocol):
 
     @classmethod
     def start_mapping(cls) -> None:
-        """_summary_"""
+        """Start the SQLAlchemy ORM mapping process."""

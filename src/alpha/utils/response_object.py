@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Any, Literal, overload
 import json
 from alpha.encoder import JSONEncoder
-from alpha.services.models.cookie import Cookie
+from alpha.utils.cookie import Cookie
 from alpha.utils._http_codes import http_codes_en
 
 if TYPE_CHECKING:
@@ -63,17 +63,17 @@ def create_response_object(
         HTTP status code for the response.
     status_message
         Human-readable message describing the status.
-    data, optional
+    data
         Additional data to include in the response, by default None
-    data_type, optional
+    data_type
         The MIME type of the response, by default "application/json"
-    http_codes, optional
+    http_codes
         A dictionary mapping HTTP status codes to their descriptions, by
         default http_codes_en
-    json_encoder, optional
+    json_encoder
         A custom JSON encoder class to use when encoding the response data, by
         default alpha.encoder.JSONEncoder
-    response_type, optional
+    response_type
         The type of response to create, either "flask" or "dict", by default
         "dict"
 
@@ -156,7 +156,9 @@ def _split_cookies_from_object(
         return None, [obj]
     if isinstance(obj, (list, tuple, set)):
         data: list[Any] = [
-            item for item in obj if not isinstance(item, Cookie)  # type: ignore
+            item
+            for item in obj
+            if not isinstance(item, Cookie)  # type: ignore
         ]
         cookies = [cookie for cookie in obj if isinstance(cookie, Cookie)]  # type: ignore
 

@@ -26,9 +26,8 @@ class RestApiRepository(Generic[DomainModel]):
     session management, and response handling. The repository can be easily
     extended or customized for specific API requirements.
 
-    Parameters
-    ----------
     Generic
+    -------
         The type of the domain model that this repository will manage. This
         allows for type safety and better integration with the rest of the
         application.
@@ -56,37 +55,37 @@ class RestApiRepository(Generic[DomainModel]):
         ----------
         host
             The base URL of the API.
-        scheme, optional
+        scheme
             The URL scheme to use (e.g., "http" or "https"). This is only used
             if the host does not already include a scheme, by default "https"
-        base_path, optional
+        base_path
             The base path of the API, by default ""
-        endpoint, optional
+        endpoint
             The default endpoint for the API. This value is used when no
             specific endpoint is provided in the method calls, by default ""
-        default_model, optional
+        default_model
             The default model to use for serialization/deserialization,
             by default None
-        use_factory, optional
+        use_factory
             Whether to use the model factory method for creating models from
             response data, by default True
-        serialize, optional
+        serialize
             Whether to serialize objects before sending them in requests,
             by default True
-        model_factory_method_name, optional
+        model_factory_method_name
             The name of the class method to use for creating models from
             dictionaries, by default "from_dict"
-        model_serialization_method_name, optional
+        model_serialization_method_name
             The name of the method to use for serializing models to
             dictionaries, by default "to_dict"
-        session, optional
+        session
             The requests session (or compatible HTTP client, e.g., httpx) to
             use for context management, by default None
-        request_headers, optional
+        request_headers
             Default headers to include in every request, by default None
-        request_timeout, optional
-            The timeout for API requests in seconds, by default 30
-        response_data_attribute, optional
+        request_cookies
+            Default cookies to include in every request, by default None
+        response_data_attribute
             The attribute in the response data to extract the relevant data
             from, by default None
         """
@@ -643,7 +642,7 @@ class RestApiRepository(Generic[DomainModel]):
             This URL should include any necessary query parameters. The URL is
             expected to be properly formatted and ready for use in an API
             request.
-        additional_request_params, optional
+        additional_request_params
             Additional parameters to include in the function call which handles
             the API request. This allows for flexibility in specifying
             parameters such as headers, authentication tokens, or other request
@@ -679,7 +678,7 @@ class RestApiRepository(Generic[DomainModel]):
             The data to be sent in the body of the POST request. This data is
             expected to be in a format that can be serialized to JSON, as it
             will be sent as JSON in the request body.
-        additional_request_params, optional
+        additional_request_params
             Additional parameters to include in the function call which handles
             the API request. This allows for flexibility in specifying
             parameters such as headers, authentication tokens, or other request
@@ -716,7 +715,7 @@ class RestApiRepository(Generic[DomainModel]):
             The data to be sent in the body of the PATCH request. This data is
             expected to be in a format that can be serialized to JSON, as it
             will be sent as JSON in the request body.
-        additional_request_params, optional
+        additional_request_params
             Additional parameters to include in the function call which handles
             the API request. This allows for flexibility in specifying
             parameters such as headers, authentication tokens, or other request
@@ -753,7 +752,7 @@ class RestApiRepository(Generic[DomainModel]):
             The data to be sent in the body of the PUT request. This data is
             expected to be in a format that can be serialized to JSON, as it
             will be sent as JSON in the request body.
-        additional_request_params, optional
+        additional_request_params
             Additional parameters to include in the function call which handles
             the API request. This allows for flexibility in specifying
             parameters such as headers, authentication tokens, or other request
@@ -783,7 +782,7 @@ class RestApiRepository(Generic[DomainModel]):
             This URL should include any necessary query parameters. The URL is
             expected to be properly formatted and ready for use in an API
             request.
-        additional_request_params, optional
+        additional_request_params
             Additional parameters to include in the function call which handles
             the API request. This allows for flexibility in specifying
             parameters such as headers, authentication tokens, or other request
@@ -870,13 +869,13 @@ class RestApiRepository(Generic[DomainModel]):
 
         Parameters
         ----------
-        endpoint, optional
+        endpoint
             The endpoint to use for the URL, by default None
-        param, optional
+        param
             The parameter to append to the URL, by default None
-        parent_endpoint, optional
+        parent_endpoint
             An optional parent endpoint to include in the URL, by default None
-        parent_param, optional
+        parent_param
             An optional parameter to append after the parent endpoint,
             by default None
         **params

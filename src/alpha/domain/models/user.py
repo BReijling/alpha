@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from enum import Enum, auto
 from typing import Any, Self, Sequence, cast
 from uuid import UUID
 
@@ -8,73 +7,59 @@ from alpha.domain.models.base_model import BaseDomainModel, DomainModel
 from alpha.domain.models.group import Group
 from alpha.domain.models.life_cycle_base import LifeCycleBase
 
+from alpha.domain.models.role import Role
 from alpha.providers.models.identity import Identity
-
-
-class Role(Enum):
-    """Defines user roles with varying levels of permissions. The roles are
-    ordered from highest to lowest permissions. The comparison methods allow
-    for easy comparison of roles based on their hierarchy. The roles are
-    ordered on a scale from highest to lowest permissions.
-
-    Typical permissions are as follows:
-    - CREATE: Permission to create new content or data, but not modify existing
-    content.
-    - READ: Permission to read content or data.
-    - UPDATE: Permission to modify existing content or data, but not create new
-    content.
-    - DELETE: Permission to delete content or data.
-    - MANAGE_USERS: Permission to manage user accounts and permissions.
-    - MANAGE_SETTINGS: Permission to manage system settings and configurations.
-    - ALL: Permission to perform all actions, including user management and
-    system settings.
-
-    Roles:
-    - ADMIN: Role with permissions to manage users, content, and system
-    settings. Typically has the ALL permissions.
-    - SUPERUSER: Role with all permissions, including system settings and user
-    management. Typically has the ALL permissions, but may be used to denote a
-    special type of admin user with additional privileges or responsibilities.
-    - OWNER: Role with permissions to manage their own resources and users, but
-    not system settings. Typically has permissions similar to ADMIN, but
-    limited to their own scope of resources.
-    - MODERATOR: Role with permissions to manage content and users, but not
-    system settings. Typically has permissions to UPDATE and DELETE content,
-    and MANAGE_USERS, but not MANAGE_SETTINGS.
-    - EDITOR: Role with permissions to create and edit content, but not manage
-    users or settings. Typically has permissions to CREATE, READ, UPDATE, and
-    DELETE content, but not MANAGE_USERS or MANAGE_SETTINGS.
-    - USER: Default role with standard permissions. Typically has permissions
-    to CREATE, READ, and UPDATE their own content, but not DELETE content or
-    manage users or settings.
-    - VIEWER: Typical read-only role with limited permissions. Typically has
-    permission to READ content, but not CREATE, UPDATE, DELETE, or manage users
-    or settings.
-    """
-
-    ADMIN = auto()
-    SUPERUSER = auto()
-    OWNER = auto()
-    MODERATOR = auto()
-    EDITOR = auto()
-    USER = auto()
-    VIEWER = auto()
-
-    def __lt__(self, obj: Self) -> bool:
-        return self.value < obj.value
-
-    def __le__(self, obj: Self) -> bool:
-        return self.value <= obj.value
-
-    def __gt__(self, obj: Self) -> bool:
-        return self.value > obj.value
-
-    def __ge__(self, obj: Self) -> bool:
-        return self.value >= obj.value
 
 
 @dataclass(kw_only=True)
 class User(LifeCycleBase, BaseDomainModel):
+    """User domain model which represents a user in the system. The User model
+    includes attributes for user identification, authentication, and
+    authorization, as well as lifecycle attributes for tracking creation and
+    modification times.
+
+    Attributes
+    ----------
+    id
+        Unique identifier for the user, which can be a UUID, integer, or
+        string.
+    username
+        The username of the user, used for authentication and identification.
+    password
+        The password of the user, used for authentication. In a real
+        application, this should be stored securely (e.g., hashed and salted).
+    role
+        The role of the user, which can be a string or an instance of the Role
+        enum. The role determines the permissions and access level of the user.
+    email
+        The email address of the user, used for communication and
+        identification.
+    phone
+        The phone number of the user, used for communication and
+        identification.
+    display_name
+        The display name of the user, used for showing the user's name in the
+        UI.
+    permissions
+        A list of specific permissions assigned to the user, which can be used
+        for fine-grained access control. This can be used in conjunction with
+        the role to provide additional permissions or override role-based
+        permissions.
+    groups
+        A list of groups that the user belongs to, which can be used for group-
+        based access control. Each group can have its own set of permissions
+        that apply to its members.
+    is_active
+        A boolean flag indicating whether the user account is active. Inactive
+        users may not be able to log in or access certain features of the
+        application.
+    admin
+        A boolean flag indicating whether the user has administrative
+        privileges. This can be used to grant additional permissions or access
+        to certain features of the application that are reserved for
+        administrators.
+    """
+
     id: UUID | int | str | None = None
     username: str | None = None
     password: str | None = None

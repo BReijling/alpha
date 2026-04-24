@@ -3,26 +3,24 @@ import ssl
 from typing import Any, Literal, cast
 
 ClientStrategyType = Literal[
-    'SYNC',
-    'SAFE_RESTARTABLE',
-    'SAFE_SYNC',
-    'ASYNC',
-    'LDIF',
-    'RESTARTABLE',
-    'REUSABLE',
-    'MOCK_SYNC',
-    'MOCK_ASYNC',
-    'ASYNC_STREAM',
+    "SYNC",
+    "SAFE_RESTARTABLE",
+    "SAFE_SYNC",
+    "ASYNC",
+    "LDIF",
+    "RESTARTABLE",
+    "REUSABLE",
+    "MOCK_SYNC",
+    "MOCK_ASYNC",
+    "ASYNC_STREAM",
 ]
 
 
 class LDAPConnector:
-    """LDAP connector.
-
-    Intended for providers that connect to LDAP directories.
-
-    For example, connecting to an LDAP server to authenticate users
-    or retrieve user information.
+    """Intended for providers that connect to LDAP directories. This class
+    provides methods to establish and manage a connection to an LDAP server,
+    including connecting, disconnecting, and checking the connection status. It
+    also allows retrieval of the current connection and server information.
     """
 
     def __init__(
@@ -34,8 +32,7 @@ class LDAPConnector:
         use_tls: bool = True,
         client_strategy: ClientStrategyType = SYNC,
     ) -> None:
-        """Initialize the LDAP connector with server details.
-
+        """
         Parameters
         ----------
         server_url
@@ -49,7 +46,19 @@ class LDAPConnector:
         server_port
             Port of the LDAP server.
         client_strategy
-            The client strategy to use for the connection.
+            The client strategy to use for the connection. This can be one of the
+            following values:
+
+            - 'SYNC': Synchronous strategy (default).
+            - 'SAFE_RESTARTABLE': Safe restartable strategy.
+            - 'SAFE_SYNC': Safe synchronous strategy.
+            - 'ASYNC': Asynchronous strategy.
+            - 'LDIF': LDIF strategy.
+            - 'RESTARTABLE': Restartable strategy.
+            - 'REUSABLE': Reusable strategy.
+            - 'MOCK_SYNC': Mock synchronous strategy.
+            - 'MOCK_ASYNC': Mock asynchronous strategy.
+            - 'ASYNC_STREAM': Asynchronous stream strategy.
         """
         self._server_url = server_url
         self._bind_dn = bind_dn
@@ -71,6 +80,16 @@ class LDAPConnector:
             get_info=ALL,
         )
         self._connection: Connection | None = None
+
+    @property
+    def connection_cls(self) -> type[Connection]:
+        """Get the connection class."""
+        return Connection
+
+    @property
+    def bind_dn(self) -> str:
+        """Get the bind DN."""
+        return self._bind_dn
 
     def connect(self) -> None:
         """Method to establish a connection to the LDAP server."""
@@ -112,13 +131,3 @@ class LDAPConnector:
     def get_server(self) -> Server:
         """Get the LDAP server."""
         return self._server
-
-    @property
-    def connection_cls(self) -> type[Connection]:
-        """Get the connection class."""
-        return Connection
-
-    @property
-    def bind_dn(self) -> str:
-        """Get the bind DN."""
-        return self._bind_dn

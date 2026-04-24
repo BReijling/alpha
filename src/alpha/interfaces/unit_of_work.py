@@ -1,4 +1,5 @@
-"""_summary_
+"""Contains the UnitOfWork protocol, which defines the interface for a unit of
+work implementation.
 """
 
 from typing import (
@@ -15,39 +16,55 @@ UOW = TypeVar("UOW", bound="UnitOfWork")
 
 @runtime_checkable
 class UnitOfWork(Protocol):
-    """_summary_
-
-    Parameters
-    ----------
-    Protocol : _type_
-        _description_
+    """Unit of Work protocol defining the interface for a unit of work 
+    implementation.
     """
 
     def __enter__(self: UOW) -> UOW:
-        """_summary_"""
+        """Enter the runtime context related to this object.
+
+        Returns
+        -------
+        UOW
+            The unit of work instance.
+        """
         ...
 
     def __exit__(self, *args: Any) -> None:
-        """_summary_"""
+        """Exit the runtime context related to this object.
+        """
+        ...
 
     def commit(self) -> None:
-        """_summary_"""
+        """Commit the current transaction."""
+        ...
 
     def flush(self) -> None:
-        """_summary_"""
+        """Flush the current session."""
+        ...
 
     def rollback(self) -> None:
-        """_summary_"""
+        """Rollback the current transaction."""
+        ...
 
     def refresh(self, obj: object) -> None:
-        """_summary_"""
+        """Refresh the state of the given object from the database.
+        
+        Parameters
+        ----------
+        obj
+            The object to refresh.
+        """
+        ...
 
     @property
     def session(self) -> Session:
-        """_summary_
+        """Get the current session.
 
         Returns
         -------
         Session
-            _description_
+            The current SQLAlchemy session.
         """
+        ...
+        

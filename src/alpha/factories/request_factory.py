@@ -48,22 +48,22 @@ class RequestFactory:
         ----------
         func
             A callable service function
-        cast_args, optional
+        cast_args
             Make use of the GenericTypeFactory to cast arguments,
             by default True
-        use_model_class_factory, optional
+        use_model_class_factory
             Make use of the ModelClassFactory to map objects to a dataclass,
             by default True
-        model_class_factory, optional
+        model_class_factory
             A ModelClassFactory class
             by default ModelClassFactory
-        generic_type_factory, optional
+        generic_type_factory
             A TypeFactory that can handle generic types
             by default GenericTypeFactory
-        enum_type_factory, optional
+        enum_type_factory
             A TypeFactory that can handle enum types
             by default EnumTypeFactory
-        json_patch_type_factory, optional
+        json_patch_type_factory
             A TypeFactory that can handle a JsonPatch type
             by default JsonPatchTypeFactory
         """

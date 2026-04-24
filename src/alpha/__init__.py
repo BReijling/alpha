@@ -4,13 +4,20 @@ from alpha.factories.jwt_factory import JWTFactory
 from alpha.factories.logging_handler_factory import LoggingHandlerFactory
 from alpha.factories.model_class_factory import ModelClassFactory
 from alpha.domain.models.user import User
-from alpha.domain.models.base_model import BaseDomainModel, DomainModel
+from alpha.domain.models.group import Group
+from alpha.domain.models.role import Role
+from alpha.domain.models.base_model import (
+    BaseDomainModel,
+    DomainModel,
+    DomainModelCovariant,
+    DomainModelContravariant,
+)
 from alpha.domain.models.life_cycle_base import LifeCycleBase
 from alpha.infra.connectors.oidc_connector import (
     OIDCConnector,
     KeyCloakOIDCConnector,
 )
-from alpha.infra.databases.sql_alchemy import SqlAlchemyDatabase
+from alpha.infra.connectors.sql_alchemy import SqlAlchemyDatabase
 from alpha.infra.models.filter_operators import And, Or
 from alpha.infra.models.json_patch import JsonPatch
 from alpha.infra.models.order_by import OrderBy, Order
@@ -19,7 +26,7 @@ from alpha.interfaces.attrs_instance import AttrsInstance
 from alpha.interfaces.dataclass_instance import DataclassInstance
 from alpha.interfaces.pydantic_instance import PydanticInstance
 from alpha.interfaces.openapi_model import OpenAPIModel
-from alpha.interfaces.updateable import Updateable
+from alpha.interfaces.updatable import Updatable
 from alpha.interfaces.patchable import Patchable
 from alpha.interfaces.api_repository import ApiRepository
 from alpha.interfaces.sql_repository import SqlRepository
@@ -85,8 +92,12 @@ __all__ = [
     "ModelClassFactory",
     "BaseDomainModel",
     "DomainModel",
+    "DomainModelCovariant",
+    "DomainModelContravariant",
     "LifeCycleBase",
     "User",
+    "Group",
+    "Role",
     "OIDCConnector",
     "KeyCloakOIDCConnector",
     "SqlAlchemyDatabase",
@@ -101,7 +112,7 @@ __all__ = [
     "DataclassInstance",
     "PydanticInstance",
     "OpenAPIModel",
-    "Updateable",
+    "Updatable",
     "Patchable",
     "ApiRepository",
     "SqlRepository",

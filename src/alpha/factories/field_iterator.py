@@ -40,7 +40,7 @@ class Field:
             in which case the value will be evaluated to extract the type
         default
             default value
-        default_factory, optional
+        default_factory
             default value if present, by default None
         """
         self.init = init

@@ -64,12 +64,12 @@ dev = [
     "httpx>=0.28.1",
     "tox>=4.53.0",
 ]
-docs = [
-    "mkdocs-material>=9.5",
-    "mkdocstrings[python]>=0.29",
-    "mkdocs-autorefs>=1.0",
-    "mkdocs-mermaid2-plugin>=1.2.0"
-]
+# docs = [
+#     "mkdocs-material>=9.5",
+#     "mkdocstrings[python]>=0.29",
+#     "mkdocs-autorefs>=1.0",
+#     "mkdocs-mermaid2-plugin>=1.2.0"
+# ]
 
 [project.optional-dependencies]
 api-generator = [

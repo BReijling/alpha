@@ -10,12 +10,12 @@
 
 ## Core features
 
-- **JSON Serialization** — `JSONEncoder` for complex types: numpy, pandas, datetime, UUID, Enums and objects with `to_dict()`
+- **API code generation** — OpenAPI code generation via CLI, Flask integration, request/response utilities
 - **Authentication & Authorization** — OIDC/KeyCloak, LDAP/Active Directory, JWT and password-based authentication
 - **Database access layer** — SQLAlchemy abstraction with Repository and Unit of Work patterns
-- **API development** — OpenAPI code generation via CLI, Flask integration, request/response utilities
 - **Dependency Injection** — YAML-configurable DI container built on `dependency-injector`
 - **Model support** — Domain models with audit trail, attrs, Pydantic, dataclasses and OpenAPI model support
+- **JSON Serialization** — `JSONEncoder` for complex types: numpy, pandas, datetime, UUID, Enums and objects with `to_dict()`
 
 ## Installation
 
@@ -47,9 +47,7 @@ db = SqlAlchemyDatabase("postgresql+psycopg2://user:pass@localhost/mydb")
 
 # Use the Unit of Work pattern
 with SqlAlchemyUnitOfWork(db) as uow:
-    repo = uow.get_repository(MyRepository)
-    items = repo.get_all()
-    uow.commit()
+    user = uow.users.get_by_id(1)
 ```
 
 ## Learn more

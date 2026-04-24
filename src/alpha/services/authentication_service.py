@@ -14,7 +14,7 @@ from alpha.providers.models.identity import Identity
 from alpha.providers.models.token import Token
 from alpha.providers.models.credentials import PasswordCredentials
 from alpha.interfaces.providers import IdentityProvider
-from alpha.services.models.cookie import Cookie
+from alpha.utils.cookie import Cookie
 from alpha.utils.secret_generator import generate_secret
 from alpha import exceptions
 
@@ -69,71 +69,71 @@ class AuthenticationService:
         ----------
         identity_provider
             Identity provider to use for authentication.
-        identity_id_attribute, optional
+        identity_id_attribute
             Attribute name in the identity to use as the unique identifier, by
             default "subject"
-        use_cookies, optional
+        use_cookies
             Whether to use cookies for authentication, by default False
-        use_refresh_tokens, optional
+        use_refresh_tokens
             Whether to use refresh tokens for authentication, by default False
-        cookie_auth_token_name, optional
+        cookie_auth_token_name
             Name of the cookie to store the access token,
             by default "auth_token"
-        cookie_refresh_token_name, optional
+        cookie_refresh_token_name
             Name of the cookie to store the refresh token,
             by default "refresh_token"
-        cookie_path, optional
+        cookie_path
             Path for which the authentication cookies are valid,
             by default "/"
-        cookie_domain, optional
+        cookie_domain
             Domain for which the authentication cookies are valid,
             by default None
-        cookie_secure, optional
+        cookie_secure
             Whether the authentication cookies should be secure,
             by default True
-        cookie_httponly, optional
+        cookie_httponly
             Whether the authentication cookies should be HTTP-only,
             by default True
-        cookie_samesite, optional
+        cookie_samesite
             The SameSite attribute for the authentication cookies,
             by default "Lax"
-        auth_token_max_age, optional
+        auth_token_max_age
             Maximum age of the access token cookie in seconds,
             by default 900
-        refresh_token_max_age, optional
+        refresh_token_max_age
             Maximum age of the refresh token cookie in seconds,
             by default 3600 * 24 * 7
-        merge_with_database_users, optional
+        merge_with_database_users
             Whether to merge identity data with database user data,
             by default False
-        merge_with_database_groups, optional
+        merge_with_database_groups
             Whether to merge identity data with database group data,
             by default False
-        user_username_attribute, optional
+        user_username_attribute
             Attribute name in the user database to use as the unique
             identifier, by default "username"
-        group_name_attribute, optional
+        group_name_attribute
             Attribute name in the group database to use as the unique
             identifier, by default "name"
-        uow, optional
+        uow
             UnitOfWork instance for database operations, by default None
-        user_model, optional
+        user_model
             User model class to use for database operations, by default User
-        group_model, optional
+        group_model
             Group model class to use for database operations, by default Group
-        token_model, optional
+        token_model
             Token model class to use for database operations, by default Token
-        users_repository_name, optional
+        users_repository_name
             Name of the user repository in the UnitOfWork, by default "users"
-        groups_repository_name, optional
+        groups_repository_name
             Name of the group repository in the UnitOfWork, by default "groups"
-        refresh_token_storage, optional
+        refresh_token_storage
             Storage mechanism for refresh tokens, by default "file". Supported
             values are "database", "memory", "cache", and "file".
-        refresh_token_repository_name, optional
+        refresh_token_repository_name
             Name of the refresh token repository in the UnitOfWork,
             by default "refresh_tokens"
-        refresh_token_storage_file_path, optional
+        refresh_token_storage_file_path
             File path for storing refresh tokens if using file storage,
             by default None. This is required if refresh_token_storage is set
             to "file". When the value is None the file will be stored in the
@@ -151,14 +151,14 @@ class AuthenticationService:
                 },
                 ...
             }
-        refresh_token_length, optional
+        refresh_token_length
             Length of the generated refresh tokens, by default 32
-        refresh_identity_on_refresh, optional
+        refresh_identity_on_refresh
             Whether to refresh the identity when refreshing the token, by
             default False. This need to be implemented in the
             identity provider's issue_token method. This usually requires
             additional authorization from the identity service.
-        static_user, optional
+        static_user
             Static user to use for authentication, by default None.
             If provided, this user will be authenticated if the credentials
             match, bypassing the identity provider. This can be used for
@@ -285,7 +285,7 @@ class AuthenticationService:
 
         Parameters
         ----------
-        refresh_token, optional
+        refresh_token
             Optional refresh token to invalidate along with the authentication
             token. This is only applicable if using refresh tokens.
 
@@ -350,7 +350,7 @@ class AuthenticationService:
         ----------
         refresh_token
             Refresh token to use for refreshing the authentication token.
-        auth_token, optional
+        auth_token
             Optional current authentication token, which can be reused if
             needed.
 

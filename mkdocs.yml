@@ -1,24 +1,24 @@
-site_name: alpha-python
+site_name: Alpha
 site_description: A foundational Python library providing standard building blocks for Python applications that use APIs and/or database interactions.
 site_author: Bart Reijling
 site_url: https://alpha-python.readthedocs.io/
 
 repo_name: breijling/alpha
 repo_url: https://github.com/breijling/alpha
-edit_uri: edit/main/docs/
+
 
 theme:
-  name: material
+  name: readthedocs
   palette:
     - scheme: default
-      primary: indigo
-      accent: indigo
+      primary: cyan
+      accent: cyan
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
     - scheme: slate
-      primary: indigo
-      accent: indigo
+      primary: cyan
+      accent: cyan
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
@@ -44,9 +44,10 @@ plugins:
           options:
             docstring_style: numpy
             show_source: true
-            show_root_heading: true
+            show_root_heading: false
             show_root_full_path: false
             show_category_heading: true
+            show_submodules: false
             members_order: source
             separate_signature: true
             merge_init_into_class: true
@@ -58,7 +59,11 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets:
       base_path: ['.']
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:mermaid2.fence_mermaid
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.details
@@ -72,24 +77,96 @@ nav:
   - Quickstart: quickstart.md
   - Concepts:
     - Overview: concepts/index.md
+    - Design Concepts: concepts/design-concepts.md
     - Repository Pattern: concepts/repository-pattern.md
     - Dependency Injection: concepts/dependency-injection.md
   - Guides:
-    - Database: guides/database.md
-    - Authentication: guides/authentication.md
     - API Generation: guides/api-generation.md
+    - Authentication: guides/authentication.md
+    - Database: guides/database.md
     - Flask Integration: guides/flask-integration.md
   - API Reference:
     - Overview: reference/index.md
-    - JSON Encoder: reference/encoder.md
-    - Domain Models: reference/domain-models.md
-    - Repositories: reference/repositories.md
-    - Adapters: reference/adapters.md
-    - Factories: reference/factories.md
-    - Providers: reference/providers.md
-    - Services: reference/services.md
-    - Interfaces: reference/interfaces.md
-    - Utilities: reference/utils.md
+    - Adapters: 
+      - Overview: reference/adapters/index.md
+      - REST API Unit-of-Work: reference/adapters/rest_api_unit_of_work.md
+      - SQLAlchemy Unit-of-Work: reference/adapters/sqla_unit_of_work.md
+    - Domain: 
+      - Overview: reference/domain/index.md
+      - Models:
+        - BaseDomainModel: reference/domain/models/base_model.md
+        - LifeCycleBase: reference/domain/models/life_cycle_base.md
+        - User: reference/domain/models/user.md
+        - Role: reference/domain/models/role.md
+        - Group: reference/domain/models/group.md
+    - Factories:
+      - Overview: reference/factories/index.md
+      - JWT Factory: reference/factories/jwt_factory.md
+      - Model Class Factory: reference/factories/model_class_factory.md
+      - Logging Handler Factory: reference/factories/logging_handler_factory.md
+      - Type Factories: reference/factories/type_factories.md
+      - Request Factory: reference/factories/request_factory.md
+      - Response Factory: reference/factories/response_factory.md
+      - Password Factory: reference/factories/password_factory.md
+    - Infra:
+      - Overview: reference/infra/index.md
+      - Connectors:
+        - SQLAlchemy Database: reference/infra/connectors/sql_alchemy.md
+        - LDAP Connector: reference/infra/connectors/ldap_connector.md
+        - OIDC Connector: reference/infra/connectors/oidc_connector.md
+      - Models:
+        - Search Filter: reference/infra/models/search_filter.md
+        - Filter Operators: reference/infra/models/filter_operators.md
+        - Order By: reference/infra/models/order_by.md
+        - JSON Patch: reference/infra/models/json_patch.md
+        - Query Clause: reference/infra/models/query_clause.md
+    - Interfaces:
+      - Overview: reference/interfaces/index.md
+      - UnitOfWork: reference/interfaces/unit_of_work.md
+      - SqlDatabase: reference/interfaces/sql_database.md
+      - SqlRepository: reference/interfaces/sql_repository.md
+      - ApiRepository: reference/interfaces/api_repository.md
+      - SqlMapper: reference/interfaces/sql_mapper.md
+      - OpenAPIModel: reference/interfaces/openapi_model.md
+      - AttrsInstance: reference/interfaces/attrs_instance.md
+      - DataclassInstance: reference/interfaces/dataclass_instance.md
+      - PydanticInstance: reference/interfaces/pydantic_instance.md
+      - Updatable: reference/interfaces/updatable.md
+      - Patchable: reference/interfaces/patchable.md
+      - Providers: reference/interfaces/providers.md
+      - TokenFactory: reference/interfaces/token_factory.md
+    - Providers:
+      - Overview: reference/providers/index.md
+      - OIDC Provider: reference/providers/oidc_provider.md
+      - LDAP Provider: reference/providers/ldap_provider.md
+      - Database Provider: reference/providers/database_provider.md
+      - Models:
+        - Identity Model: reference/providers/models/identity.md
+        - Credentials Model: reference/providers/models/credentials.md
+        - Token Model: reference/providers/models/token.md
+    - Repositories:
+      - Overview: reference/repositories/index.md
+      - SQLAlchemy Repository: reference/repositories/sql_alchemy_repository.md
+      - REST API Repository: reference/repositories/rest_api_repository.md
+      - Models:
+        - Repository Model: reference/repositories/models/repository_model.md
+    - Services:
+      - Overview: reference/services/index.md
+      - Authentication Service: reference/services/authentication_service.md
+      - User Lifecycle Management: reference/services/user_lifecycle_management.md
+    - Utilities:
+      - Overview: reference/utils/index.md
+      - Logging Configurator: reference/utils/logging_configurator.md
+      - Request Headers: reference/utils/headers.md
+      - Response Object: reference/utils/create_response_object.md
+      - Cookie: reference/utils/cookie.md
+      - Secret Generator: reference/utils/generate_secret.md
+      - Attrs Instance Checker: reference/utils/is_attrs.md
+      - Pydantic Instance Checker: reference/utils/is_pydantic.md
+      - Version Checker: reference/utils/minor_version_gte.md
+      - Logging Level Checker: reference/utils/logging_level_checker.md
+      - Verify Identity: reference/utils/verify_identity.md
+    - Encoder: reference/encoder.md
   - Changelog: changelog.md
 
 extra:

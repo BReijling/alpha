@@ -1,30 +1,28 @@
-"""_summary_"""
+"""Contains the SqlRepository protocol, which defines the interface for
+SQLAlchemy ORM repository operations.
+"""
 
 from enum import Enum
 from typing import Any, Literal, Protocol, overload, runtime_checkable
 from uuid import UUID
 
-from sqlalchemy.orm import (
-    Query,
-    Session,
-)
+from sqlalchemy.orm import Session
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
 from alpha.domain.models.base_model import BaseDomainModel, DomainModel
-from alpha.infra.models.search_filter import SearchFilter
-from alpha.infra.models.query_clause import QueryClause
+from alpha.infra.models.json_patch import JsonPatch
 from alpha.interfaces.patchable import Patchable
-from alpha.interfaces.updateable import Updateable
+from alpha.interfaces.updatable import Updatable
 
 
 @runtime_checkable
 class SqlRepository(Protocol[DomainModel]):
-    """_summary_
+    """Repository interface for SQLAlchemy ORM operations.
 
-    Parameters
-    ----------
-    Protocol : _type_
-        _description_
+    Generic
+    -------
+        A generic type variable used to specify the domain model type for the
+        repository.
     """
 
     session: Session
@@ -52,15 +50,17 @@ class SqlRepository(Protocol[DomainModel]):
         return_obj: bool = True,
         raise_if_exists: bool = False,
     ) -> DomainModel | None:
-        """_summary_
+        """Add a domain model instance to the database.
 
         Parameters
         ----------
-        obj : DomainModel
-            _description_
-        raise_if_exists : bool, optional
-            _description_, by default False
+        obj
+            The domain model instance to add to the database.
+        raise_if_exists
+            Whether to raise an exception if the instance already exists, by
+            default False
         """
+        ...
 
     def add_all(
         self,
@@ -68,32 +68,33 @@ class SqlRepository(Protocol[DomainModel]):
         return_obj: bool = False,
         raise_if_exists: bool = False,
     ) -> list[DomainModel] | None:
-        """_summary_
+        """Add multiple domain model instances to the database.
 
         Parameters
         ----------
-        objs : list[DomainModel]
-            _description_
-        raise_if_exists : bool, optional
-            _description_, by default False
+        objs
+            The list of domain model instances to add to the database.
+        raise_if_exists
+            Whether to raise an exception if any of the instances already exist, by default False
         """
+        ...
 
     def count(
         self,
         model: DomainModel | None = None,
         **kwargs: Any,
     ) -> int:
-        """_summary_
+        """Count the number of domain model instances in the database.
 
         Parameters
         ----------
-        model : DomainModel | None, optional
-            _description_, by default None
+        model
+            The domain model class to count instances of, by default None
 
         Returns
         -------
         int
-            _description_
+            The number of domain model instances in the database.
         """
         ...
 
@@ -105,23 +106,25 @@ class SqlRepository(Protocol[DomainModel]):
         model: DomainModel | None = None,
         **kwargs: Any,
     ) -> DomainModel:
-        """_summary_
+        """Retrieve a single domain model instance from the database based on a
+        specific attribute and value.
 
         Parameters
         ----------
-        attr : str | InstrumentedAttribute
-            _description_
-        value : str | int | float | Enum | UUID
-            _description_
-        cursor_result : str, optional
-            _description_, by default "first"
-        model : DomainModel | None, optional
-            _description_, by default None
+        attr
+            The attribute to filter by.
+        value
+            The value of the attribute to filter by.
+        cursor_result
+            The type of result to return, by default "first"
+        model
+            The domain model class to query, by default None
 
         Returns
         -------
         DomainModel
-            _description_
+            The domain model instance that matches the query, or None if no
+            match is found.
         """
         ...
 
@@ -133,23 +136,24 @@ class SqlRepository(Protocol[DomainModel]):
         model: DomainModel | None = None,
         **kwargs: Any,
     ) -> list[DomainModel]:
-        """_summary_
+        """Retrieve multiple domain model instances from the database based on
+        a specific attribute and value.
 
         Parameters
         ----------
-        attr : str | InstrumentedAttribute
-            _description_
-        value : str | int | float | Enum | UUID
-            _description_
-        cursor_result : str, optional
-            _description_, by default "all"
-        model : DomainModel | None, optional
-            _description_, by default None
+        attr
+            The attribute to filter by.
+        value
+            The value of the attribute to filter by.
+        cursor_result
+            The type of result to return, by default "all"
+        model
+            The domain model class to query, by default None
 
         Returns
         -------
         list[DomainModel]
-            _description_
+            The list of domain model instances that match the query.
         """
         ...
 
@@ -161,23 +165,25 @@ class SqlRepository(Protocol[DomainModel]):
         model: DomainModel | None = None,
         **kwargs: Any,
     ) -> DomainModel:
-        """_summary_
+        """Retrieve a single domain model instance from the database based on a
+        specific attribute and value, ensuring that exactly one match is found.
 
         Parameters
         ----------
-        attr : str | InstrumentedAttribute
-            _description_
-        value : str | int | float | Enum | UUID
-            _description_
-        cursor_result : str, optional
-            _description_, by default "one"
-        model : DomainModel | None, optional
-            _description_, by default None
+        attr
+            The attribute to filter by.
+        value
+            The value of the attribute to filter by.
+        cursor_result
+            The type of result to return, by default "one"
+        model
+            The domain model class to query, by default None
 
         Returns
         -------
         DomainModel
-            _description_
+            The domain model instance that matches the query, or None if no
+            match is found.
         """
         ...
 
@@ -189,23 +195,25 @@ class SqlRepository(Protocol[DomainModel]):
         model: DomainModel | None = None,
         **kwargs: Any,
     ) -> DomainModel | None:
-        """_summary_
+        """Retrieve a single domain model instance from the database based on a
+        specific attribute and value, ensuring that at most one match is found.
 
         Parameters
         ----------
-        attr : str | InstrumentedAttribute
-            _description_
-        value : str | int | float | Enum | UUID
-            _description_
-        cursor_result : str, optional
-            _description_, by default "one_or_none"
-        model : DomainModel | None, optional
-            _description_, by default None
+        attr
+            The attribute to filter by.
+        value
+            The value of the attribute to filter by.
+        cursor_result
+            The type of result to return, by default "one_or_none"
+        model
+            The domain model class to query, by default None
 
         Returns
         -------
         DomainModel | None
-            _description_
+            The domain model instance that matches the query, or None if no
+            match is found.
         """
         ...
 
@@ -217,63 +225,70 @@ class SqlRepository(Protocol[DomainModel]):
         model: DomainModel | None = None,
         **kwargs: Any,
     ) -> DomainModel | None:
-        """_summary_
+        """Retrieve a single domain model instance from the database based on
+        its unique identifier.
 
         Parameters
         ----------
-        value : str | int | UUID
-            _description_
-        attr : str | InstrumentedAttribute, optional
-            _description_, by default "id"
-        cursor_result : str, optional
-            _description_, by default "one_or_none"
-        model : DomainModel | None, optional
-            _description_, by default None
+        value
+            The unique identifier of the domain model instance.
+        attr
+            The attribute to filter by, by default "id"
+        cursor_result
+            The type of result to return, by default "one_or_none"
+        model
+            The domain model class to query, by default None
 
         Returns
         -------
         DomainModel | None
-            _description_
+            The domain model instance that matches the query, or None if no
+            match is found.
         """
         ...
 
-    def patch(self, obj: Patchable, patches: dict[str, Any]) -> DomainModel:
-        """_summary_
+    def patch(self, obj: Patchable[Any], patches: JsonPatch) -> DomainModel:
+        """Patch a domain model instance in the database using a JSON patch
+        object.
 
         Parameters
         ----------
-        obj : Patchable
-            _description_
-        patches : dict[str, Any]
-            _description_
+        obj
+            The domain model instance to patch.
+        patches
+            The JSON patch object containing the changes to apply to the domain
+            model instance.
 
         Returns
         -------
         DomainModel
-            _description_
+            The patched domain model instance.
         """
+        ...
 
     def remove(self, obj: DomainModel) -> None:
-        """_summary_
+        """Remove a domain model instance from the database.
 
         Parameters
         ----------
-        obj : DomainModel
-            _description_
+        obj
+            The domain model instance to remove.
         """
+        ...
 
     def remove_all(
         self,
         objs: list[DomainModel] | None,
         **kwargs: Any,
     ) -> None:
-        """_summary_
+        """Remove multiple domain model instances from the database.
 
         Parameters
         ----------
-        objs : list[DomainModel] | None
-            _description_
+        objs
+            The list of domain model instances to remove, by default None
         """
+        ...
 
     def select(
         self,
@@ -281,36 +296,38 @@ class SqlRepository(Protocol[DomainModel]):
         cursor_result: str = "all",
         **kwargs: Any,
     ) -> list[DomainModel]:
-        """_summary_
+        """Select domain model instances from the database based on optional
+        filters.
 
         Parameters
         ----------
-        model : DomainModel | None, optional
-            _description_, by default None
-        cursor_result : str, optional
-            _description_, by default "all"
+        model
+            The domain model class to query, by default None
+        cursor_result
+            The type of result to return, by default "all"
 
         Returns
         -------
         list[DomainModel]
-            _description_
+            The list of domain model instances that match the query.
         """
         ...
 
-    def update(self, obj: Updateable, other: DomainModel) -> DomainModel:
-        """_summary_
+    def update(self, obj: Updatable, other: DomainModel) -> DomainModel:
+        """Update a domain model instance in the database.
 
         Parameters
         ----------
-        obj : DomainModel
-            _description_
-        other : DomainModel
-            _description_
+        obj
+            The domain model instance to update.
+
+        other
+            The domain model instance containing the updated values.
 
         Returns
         -------
         DomainModel
-            _description_
+            The updated domain model instance.
         """
         ...
 
@@ -320,50 +337,20 @@ class SqlRepository(Protocol[DomainModel]):
         cursor_result: str = "all",
         **kwargs: Any,
     ) -> list[DomainModel]:
-        """_summary_
+        """View domain model instances from the database based on optional
+        filters.
+
 
         Parameters
         ----------
-        model : DomainModel
-            _description_
-        cursor_result : str, optional
-            _description_, by default "all"
+        model
+            The domain model class to query.
+        cursor_result
+            The type of result to return, by default "all"
 
         Returns
         -------
         list[DomainModel]
-            _description_
+            The list of domain model instances that match the query.
         """
         ...
-
-    def _query(
-        self,
-        cursor_result: str | None = None,
-        model: DomainModel | None = None,
-        filters: list[SearchFilter] = [],
-        **kwargs: Any,
-    ) -> Any:
-        """_summary_
-
-        Parameters
-        ----------
-        cursor_result : str | None, optional
-            _description_, by default None
-        model : DomainModel | None, optional
-            _description_, by default None
-        filters : list[SearchFilter], optional
-            _description_, by default []
-
-        Returns
-        -------
-        Any
-            _description_
-        """
-        ...
-
-    def _query_clause(
-        self,
-        clause: QueryClause,
-        query: Query[Any],
-        model: DomainModel,
-    ) -> Query[Any]: ...

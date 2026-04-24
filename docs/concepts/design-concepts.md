@@ -24,7 +24,7 @@ In software architecture, we often talk about different layers or components tha
 - **Providers** — manage authentication and external service integrations. Providers handle the interaction with external systems, such as third-party APIs or authentication services, ensuring that these integrations are consistent and reliable.
 - **Utilities** — provide helper functions and common utilities used across the codebase. Utilities offer reusable functionality that can be leveraged by multiple components, promoting code reuse and reducing duplication.
 
-By organizing our code into these components, we can create a clear separation of concerns and make it easier to maintain and evolve our software over time. Each component has a specific role and responsibility, which helps to keep our codebase organized and manageable as it grows in complexity.
+By organizing our code into these components, we can create a clear separation of concerns and make it easier to maintain, evolve our software over time and increase testability. Each component has a specific role and responsibility, which helps to keep our codebase organized and manageable as it grows in complexity. 
 
 Alpha components are designed to work together seamlessly, allowing you to build robust and scalable applications that are aligned with the principles of Domain-Driven Design. Whether you are building a small application or a large enterprise system, the architectural patterns and components provided by Alpha can help you to create software that is maintainable, scalable, and closely aligned with your business needs.
 

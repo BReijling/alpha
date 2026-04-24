@@ -9,7 +9,21 @@ from alpha.encoder import JSONEncoder
 
 class JWTFactory:
     """An implementation of the TokenFactory interface which can be used to
-    generate and decode a JSON Web Token.
+    generate and decode a JSON Web Token. The `pyjwt` library is used to handle 
+    the encoding and decoding of the JWT. The JWTFactory class provides methods 
+    for creating a JWT token, validating a JWT token, and retrieving the 
+    payload from a JWT token. The class is initialized with a secret key, 
+    token lifetime, issuer, algorithm, and decoding options. 
+    
+    The `create` method generates a JWT token for a given subject and payload, 
+    with an optional `not_before` parameter to specify when the token becomes 
+    valid. 
+    
+    The `validate` method checks the validity of a JWT token and raises 
+    appropriate exceptions if the token is invalid. 
+    
+    The `get_payload` method retrieves the payload from a JWT token without
+    verifying its signature.
     """
 
     def __init__(
@@ -29,16 +43,17 @@ class JWTFactory:
         ----------
         secret
             The secret key used to sign the JWT.
-        lifetime_hours, optional
+        lifetime_hours
             The lifetime of the JWT in hours, by default "12"
-        issuer, optional
+        issuer
             The issuer of the JWT, by default "http://localhost"
-        jwt_algorithm, optional
+        jwt_algorithm
             The algorithm used to sign the JWT, by default "HS256"
-        options, optional
+        options
             A dictionary of options to customize the decoding behavior, by
-            default None. If not provided, it defaults to requiring standard
-            claims and verifying the signature.
+            default None. If not provided, it defaults to requiring all 
+            standard claims (exp, iat, nbf, iss, sub) and verifying the
+            signature.
 
         Raises
         ------
@@ -137,9 +152,9 @@ class JWTFactory:
     def get_payload(
         self, token: str, options: dict[str, Any] | None = None
     ) -> dict[str, Any]:
-        """Retrieve the payload from a JWT token. This method does not perform
-        validation of the token by default. It simply decodes the token and
-        extracts the payload.
+        """Retrieve the payload from a JWT token. This method decodes the token 
+        and extracts the payload data. If the token is invalid, it raises an 
+        appropriate exception. If the token is valid, it returns the payload.
 
         If the `options` parameter is provided, it will be passed to the
         `jwt.decode` function. This allows customization of the decoding

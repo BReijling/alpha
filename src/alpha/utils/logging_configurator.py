@@ -31,22 +31,22 @@ class LoggingConfigurator:
         stream: str = "stdout",
         logger_name: str = "root",
     ) -> None:
-        """_summary_
+        """Initialize the LoggingConfigurator.
 
         Parameters
         ----------
-        config, optional
-            _description_, by default None
-        fmt, optional
-            _description_, by default FORMAT
-        handlers, optional
-            _description_, by default None
-        level, optional
-            _description_, by default logging.INFO
-        stream, optional
-            _description_, by default "stdout"
-        logger_name, optional
-            _description_, by default 'root'
+        config
+            The logging configuration dictionary, by default None
+        fmt
+            The logging format, by default FORMAT
+        handlers
+            The list of logging handlers, by default None
+        level
+            The logging level, by default logging.INFO
+        stream
+            The logging stream, by default "stdout"
+        logger_name
+            The name of the logger, by default 'root'
         """
         if not fmt:
             fmt = FORMAT
@@ -101,8 +101,10 @@ class GunicornLogger(glogging.Logger):
     def setup(self, cfg: Any):
         """Set the FORMAT on the gunicorn logging handler.
 
-        Args:
-            cfg: gunicorn glogging configuration
+        Parameters
+        ----------
+        cfg
+            The gunicorn glogging configuration
         """
         super().setup(cfg)  # type: ignore
 
@@ -118,7 +120,7 @@ def logging_level_checker(level: str | int, logger_name: str = "root") -> bool:
 
     Parameters
     ----------
-    level : Union[str, int]
+    level
         The logging level as a string or the corresponding integer
 
     Returns

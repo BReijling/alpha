@@ -12,7 +12,23 @@ DomainModelContravariant = TypeVar(
 
 @dataclass
 class BaseDomainModel:
+    """Base class for all domain models which can be inherited by all domain
+    models in the application.
+
+    This class is mainly being used to provide a common interface for all
+    domain models, and to provide a common method for converting the domain
+    model instance to a dictionary.
+
+    It has no attributes of its own.
+    """
+
     def to_dict(self) -> dict[str, Any]:
+        """Convert the domain model instance to a dictionary.
+
+        Returns
+        -------
+            A dictionary representation of the domain model instance.
+        """
         obj: dict[str, Any] = {}
         for attr in self.__dataclass_fields__.keys():
             if not attr.startswith("_"):
@@ -22,4 +38,22 @@ class BaseDomainModel:
         return obj
 
     def update(self, obj: DomainModel) -> DomainModel:
-        raise NotImplementedError("Subclasses must implement the update method")
+        """Update the current instance with the values from another instance.
+
+        Parameters
+        ----------
+        obj
+            Object to update the current instance with.
+
+        Returns
+        -------
+            The updated instance of the domain model.
+
+        Raises
+        ------
+        NotImplementedError
+            If the method is not implemented in the subclass.
+        """
+        raise NotImplementedError(
+            "Subclasses must implement the update method"
+        )

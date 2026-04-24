@@ -27,7 +27,8 @@ from alpha.infra.models.search_filter import SearchFilter
 from alpha.infra.models.query_clause import QueryClause
 from alpha.infra.models.filter_operators import FilterOperator
 from alpha.infra.models.json_patch import JsonPatch
-from alpha.interfaces.updateable import Updateable
+from alpha.interfaces.patchable import Patchable
+from alpha.interfaces.updatable import Updatable
 from alpha.utils.logging_level_checker import logging_level_checker as llc
 
 
@@ -64,17 +65,26 @@ class SqlAlchemyRepository(Generic[DomainModel]):
             # Custom query logic here
             pass
     ```
+
+    Generic
+    -------
+        A generic type variable used to specify the domain model type for the
+        repository.
     """
 
     def __init__(self, session: Session, default_model: DomainModel) -> None:
-        """_summary_
+        """Initialize the SqlAlchemyRepository with a database session and a
+        default domain model type. The session is used for all database
+        interactions, and the default model is used for operations where no
+        specific model type is provided.
+
 
         Parameters
         ----------
-        session : Session
-            _description_
-        default_model : DomainModel
-            _description_
+        session
+            The SQLAlchemy session used for database interactions.
+        default_model
+            The default domain model type for the repository.
         """
         self.session = session
         self._default_model = default_model
@@ -85,26 +95,30 @@ class SqlAlchemyRepository(Generic[DomainModel]):
         return_obj: bool = True,
         raise_if_exists: bool = False,
     ) -> DomainModel | None:
-        """_summary_
+        """Add a domain model instance to the database session.
 
         Parameters
         ----------
-        obj : DomainModel
-            _description_
-        return_obj : bool, optional
-            _description_, by default True
-        raise_if_exists : bool, optional
-            _description_, by default False
+        obj
+            The domain model instance to add.
+        return_obj
+            Whether to return the added object, by default True
+        raise_if_exists
+            Whether to raise an exception if the object already exists, by
+            default False
 
         Returns
         -------
         DomainModel | None
-            _description_
+            The added domain model instance if return_obj is True, otherwise
+            None.
 
         Raises
         ------
         exceptions.AlreadyExistsException
-            _description_
+            If raise_if_exists is True and an IntegrityError occurs during the
+            add operation, indicating that the object already exists in the
+            database.
         """
         try:
             self.session.add(obj)
@@ -138,26 +152,30 @@ class SqlAlchemyRepository(Generic[DomainModel]):
         return_obj: bool = False,
         raise_if_exists: bool = False,
     ) -> list[DomainModel] | None:
-        """_summary_
+        """Add multiple domain model instances to the database session.
 
         Parameters
         ----------
-        objs : list[DomainModel]
-            _description_
-        return_obj : bool, optional
-            _description_, by default False
-        raise_if_exists : bool, optional
-            _description_, by default False
+        objs
+            The list of domain model instances to add.
+        return_obj
+            Whether to return the added objects, by default False
+        raise_if_exists
+            Whether to raise an exception if any object already exists, by
+            default False
 
         Returns
         -------
         list[DomainModel] | None
-            _description_
+            The list of added domain model instances if return_obj is True,
+            otherwise None.
 
         Raises
         ------
         exceptions.AlreadyExistsException
-            _description_
+            If raise_if_exists is True and an IntegrityError occurs during the
+            add operation, indicating that one or more objects already exist in
+            the database.
         """
         if return_obj:
             objects: list[DomainModel] | None = []
@@ -194,17 +212,19 @@ class SqlAlchemyRepository(Generic[DomainModel]):
         model: DomainModel | None = None,
         **kwargs: Any,
     ) -> int:
-        """_summary_
+        """Count the number of records in the database for a given model and
+        optional filters.
 
         Parameters
         ----------
-        model : DomainModel | None, optional
-            _description_, by default None
+        model
+            The domain model class to count records for, by default None
 
         Returns
         -------
         int
-            _description_
+            The number of records in the database for the given model and
+            filters.
         """
         return self._query(cursor_result="count", model=model, **kwargs)  # type: ignore
 
@@ -216,25 +236,25 @@ class SqlAlchemyRepository(Generic[DomainModel]):
         model: DomainModel | None = None,
         **kwargs: Any,
     ) -> DomainModel:
-        """_summary_
+        """Retrieve a single domain model instance from the database based on a
+        specified attribute and value.
 
         Parameters
         ----------
-        attr : str | InstrumentedAttribute
-            _description_
-        value : str | int | float | Enum | UUID
-            _description_
-        cursor_result : str, optional
-            _description_, by default "first"
-        model : DomainModel | None, optional
-            _description_, by default None
+        attr
+            The attribute to filter by.
+        value
+            The value to filter by.
+        cursor_result
+            The type of result to return, by default "first"
+        model
+            The domain model class to query, by default None
 
         Returns
         -------
         DomainModel
-            _description_
+            The retrieved domain model instance.
         """
-
         if isinstance(attr, InstrumentedAttribute):
             attr = attr.key
         return self._query(
@@ -252,23 +272,24 @@ class SqlAlchemyRepository(Generic[DomainModel]):
         model: DomainModel | None = None,
         **kwargs: Any,
     ) -> list[DomainModel]:
-        """_summary_
+        """Retrieve multiple domain model instances from the database based on
+        a specified attribute and value.
 
         Parameters
         ----------
-        attr : str | InstrumentedAttribute
-            _description_
-        value : str | int | float | Enum | UUID
-            _description_
-        cursor_result : str, optional
-            _description_, by default "all"
-        model : DomainModel | None, optional
-            _description_, by default None
+        attr
+            The attribute to filter by.
+        value
+            The value to filter by.
+        cursor_result
+            The type of result to return, by default "all"
+        model
+            The domain model class to query, by default None
 
         Returns
         -------
         list[DomainModel]
-            _description_
+            The list of retrieved domain model instances.
         """
         objs = self.get(
             attr=attr,
@@ -287,23 +308,24 @@ class SqlAlchemyRepository(Generic[DomainModel]):
         model: DomainModel | None = None,
         **kwargs: Any,
     ) -> DomainModel:
-        """_summary_
+        """Retrieve a single domain model instance from the database based on a
+        specified attribute and value, expecting exactly one result.
 
         Parameters
         ----------
-        attr : str | InstrumentedAttribute
-            _description_
-        value : str | int | float | Enum | UUID
-            _description_
-        cursor_result : str, optional
-            _description_, by default "one"
-        model : DomainModel | None, optional
-            _description_, by default None
+        attr
+            The attribute to filter by.
+        value
+            The value to filter by.
+        cursor_result
+            The type of result to return, by default "one"
+        model
+            The domain model class to query, by default None
 
         Returns
         -------
         DomainModel
-            _description_
+            The retrieved domain model instance.
         """
         return self.get(
             attr=attr,
@@ -321,23 +343,24 @@ class SqlAlchemyRepository(Generic[DomainModel]):
         model: DomainModel | None = None,
         **kwargs: Any,
     ) -> DomainModel | None:
-        """_summary_
+        """Retrieve a single domain model instance from the database based on a
+        specified attribute and value, expecting zero or one result.
 
         Parameters
         ----------
-        attr : str | InstrumentedAttribute
-            _description_
-        value : str | int | float | Enum | UUID
-            _description_
-        cursor_result : str, optional
-            _description_, by default "one_or_none"
-        model : DomainModel | None, optional
-            _description_, by default None
+        attr
+            The attribute to filter by.
+        value
+            The value to filter by.
+        cursor_result
+            The type of result to return, by default "one_or_none"
+        model
+            The domain model class to query, by default None
 
         Returns
         -------
         DomainModel | None
-            _description_
+            The retrieved domain model instance or None if not found.
         """
         return self.get(
             attr=attr,
@@ -355,23 +378,24 @@ class SqlAlchemyRepository(Generic[DomainModel]):
         model: DomainModel | None = None,
         **kwargs: Any,
     ) -> DomainModel | None:
-        """_summary_
+        """Retrieve a single domain model instance from the database based on
+        its ID.
 
         Parameters
         ----------
-        value : str | int | UUID
-            _description_
-        attr : str | InstrumentedAttribute, optional
-            _description_, by default "id"
-        cursor_result : str, optional
-            _description_, by default "one_or_none"
-        model : DomainModel | None, optional
-            _description_, by default None
+        value
+            The ID value to filter by.
+        attr
+            The attribute to filter by, by default "id"
+        cursor_result
+            The type of result to return, by default "one_or_none"
+        model
+            The domain model class to query, by default None
 
         Returns
         -------
         DomainModel | None
-            _description_
+            The retrieved domain model instance or None if not found.
         """
         return self.get(
             attr=attr,
@@ -382,16 +406,16 @@ class SqlAlchemyRepository(Generic[DomainModel]):
         )
 
     def patch(
-        self, obj: BaseDomainModel, patches: JsonPatch
+        self, obj: Patchable[Any], patches: JsonPatch
     ) -> BaseDomainModel:
-        """Patch a domain model object using a JSON patch document.
+        """Patch a domain model object using a JSON patch object.
 
         Parameters
         ----------
         obj
             Patchable object to be patched.
         patches
-            JSON patch document containing the changes to apply.
+            JSON patch object containing the changes to apply.
 
         Returns
         -------
@@ -405,12 +429,12 @@ class SqlAlchemyRepository(Generic[DomainModel]):
         return cast(BaseDomainModel, patched)
 
     def remove(self, obj: DomainModel) -> None:
-        """_summary_
+        """Remove a domain model instance from the database.
 
         Parameters
         ----------
-        obj : DomainModel
-            _description_
+        obj
+            The domain model instance to remove.
         """
         self.session.delete(obj)
         self.session.flush()
@@ -420,12 +444,12 @@ class SqlAlchemyRepository(Generic[DomainModel]):
         objs: list[DomainModel] | None = None,
         **kwargs: Any,
     ) -> None:
-        """_summary_
+        """Remove multiple domain model instances from the database.
 
         Parameters
         ----------
-        objs : list[DomainModel] | None, optional
-            _description_, by default None
+        objs
+            The list of domain model instances to remove, by default None
         """
         if not objs:
             objs = self.select(**kwargs)  # type: ignore
@@ -438,36 +462,37 @@ class SqlAlchemyRepository(Generic[DomainModel]):
         cursor_result: str = "all",
         **kwargs: Any,
     ) -> list[DomainModel]:
-        """_summary_
+        """Select domain model instances from the database based on optional
+        filters.
 
         Parameters
         ----------
-        model : DomainModel | None, optional
-            _description_, by default None
-        cursor_result : str, optional
-            _description_, by default "all"
+        model
+            The domain model class to query, by default None
+        cursor_result
+            The type of result to return, by default "all"
 
         Returns
         -------
         list[DomainModel]
-            _description_
+            The list of retrieved domain model instances.
         """
         return self._query(cursor_result=cursor_result, model=model, **kwargs)  # type: ignore
 
-    def update(self, obj: Updateable, new: DomainModel) -> DomainModel:
-        """_summary_
+    def update(self, obj: Updatable, new: DomainModel) -> DomainModel:
+        """Update a domain model instance with new data.
 
         Parameters
         ----------
-        obj : DomainModel
-            _description_
-        new : DomainModel
-            _description_
+        obj
+            The domain model instance to update.
+        new
+            The new data to update the domain model instance with.
 
         Returns
         -------
         DomainModel
-            _description_
+            The updated domain model instance.
         """
         obj = obj.update(new)
         self.session.flush()
@@ -480,19 +505,20 @@ class SqlAlchemyRepository(Generic[DomainModel]):
         cursor_result: str = "all",
         **kwargs: Any,
     ) -> list[DomainModel]:
-        """_summary_
+        """View domain model instances from the database based on optional
+        filters.
 
         Parameters
         ----------
-        model : DomainModel
-            _description_
-        cursor_result : str, optional
-            _description_, by default "all"
+        model
+            The domain model class to query.
+        cursor_result
+            The type of result to return, by default "all"
 
         Returns
         -------
         list[DomainModel]
-            _description_
+            The list of retrieved domain model instances.
         """
         return self._query(cursor_result=cursor_result, model=model, **kwargs)  # type: ignore
 
@@ -510,27 +536,9 @@ class SqlAlchemyRepository(Generic[DomainModel]):
         ] = list(),
         **kwargs: Any,
     ) -> Any:
-        """_summary_
+        """Select domain model instances from the database based on optional
+        filters.
 
-        Parameters
-        ----------
-        cursor_result : str | None, optional
-            _description_, by default None
-        model : DomainModel | None, optional
-            _description_, by default None
-        filters : list[SearchFilter  |  QueryClause | FilterOperator], optional
-            _description_, by default list()
-        query : Query[Any] | None, optional
-            _description_, by default None
-        order_by : list[ InstrumentedAttribute[Any]  |  UnaryExpression[Any]  |  OrderBy  |  QueryClause ], optional
-            _description_, by default list()
-
-        Returns
-        -------
-        Any
-            _description_
-        """
-        """
         cursor_result:
             all
             first
@@ -545,6 +553,23 @@ class SqlAlchemyRepository(Generic[DomainModel]):
             order_by=[User.username, User.birthday]
             distinct=User.username
 
+        Parameters
+        ----------
+        cursor_result
+            The type of result to return, by default None
+        model
+            The domain model class to query, by default None
+        filters
+            The list of filters to apply, by default list()
+        query
+            The query object to use, by default None
+        order_by
+            The list of order by clauses, by default list()
+
+        Returns
+        -------
+        Any
+            The result of the query.
         """
         if not model:
             model = self._default_model
@@ -569,7 +594,9 @@ class SqlAlchemyRepository(Generic[DomainModel]):
 
             if isinstance(value, QueryClause):
                 subquery = self._query_clause(
-                    clause=value, query=subquery, model=model  # type: ignore
+                    clause=value,
+                    query=subquery,
+                    model=model,  # type: ignore
                 )
             elif isinstance(value, dict):  # type: ignore
                 subquery = getattr(subquery, k)(**value)  # type: ignore
@@ -577,7 +604,9 @@ class SqlAlchemyRepository(Generic[DomainModel]):
                 for item in value:  # type: ignore
                     if isinstance(item, QueryClause):
                         subquery = self._query_clause(
-                            clause=item, query=subquery, model=model  # type: ignore
+                            clause=item,
+                            query=subquery,
+                            model=model,  # type: ignore
                         )
                     else:
                         subquery = getattr(subquery, k)(item)  # type: ignore
@@ -587,11 +616,11 @@ class SqlAlchemyRepository(Generic[DomainModel]):
         for order in order_by:
             if isinstance(order, QueryClause):
                 subquery = self._query_clause(
-                    clause=order, query=subquery, model=model  # type: ignore
+                    clause=order,
+                    query=subquery,
+                    model=model,  # type: ignore
                 )
-            elif isinstance(
-                order, InstrumentedAttribute | UnaryExpression
-            ):  # type: ignore
+            elif isinstance(order, InstrumentedAttribute | UnaryExpression):  # type: ignore
                 subquery = getattr(subquery, "order_by")(order)  # type: ignore
 
         # Process cursor_result parameter
@@ -606,6 +635,23 @@ class SqlAlchemyRepository(Generic[DomainModel]):
         query: Query[Any],
         model: DomainModel,
     ) -> Query[Any]:
+        """Apply a QueryClause to a query object.
+
+        Parameters
+        ----------
+        clause
+            The QueryClause to apply.
+        query
+            The query object to apply the clause to.
+        model
+            The domain model class to query, used to set the `_domain_model`
+            attribute of the QueryClause if it is not already set.
+
+        Returns
+        -------
+        Query[Any]
+            The query object with the QueryClause applied.
+        """
         if not clause._domain_model:  # type: ignore
             clause.set_domain_model(model)
         return clause.query_clause(query)

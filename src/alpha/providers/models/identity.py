@@ -164,15 +164,15 @@ class Identity:
         ----------
         entry
             LDAP entry dictionary containing user attributes.
-        mappings, optional
+        mappings
             Attribute mappings from LDAP fields to Identity fields, by default
             DEFAULT_LDAP_MAPPINGS
-        populate_groups, optional
+        populate_groups
             Whether to extract groups from the LDAP entry, by default True
-        populate_permissions, optional
+        populate_permissions
             Whether to extract permissions from the LDAP entry, by default
             False
-        populate_claims, optional
+        populate_claims
             Whether to populate the claims dictionary from the LDAP entry, by
             default True
 
@@ -378,9 +378,9 @@ class Identity:
             Source dictionary.
         key
             Key to retrieve.
-        default, optional
+        default
             Default value to return if the key is not found, by default None
-        return_type, optional
+        return_type
             Expected return type for the value, by default str
 
         Returns

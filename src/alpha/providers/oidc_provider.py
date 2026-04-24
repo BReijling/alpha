@@ -45,17 +45,17 @@ class OIDCProvider(JWTProviderMixin):
     ----------
     connector
         Connector to use for OIDC operations.
-    token_factory, optional
+    token_factory
         Factory used to issue/validate local tokens.
-    claim_mappings, optional
+    claim_mappings
         Mapping of OIDC claims to Identity fields.
-    populate_groups, optional
+    populate_groups
         Whether to populate group memberships on the Identity.
-    populate_permissions, optional
+    populate_permissions
         Whether to populate permissions on the Identity.
-    populate_claims, optional
+    populate_claims
         Whether to include raw claims on the Identity.
-    change_password_supported, optional
+    change_password_supported
         Whether this provider supports changing passwords.
     """
 
@@ -256,7 +256,7 @@ class OIDCProvider(JWTProviderMixin):
             OIDC claims to retrieve the value from.
         field
             Name of the claim field to retrieve.
-        default, optional
+        default
             Default value to return if the claim is not found, by default None.
         Returns
         -------
@@ -383,17 +383,17 @@ class KeyCloakProvider(OIDCProvider):
     ----------
     connector
             Connector to use for OIDC operations.
-    token_factory, optional
+    token_factory
             Factory used to issue/validate local tokens.
-    claim_mappings, optional
+    claim_mappings
             Mapping of OIDC claims to Identity fields.
-    populate_groups, optional
+    populate_groups
             Whether to populate group memberships on the Identity.
-    populate_permissions, optional
+    populate_permissions
             Whether to populate permissions on the Identity.
-    populate_claims, optional
+    populate_claims
             Whether to include raw claims on the Identity.
-    change_password_supported, optional
+    change_password_supported
             Whether this provider supports changing passwords.
     """
 

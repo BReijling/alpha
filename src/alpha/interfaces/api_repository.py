@@ -177,18 +177,18 @@ class ApiRepository(Protocol[DomainModel]):
         ----------
         objs
             The objects to add.
-        return_obj
-            Whether to return the added object or not.
+        return_objs
+            Whether to return the added objects or not.
         serialize
-            Whether to serialize the object before sending it in the API
+            Whether to serialize the objects before sending them in the API
             request.
         use_factory
             Whether to use the model factory method for creating models from
             response data.
         endpoint
-            The API endpoint to which the object should be added.
+            The API endpoint to which the objects should be added.
         parent_endpoint
-            The parent API endpoint, if the resource is nested under a parent
+            The parent API endpoint, if the resources are nested under a parent
             resource.
         parent_param
             The parameter to identify the parent resource, if applicable. This

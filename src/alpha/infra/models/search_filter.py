@@ -10,6 +10,8 @@ from alpha.infra.models.query_clause import QueryClause
 
 
 class Operator(Enum):
+    """An enumeration of possible operators for search filters."""
+
     LT = auto()
     LTE = auto()
     EQ = auto()

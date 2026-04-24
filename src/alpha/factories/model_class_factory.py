@@ -106,9 +106,9 @@ class ModelClassFactory:
 
         Parameters
         ----------
-        typing_classes, optional
+        typing_classes
             A collection of class types, by default TYPING_CLASSES
-        factory_classes, optional
+        factory_classes
             An instance of FactoryClasses which acts as a toolbox of Factory
             classes, by default FACTORY_CLASSES
         """

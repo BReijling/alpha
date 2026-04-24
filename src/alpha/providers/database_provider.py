@@ -38,12 +38,12 @@ class DatabaseProvider(JWTProviderMixin):
             Unit of work instance to manage database transactions
         token_factory
             Token factory instance to generate and validate tokens
-        password_factory, optional
+        password_factory
             Password factory instance to handle password hashing and
             verification, by default None
-        user_name_attribute, optional
+        user_name_attribute
             Attribute name to identify the user, by default "username"
-        users_repository_name, optional
+        users_repository_name
             Repository name for user entities, by default "users"
         """
         self.uow = uow

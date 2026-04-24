@@ -22,9 +22,9 @@ class RestApiUnitOfWork:
 
         Parameters
         ----------
-        repos : list[RepositoryModel]
+        repos
             The list of repository models to use.
-        session : requests.sessions.Session | None
+        session
             The requests session (or compatible HTTP client, e.g., httpx) to
             use for context management, by default None
 

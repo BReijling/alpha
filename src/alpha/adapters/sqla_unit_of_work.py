@@ -23,9 +23,9 @@ class SqlAlchemyUnitOfWork:
 
         Parameters
         ----------
-        db : SqlDatabase
+        db
             The database instance to use.
-        repos : list[RepositoryModel]
+        repos
             The list of repository models to use.
 
         Raises
