@@ -117,15 +117,15 @@ sequenceDiagram
     🧠 Service-->>🧩 Controller: raise<br>(Exception)
     else ✅ Successful service return
     🧠 Service-->>-🧩 Controller: return<br>(Domain Model)
-    end
-
-    %% response mapping
-    %% mapping to API model
     opt Factory for API Model
     🧩 Controller->>+🏭 Factory: call
     Note over 🏭 Factory: ResponseFactory()
     🏭 Factory-->>-🧩 Controller: return<br>(API Model)
     end
+    end
+
+    %% response mapping
+    %% mapping to API model
     🧩 Controller-->>🧩 Controller: create_response_object()
     🧩 Controller-->>-🖥️ Endpoint: return<br>(dictionary)
 
