@@ -31,6 +31,7 @@ class PasswordAuthenticator(Protocol):
 
         Returns
         -------
+        Identity
             Identity object representing the authenticated user.
         """
         ...
@@ -59,6 +60,7 @@ class TokenValidator(Protocol):
 
         Returns
         -------
+        Identity
             Identity object representing the validated token.
         """
         ...
@@ -86,6 +88,7 @@ class TokenIssuer(Protocol):
 
         Returns
         -------
+        Token
             Token object representing the issued token.
         """
         ...
@@ -113,6 +116,7 @@ class UserDirectory(Protocol):
 
         Returns
         -------
+        Identity
             Identity object representing the subject.
         """
         ...
@@ -138,10 +142,6 @@ class PasswordChanger(Protocol):
             Object containing username and current password.
         new_password
             The new password to set for the user.
-
-        Returns
-        -------
-            None
         """
         ...
 

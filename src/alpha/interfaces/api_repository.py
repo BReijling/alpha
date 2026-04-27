@@ -105,6 +105,7 @@ class ApiRepository(Protocol[DomainModel]):
 
         Returns
         -------
+        DomainModel | dict[str, Any] | None
             The added object if `return_obj` is `True`, otherwise `None`.
         """
         ...
@@ -210,6 +211,7 @@ class ApiRepository(Protocol[DomainModel]):
 
         Returns
         -------
+        list[DomainModel] | list[dict[str, Any]] | None
             The added objects if `return_obj` is `True`, otherwise `None`.
         """
         ...
@@ -286,6 +288,7 @@ class ApiRepository(Protocol[DomainModel]):
 
         Returns
         -------
+        DomainModel | dict[str, Any]
             The retrieved object.
         """
         ...
@@ -362,6 +365,7 @@ class ApiRepository(Protocol[DomainModel]):
 
         Returns
         -------
+        list[DomainModel] | list[dict[str, Any]]
             The retrieved objects.
         """
         ...
@@ -462,6 +466,7 @@ class ApiRepository(Protocol[DomainModel]):
 
         Returns
         -------
+        DomainModel | dict[str, Any] | None
             The updated object if `return_obj` is `True`, otherwise `None`.
         """
         ...
@@ -605,6 +610,7 @@ class ApiRepository(Protocol[DomainModel]):
 
         Returns
         -------
+        DomainModel | dict[str, Any] | None
             The updated object if `return_obj` is `True`, otherwise `None`.
         """
         ...

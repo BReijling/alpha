@@ -1,3 +1,3 @@
-# Token Model
+# Token
 
-::: alpha.providers.models.token
+::: alpha.providers.models.token.Token

@@ -19,6 +19,7 @@ class DefaultFieldFactory:
 
         Returns
         -------
+        Any
             The default value found in the field object
 
         Raises

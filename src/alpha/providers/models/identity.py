@@ -139,6 +139,7 @@ class Identity:
 
         Returns
         -------
+        bool
             True if the identity is an admin, False otherwise.
         """
         if self.admin is True:
@@ -178,6 +179,7 @@ class Identity:
 
         Returns
         -------
+        Identity
             An Identity instance populated with data from the LDAP entry.
         """
         username = cls._get_key(entry, mappings["username"])
@@ -219,6 +221,7 @@ class Identity:
 
         Returns
         -------
+        Identity
             An Identity instance populated with data from the dictionary.
         """
         issued_at = data.get("issued_at", datetime.now(tz=timezone.utc))
@@ -259,6 +262,7 @@ class Identity:
 
         Returns
         -------
+        Identity
             An Identity instance populated with data from the User object.
         """
         subject = str(user.id) if user.id else user.username
@@ -339,6 +343,7 @@ class Identity:
 
         Returns
         -------
+        dict[str, Any]
             A dictionary representation of the Identity instance.
         """
         return {
@@ -385,6 +390,7 @@ class Identity:
 
         Returns
         -------
+        Any
             The value associated with the key, cast to the specified type. If
             the key is not found, returns the default value.
         """
@@ -414,6 +420,7 @@ class Identity:
 
         Returns
         -------
+        Mapping[str, Any]
             A new Identity instance without password-related claims.
         """
         filtered_claims = {
@@ -434,6 +441,7 @@ class Identity:
 
         Returns
         -------
+        list[str]
             A list of group names the user is a member of.
         """
         groups: list[str] = []
@@ -463,6 +471,7 @@ class Identity:
 
         Returns
         -------
+        Sequence[str]
             A new sequence with the item appended if it was not already
             present.
         """

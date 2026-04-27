@@ -1,3 +1,3 @@
-# Updatable Interface
+# Updatable
 
-::: alpha.interfaces.updatable
+::: alpha.interfaces.updatable.Updatable

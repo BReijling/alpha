@@ -1,3 +1,3 @@
-# AttrsInstance Protocol
+# AttrsInstance
 
 ::: alpha.interfaces.attrs_instance.AttrsInstance

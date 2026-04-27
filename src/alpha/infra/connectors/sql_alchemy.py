@@ -94,7 +94,7 @@ class SqlAlchemyDatabase:
             if create_tables:
                 self.create_tables(self._mapper.metadata)
 
-        if hasattr(self._engine.dialect, "has_schema") & create_schema:
+        if create_schema and hasattr(self._engine.dialect, "has_schema"):
             self._create_schema(self._engine, self._schema_name)
 
     def get_session(self) -> Session:

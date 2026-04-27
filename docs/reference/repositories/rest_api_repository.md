@@ -1,3 +1,3 @@
-# REST API Repository
+# RestApiRepository
 
-::: alpha.repositories.rest_api_repository
+::: alpha.repositories.rest_api_repository.RestApiRepository

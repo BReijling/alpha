@@ -27,6 +27,7 @@ class BaseDomainModel:
 
         Returns
         -------
+        dict[str, Any]
             A dictionary representation of the domain model instance.
         """
         obj: dict[str, Any] = {}
@@ -47,6 +48,7 @@ class BaseDomainModel:
 
         Returns
         -------
+        DomainModel
             The updated instance of the domain model.
 
         Raises

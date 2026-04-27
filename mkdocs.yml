@@ -6,7 +6,6 @@ site_url: https://alpha-python.readthedocs.io/
 repo_name: breijling/alpha
 repo_url: https://github.com/breijling/alpha
 
-
 theme:
   name: readthedocs
   palette:
@@ -34,6 +33,9 @@ theme:
   icon:
     repo: fontawesome/brands/github
 
+extra_css:
+  - stylesheets/mkdocstrings.css
+
 plugins:
   - search
   - mermaid2
@@ -50,7 +52,7 @@ plugins:
             show_submodules: false
             members_order: source
             separate_signature: true
-            merge_init_into_class: true
+            merge_init_into_class: false
 
 markdown_extensions:
   - admonition
@@ -77,14 +79,13 @@ nav:
   - Quickstart: quickstart.md
   - Concepts:
     - Overview: concepts/index.md
-    - Design Concepts: concepts/design-concepts.md
-    - Repository Pattern: concepts/repository-pattern.md
+    - Design Principles: concepts/design-principles.md
     - Dependency Injection: concepts/dependency-injection.md
   - Guides:
+    - Overview: guides/index.md
     - API Generation: guides/api-generation.md
     - Authentication: guides/authentication.md
-    - Database: guides/database.md
-    - Flask Integration: guides/flask-integration.md
+    - Database Interaction: guides/database-interaction.md
   - API Reference:
     - Overview: reference/index.md
     - Adapters: 
@@ -114,6 +115,7 @@ nav:
         - SQLAlchemy Database: reference/infra/connectors/sql_alchemy.md
         - LDAP Connector: reference/infra/connectors/ldap_connector.md
         - OIDC Connector: reference/infra/connectors/oidc_connector.md
+        - Keycloak Connector: reference/infra/connectors/keycloak_connector.md
       - Models:
         - Search Filter: reference/infra/models/search_filter.md
         - Filter Operators: reference/infra/models/filter_operators.md
@@ -135,10 +137,17 @@ nav:
       - Patchable: reference/interfaces/patchable.md
       - Providers: reference/interfaces/providers.md
       - TokenFactory: reference/interfaces/token_factory.md
+    - Mixins:
+      - Overview: reference/mixins/index.md
+      - UserLifecycleMixin: reference/mixins/user_lifecycle.md
+      - GroupLifecycleMixin: reference/mixins/group_lifecycle.md
+      - JWTProviderMixin: reference/mixins/jwt_provider.md
     - Providers:
       - Overview: reference/providers/index.md
       - OIDC Provider: reference/providers/oidc_provider.md
+      - Keycloak Provider: reference/providers/keycloak_provider.md
       - LDAP Provider: reference/providers/ldap_provider.md
+      - AD Provider: reference/providers/ad_provider.md
       - Database Provider: reference/providers/database_provider.md
       - Models:
         - Identity Model: reference/providers/models/identity.md
@@ -167,6 +176,7 @@ nav:
       - Logging Level Checker: reference/utils/logging_level_checker.md
       - Verify Identity: reference/utils/verify_identity.md
     - Encoder: reference/encoder.md
+    - Exceptions: reference/exceptions.md
   - Changelog: changelog.md
 
 extra:

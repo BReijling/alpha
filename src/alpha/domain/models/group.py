@@ -44,6 +44,7 @@ class Group(LifeCycleBase, BaseDomainModel):
 
         Returns
         -------
+        dict[str, Any]
             A dictionary representation of the Group instance.
         """
         return {
@@ -61,6 +62,16 @@ class Group(LifeCycleBase, BaseDomainModel):
         ----------
         obj
             Group object to update from.
+
+        Returns
+        -------
+        DomainModel
+            The updated instance of the Group.
+
+        Raises
+        ------
+        TypeError
+            If the provided object is not a Group instance.
         """
         if not isinstance(obj, Group):
             raise TypeError("Group.update expects a Group instance.")

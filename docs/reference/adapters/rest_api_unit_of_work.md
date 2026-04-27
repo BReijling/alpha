@@ -1,1 +1,3 @@
-::: alpha.adapters.rest_api_unit_of_work
+# RestApiUnitOfWork
+
+::: alpha.adapters.rest_api_unit_of_work.RestApiUnitOfWork

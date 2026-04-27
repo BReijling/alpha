@@ -1,3 +1,3 @@
-# Response Factory
+# ResponseFactory
 
-::: alpha.factories.response_factory
+::: alpha.factories.response_factory.ResponseFactory

@@ -21,9 +21,37 @@ from alpha import exceptions
 
 class AuthenticationService:
     """This class is responsible for handling authentication operations in an
-    application. It provides methods for user authentication, token, issuance,
+    application. It provides methods for user authentication, token issuance,
     token validation, password change, pretending to login as another user,
     and merging user data with identity data.
+
+    The service is designed to be flexible and configurable, allowing you to
+    customize various aspects of the authentication process, such as token
+    storage, cookie management, and integration with different identity
+    providers. It can be used in a variety of applications, including web
+    applications, APIs, and microservices, to provide a consistent and secure
+    authentication experience.
+
+    The service supports both stateless and stateful authentication mechanisms,
+    allowing you to choose the approach that best fits your application's
+    needs. Stateless authentication can be achieved using tokens (e.g., JWTs)
+    that are self-contained and do not require server-side storage, while
+    stateful authentication can be implemented using refresh tokens that
+    require server-side storage and management. The service can also be
+    configured to merge identity data with user and group data from a database,
+    providing a unified view of the authenticated user's information and
+    permissions.
+
+    Refresh tokens can be stored using different mechanisms, such as in-memory
+    storage, file storage, or database storage. This flexibility allows you to
+    choose the storage mechanism that best fits your application's requirements
+    and infrastructure. For example, in-memory storage can be used for simple
+    applications or during development, while file storage or database storage
+    can be used for production applications that require persistence and
+    scalability of refresh tokens. The service also provides methods for
+    managing refresh tokens, including creating, storing, retrieving, and
+    deleting refresh tokens as needed to maintain user sessions and ensure
+    security.
     """
 
     def __init__(
@@ -63,7 +91,8 @@ class AuthenticationService:
         refresh_identity_on_refresh: bool = False,
         static_user: User | None = None,
     ) -> None:
-        """Initialize the AuthenticationService.
+        """Initialize the AuthenticationService with the provided
+        configuration.
 
         Parameters
         ----------
@@ -75,7 +104,13 @@ class AuthenticationService:
         use_cookies
             Whether to use cookies for authentication, by default False
         use_refresh_tokens
-            Whether to use refresh tokens for authentication, by default False
+            Whether to use refresh tokens for authentication, by default False.
+            Enabling this option requires use_cookies to be True, since refresh
+            tokens are typically stored in cookies. This parameter needs to be
+            set to True if you want to use refresh tokens for maintaining user
+            sessions without requiring them to log in again, while still
+            ensuring that access tokens have a limited lifespan for security
+            purposes.
         cookie_auth_token_name
             Name of the cookie to store the access token,
             by default "auth_token"
@@ -141,6 +176,7 @@ class AuthenticationService:
             stores an object of refresh tokens. If the file does not exist, it
             will be created automatically. The structure of the JSON file
             should be as follows:
+            ```json
             {
                 "<TOKEN_VALUE>": {
                     "value": "<TOKEN_VALUE>",
@@ -151,6 +187,7 @@ class AuthenticationService:
                 },
                 ...
             }
+            ```
         refresh_token_length
             Length of the generated refresh tokens, by default 32
         refresh_identity_on_refresh
@@ -168,7 +205,8 @@ class AuthenticationService:
         Raises
         ------
         ValueError
-            If refresh tokens are enabled without using cookies, or if an invalid
+            If refresh tokens are enabled without using cookies, or if an
+            invalid configuration is detected.
         """
         self._identity_provider = identity_provider
         self._identity_id_attribute = identity_id_attribute
@@ -219,6 +257,10 @@ class AuthenticationService:
         configured to use refresh tokens, a refresh token is also created and
         stored in a cookie.
 
+        The identity can optionally be merged with user and group data from the
+        database, based on the configuration settings and the supplied unit of
+        work.
+
         Parameters
         ----------
         credentials
@@ -226,8 +268,15 @@ class AuthenticationService:
 
         Returns
         -------
+        str
             Authentication token as a string or a tuple containing a Cookie
             object and the token string.
+        tuple[Cookie, str]
+            tuple containing a Cookie object and the token string if using
+            cookies without refresh tokens.
+        tuple[Cookie, Cookie, str]
+            tuple containing two Cookie objects and the token string if using
+            cookies with refresh tokens.
         """
         # Check if static user is configured and matches the provided
         # credentials
@@ -291,13 +340,18 @@ class AuthenticationService:
 
         Returns
         -------
+        tuple[Cookie, str]
             Confirmation message. If using cookies, returns a Cookie object to
             clear the authentication cookie.
+        tuple[Cookie, Cookie, str]
+            Confirmation message. If using cookies with refresh tokens, returns
+            Cookie objects to clear both the authentication and refresh token
+            cookies.
 
         Raises
         ------
         NotImplementedError
-            If token invalidation is not implemented for non-cookie
+            Token invalidation is not implemented for non-cookie
             authentication.
         """
         if not self._use_cookies:
@@ -335,6 +389,7 @@ class AuthenticationService:
 
         Returns
         -------
+        Identity
             Verified Identity instance.
         """
         return self._identity_provider.validate(Token(value=token))
@@ -356,6 +411,7 @@ class AuthenticationService:
 
         Returns
         -------
+        tuple[Cookie, str]
             A tuple containing a Cookie object for the new authentication token
             and the token string.
 
@@ -368,8 +424,8 @@ class AuthenticationService:
         """
         if not self._use_cookies or not self._use_refresh_tokens:
             raise exceptions.MissingConfigurationException(
-                "Refresh token authentication is not enabled. Both use_cookies "
-                "and use_refresh_tokens must be True."
+                "Refresh token authentication is not enabled. Both "
+                "use_cookies and use_refresh_tokens must be True."
             )
 
         stored_refresh_token = self._get_refresh_token_from_storage(
@@ -447,6 +503,18 @@ class AuthenticationService:
     ) -> str | tuple[Cookie, str]:
         """Login as another user by pretending to be them.
 
+        The identity provider is used to retrieve the identity of the user to
+        pretend to be. An authentication token is then issued for the pretended
+        identity. If configured to use cookies, the token is also stored in a
+        cookie.
+
+        To be able to use this method, the authenticated identity must have
+        admin privileges. The identity provider has to be able to retrieve the
+        identity of the user to pretend to be. Generally this means that the
+        identity provider needs to have access to the user's information. This
+        requires admin privileges on the identity provider side, so this method
+        should only be used in trusted environments.
+
         Parameters
         ----------
         identity
@@ -456,7 +524,11 @@ class AuthenticationService:
 
         Returns
         -------
+        str
             Authentication token as a string.
+        tuple[Cookie, str]
+            A tuple containing a Cookie object and the token string if using
+            cookies.
 
         Raises
         ------
@@ -475,6 +547,7 @@ class AuthenticationService:
 
         identity.pretend_identity = pretend_identity
         token = self._identity_provider.issue_token(identity)
+
         if not self._use_cookies:
             return str(token)
 
@@ -496,6 +569,7 @@ class AuthenticationService:
 
         Returns
         -------
+        Identity
             Updated Identity instance.
         """
         if self.uow is None:
@@ -534,6 +608,7 @@ class AuthenticationService:
 
         Returns
         -------
+        Identity
             Updated Identity instance.
         """
         if self.uow is None:
@@ -577,6 +652,7 @@ class AuthenticationService:
 
         Returns
         -------
+        Cookie
             Cookie object representing the cookie.
         """
         return Cookie(
@@ -600,6 +676,7 @@ class AuthenticationService:
 
         Returns
         -------
+        Token
             Token object representing the refresh token.
         """
         token = self._token_model(
@@ -640,7 +717,7 @@ class AuthenticationService:
         Parameters
         ----------
         refresh_token
-            The refresh token to delete.
+        The refresh token to delete.
         """
         if self._refresh_token_storage == "database":
             self._delete_refresh_token_from_database(refresh_token)
@@ -674,6 +751,7 @@ class AuthenticationService:
 
         Returns
         -------
+        Token
             The stored Token object.
 
         Raises
@@ -703,6 +781,7 @@ class AuthenticationService:
 
         Returns
         -------
+        Token
             The stored Token object.
 
         Raises
@@ -807,6 +886,7 @@ class AuthenticationService:
 
         Returns
         -------
+        Cookie
             Cookie object representing the logout cookie.
         """
         return Cookie(
@@ -838,6 +918,7 @@ class AuthenticationService:
 
         Returns
         -------
+        Token
             Token object representing the refresh token.
         """
         if self._refresh_token_storage == "database":
@@ -877,6 +958,7 @@ class AuthenticationService:
 
         Returns
         -------
+        Token
             The retrieved refresh token, or None if not found.
         """
         if self.uow is None:
@@ -902,6 +984,7 @@ class AuthenticationService:
 
         Returns
         -------
+        Token
             The retrieved refresh token, or None if not found.
 
         Raises
@@ -935,6 +1018,7 @@ class AuthenticationService:
 
         Returns
         -------
+        Token
             The retrieved refresh token, or None if not found.
         """
         token = self._in_memory_refresh_tokens.get(refresh_token)
@@ -951,6 +1035,7 @@ class AuthenticationService:
 
         Returns
         -------
+        Token
             The verified refresh token.
 
         Raises

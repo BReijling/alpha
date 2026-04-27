@@ -1,3 +1,3 @@
-# LDAP Provider
+# LDAPProvider
 
-::: alpha.providers.ldap_provider
+::: alpha.providers.ldap_provider.LDAPProvider

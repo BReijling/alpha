@@ -1,6 +1,7 @@
 """Contains Field & FieldIterator class"""
 
 import dataclasses
+from dataclasses import is_dataclass
 import attrs
 from pydantic.fields import FieldInfo
 from typing import Any
@@ -92,6 +93,7 @@ class Field:
 
         Returns
         -------
+        Field
             Field object
         """
         return cls(
@@ -113,6 +115,7 @@ class Field:
 
         Returns
         -------
+        Field
             Field object
         """
         return cls(
@@ -133,6 +136,7 @@ class Field:
 
         Returns
         -------
+        Field
             Field object
         """
         init = getattr(obj, "init", True)
@@ -169,7 +173,7 @@ class FieldIterator:
         self._index = 0
 
         try:
-            if dataclasses.is_dataclass(obj):
+            if is_dataclass(obj):
                 self._fields = [
                     Field.from_dataclass(field)
                     for field in dataclasses.fields(obj)
@@ -200,6 +204,7 @@ class FieldIterator:
 
         Returns
         -------
+        FieldIterator
             This object
         """
         return self
@@ -209,6 +214,7 @@ class FieldIterator:
 
         Returns
         -------
+        Field
             Next item in the collection
 
         Raises

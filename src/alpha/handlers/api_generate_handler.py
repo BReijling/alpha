@@ -20,8 +20,8 @@ class ApiGenerateHandler(BaseHandler):
         except ImportError:
             print(
                 "OpenAPI Generator CLI is not installed. Please install "
-                "the required packages first. \nThis can be done by installing "
-                "the \'api-generator\' extra: \n"
+                "the required packages first. \nThis can be done by "
+                "installing the 'api-generator' extra: \n"
                 "- pip install alpha-python[api-generator]\n"
                 "- poetry add --dev alpha-python --extras api-generator\n"
                 "- uv add --dev alpha-python --extra api-generator"
@@ -38,14 +38,14 @@ class ApiGenerateHandler(BaseHandler):
         self.no_watch = False
         self.permissions_only = False
         self.templates_only = False
-        self.templates_folder = 'templates'
-        self.output_folder = 'api'
+        self.templates_folder = "templates"
+        self.output_folder = "api"
         self.generator_name = None
-        self.reserved_words_mappings = ['date', 'field']
+        self.reserved_words_mappings = ["date", "field"]
 
         self.cwd = os.getcwd()
         self.module_path = os.path.dirname(os.path.realpath(__file__))
-        self.project_templates_folder = os.path.join(self.cwd, 'templates')
+        self.project_templates_folder = os.path.join(self.cwd, "templates")
 
     def validate_arguments(
         self,
@@ -62,9 +62,9 @@ class ApiGenerateHandler(BaseHandler):
             or service_package is None
         ):
             raise InvalidArgumentsException(
-                '\n\nDubbelcheck alle opgegeven parameters, ben je in de'
-                ' juiste map aan het werk? De packagenaam kan namelijk niet'
-                ' automatisch worden afgeleid\n'
+                "\n\nDubbelcheck alle opgegeven parameters, ben je in de"
+                " juiste map aan het werk? De packagenaam kan namelijk niet"
+                " automatisch worden afgeleid\n"
             )
 
     def handle_command(self) -> None:
@@ -83,13 +83,13 @@ class ApiGenerateHandler(BaseHandler):
         """
 
         self.permissions_file_path = (
-            f'{self.cwd}/api/{self.api_package}/config/permissions.yaml'
+            f"{self.cwd}/api/{self.api_package}/config/permissions.yaml"
         )
 
         # Return early exit if only templates are needed
         if self.templates_only:
             self._copy_templates()
-            print('Done copying templates folder to project directory.')
+            print("Done copying templates folder to project directory.")
             return
 
         if not os.path.isfile(str(self.spec_file)):
@@ -107,7 +107,7 @@ class ApiGenerateHandler(BaseHandler):
         # Return early exit if the watch process is undesirable
         if self.no_watch:
             self._run_generator()
-            print('Done generating API code.')
+            print("Done generating API code.")
             return
 
         files_to_watch = [str(self.spec_file), str(self.post_process_file)]
@@ -118,7 +118,7 @@ class ApiGenerateHandler(BaseHandler):
                 for file_name in files_to_watch:
                     if not os.path.isfile(file_name):
                         continue
-                    hash.update(open(file_name, 'rb').read())
+                    hash.update(open(file_name, "rb").read())
 
                 new_hash_string = hash.hexdigest()
 
@@ -128,7 +128,7 @@ class ApiGenerateHandler(BaseHandler):
 
                 hash_string = new_hash_string
                 self._run_generator()
-                print('Done generating.')
+                print("Done generating.")
 
                 print(
                     f"Watching '{self.spec_file}' and"
@@ -136,7 +136,7 @@ class ApiGenerateHandler(BaseHandler):
                     f" '{self.service_package}'"
                 )
         except KeyboardInterrupt:
-            print('Stopped watching')
+            print("Stopped watching")
 
     def _run_generator(self) -> None:
         """Run the generator, based on docker, using the gen-code.sh file."""
@@ -148,20 +148,20 @@ class ApiGenerateHandler(BaseHandler):
         # self._generate_configuration()
 
         os.chdir(self.module_path)
-        os.environ['WORKING_DIR'] = self.cwd
-        os.environ['SPEC_FILE'] = str(self.spec_file)
-        os.environ['GENERATOR_NAME'] = str(self.generator_name)
-        os.environ['PACKAGE_NAME'] = str(self.api_package)
-        os.environ['SERVICE_PACKAGE'] = str(self.service_package)
-        os.environ['FLASK_ENV'] = 'development'
-        os.environ['CONTAINER_IMPORT'] = str(self.container_import)
-        os.environ['INIT_CONTAINER_FROM'] = str(self.init_container_from)
-        os.environ['INIT_CONTAINER_FUNCTION'] = str(
+        os.environ["WORKING_DIR"] = self.cwd
+        os.environ["SPEC_FILE"] = str(self.spec_file)
+        os.environ["GENERATOR_NAME"] = str(self.generator_name)
+        os.environ["PACKAGE_NAME"] = str(self.api_package)
+        os.environ["SERVICE_PACKAGE"] = str(self.service_package)
+        os.environ["FLASK_ENV"] = "development"
+        os.environ["CONTAINER_IMPORT"] = str(self.container_import)
+        os.environ["INIT_CONTAINER_FROM"] = str(self.init_container_from)
+        os.environ["INIT_CONTAINER_FUNCTION"] = str(
             self.init_container_function
         )
-        os.environ['RESERVED_WORDS_MAPPINGS'] = ' '.join(
+        os.environ["RESERVED_WORDS_MAPPINGS"] = " ".join(
             [
-                f'--reserved-words-mappings={word}={word}'
+                f"--reserved-words-mappings={word}={word}"
                 for word in self.reserved_words_mappings
             ]
         )
@@ -169,19 +169,19 @@ class ApiGenerateHandler(BaseHandler):
         self._copy_templates()
 
         # Calling generate code shell script
-        subprocess.call(['bash', './gen-code.sh'])
+        subprocess.call(["bash", "./gen-code.sh"])
 
         self._remove_templates()
 
         os.chdir(self.cwd)
 
         # Run post process file of the current project
-        post_process_file = f'{self.cwd}/{self.post_process_file}'
+        post_process_file = f"{self.cwd}/{self.post_process_file}"
         if os.path.isfile(post_process_file):
-            print('Found post process, running...')
-            subprocess.call(['python3', post_process_file])
+            print("Found post process, running...")
+            subprocess.call(["python3", post_process_file])
         else:
-            print(f'No post process file ({self.post_process_file}) found')
+            print(f"No post process file ({self.post_process_file}) found")
 
     def _copy_templates(self) -> None:
         """Copy mustache templates to the templates folder in the working

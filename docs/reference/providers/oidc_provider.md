@@ -1,3 +1,3 @@
-# OIDC Provider
+# OIDCProvider
 
-::: alpha.providers.oidc_provider
+::: alpha.providers.oidc_provider.OIDCProvider

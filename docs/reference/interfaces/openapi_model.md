@@ -1,3 +1,3 @@
-# OpenAPIModel Protocol
+# OpenAPIModel
 
-::: alpha.interfaces.openapi_model
+::: alpha.interfaces.openapi_model.OpenAPIModel

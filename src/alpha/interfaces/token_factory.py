@@ -28,8 +28,8 @@ class TokenFactory(Protocol):
 
         Returns
         -------
-            str
-                The generated authentication token as a string.
+        str
+            The generated authentication token as a string.
         """
         ...
 
@@ -43,8 +43,8 @@ class TokenFactory(Protocol):
 
         Returns
         -------
-            bool
-                True if the token is valid, False otherwise.
+        bool
+            True if the token is valid, False otherwise.
         """
         ...
 
@@ -63,8 +63,8 @@ class TokenFactory(Protocol):
 
         Returns
         -------
-            dict[str, str]
-                A dictionary containing the payload data extracted from the
-                token.
+        dict[str, str]
+            A dictionary containing the payload data extracted from the
+            token.
         """
         ...

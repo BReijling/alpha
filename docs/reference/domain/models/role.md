@@ -1,3 +1,3 @@
-# Role Model
+# Role
 
 ::: alpha.domain.models.role.Role

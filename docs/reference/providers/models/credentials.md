@@ -1,3 +1,3 @@
-# Credentials Model
+# PasswordCredentials
 
-::: alpha.providers.models.credentials
+::: alpha.providers.models.credentials.PasswordCredentials

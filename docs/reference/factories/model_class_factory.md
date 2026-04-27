@@ -1,3 +1,3 @@
-# Model Class Factory
+# ModelClassFactory
 
-::: alpha.factories.model_class_factory
+::: alpha.factories.model_class_factory.ModelClassFactory

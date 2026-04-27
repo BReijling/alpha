@@ -1,3 +1,3 @@
-# Password Factory
+# PasswordFactory
 
-::: alpha.factories.password_factory
+::: alpha.factories.password_factory.PasswordFactory

@@ -1,4 +1,5 @@
 """Contains these ClassFactory classes:
+
 - IterableClassFactory
 - DictClassFactory
 - DataclassClassFactory
@@ -14,7 +15,7 @@ import sys
 import types
 import typing
 from dataclasses import is_dataclass
-from typing import Any, Iterable, Optional, Union, get_args, get_origin
+from typing import Any, Iterable, Union, get_args, get_origin
 
 from alpha import exceptions
 from alpha.factories._type_mapping import TYPES
@@ -24,6 +25,7 @@ from alpha.interfaces.factories import (
     FactoryClassesInstance,
 )
 from alpha.interfaces.openapi_model import OpenAPIModel
+from alpha.utils.is_pydantic import is_pydantic
 from alpha.utils.is_attrs import is_attrs
 
 
@@ -49,7 +51,9 @@ class IterableClassFactory:
 
         Returns
         -------
-            The new iterable object
+        Any
+            An iterable of the field.type, containing the mapped items of the
+            corresponding OpenAPIModel instance attribute
 
         Raises
         ------
@@ -68,7 +72,7 @@ class IterableClassFactory:
 
         cls = field_args[0]
 
-        if is_dataclass(cls) or is_attrs(cls):
+        if is_dataclass(cls) or is_attrs(cls) or is_pydantic(cls):
             if factory_classes.model_class_factory is None:
                 raise ValueError(
                     "ModelClassFactory instance is not present in "
@@ -122,7 +126,7 @@ class DictClassFactory:
         obj: OpenAPIModel,
         field: Field,
         factory_classes: FactoryClassesInstance,
-    ) -> Any:
+    ) -> dict[str, Any]:
         """Processing dictionary classes. Considering multiple options to get a
         dictionary from an object.
 
@@ -137,6 +141,7 @@ class DictClassFactory:
 
         Returns
         -------
+        dict[str, Any]
             Dictionary object
 
         Raises
@@ -147,7 +152,7 @@ class DictClassFactory:
         value: Union[dict[str, Any], Any] = getattr(obj, field.name, None)
 
         if isinstance(value, dict):
-            return value
+            return value  # type: ignore
         if hasattr(value, "to_dict"):
             return getattr(value, "to_dict")()
         if hasattr(value, "_asdict"):
@@ -183,7 +188,10 @@ class DataclassClassFactory:
 
         Returns
         -------
-            DataclassInterface object
+        Any
+            A dataclass instance created by the model_class_factory from the
+            factory_class instance. An instance of Attrs or Pydantic class will
+            also be considered as a dataclass instance.
 
         Raises
         ------
@@ -233,7 +241,9 @@ class GenericAliasClassFactory:
 
         Returns
         -------
-            An iterable or a dictionary
+        Any
+            An instance of the generic alias type, containing the mapped items
+            of the corresponding OpenAPIModel instance attribute.
 
         Raises
         ------
@@ -305,7 +315,17 @@ class UnionClassFactory:
 
         Returns
         -------
-            Any value with a type of one of the union arguments
+        Any
+            A value of a type that is compatible with one of the types in the
+            union type arguments. If the first union argument is a dataclass or
+            attrs class, the returned value will be an instance of that class
+            created by the model_class_factory from the factory_class instance.
+            An instance of Attrs or Pydantic class will also be considered as a
+            dataclass instance. If the value is of one of the types in the
+            union arguments, the value will be returned untouched. If the value
+            type is not in the union arguments, the value will be processed by
+            the GenericTypeClass, to try to map the value to match the type of
+            the first union argument.
 
         Raises
         ------
@@ -322,7 +342,7 @@ class UnionClassFactory:
         args = get_args(field.type)
         cls = args[0]
 
-        if is_dataclass(cls) or is_attrs(cls):
+        if is_dataclass(cls) or is_attrs(cls) or is_pydantic(cls):
             if factory_classes.model_class_factory is None:
                 raise ValueError(
                     "ModelClassFactory instance is not present in "
@@ -350,7 +370,7 @@ class NativeClassFactory:
         obj: OpenAPIModel,
         field: Field,
         factory_classes: FactoryClassesInstance,
-    ) -> Optional[Any]:
+    ) -> Any | None:
         """Processing native types. Native types are all types that have a
         `type` value for the `__class__` attribute.
 
@@ -369,7 +389,11 @@ class NativeClassFactory:
 
         Returns
         -------
-            Any value which is returned by another Factory
+        Any | None
+            Any value which is returned by another Factory or None. The value
+            will be returned by another Factory when the type of the attribute
+            is supported and the corresponding value of the OpenAPIModel is
+            present.
 
         Raises
         ------
@@ -389,7 +413,7 @@ class NativeClassFactory:
         if isinstance(value, cls):
             return value
 
-        if is_dataclass(cls) or is_attrs(cls):
+        if is_dataclass(cls) or is_attrs(cls) or is_pydantic(cls):
             return factory_classes.class_factories["dataclass"].process(
                 obj=obj, field=field, factory_classes=factory_classes
             )
@@ -418,7 +442,7 @@ class EnumClassFactory:
         obj: OpenAPIModel,
         field: Field,
         factory_classes: FactoryClassesInstance,
-    ) -> Optional[enum.Enum]:
+    ) -> enum.Enum | None:
         """Processing Enum types. This class acts as an adapter for the
         EnumTypeFactory.
 
@@ -433,7 +457,8 @@ class EnumClassFactory:
 
         Returns
         -------
-            An enum instance
+        enum.Enum | None
+            An enum instance or None
         """
         return factory_classes.type_factories["enum"].process(
             key=field.name, value=getattr(obj, field.name), cls=field.type
@@ -446,22 +471,23 @@ class JsonPatchClassFactory:
         obj: OpenAPIModel,
         field: Field,
         factory_classes: FactoryClassesInstance,
-    ) -> Optional[JsonPatch]:
+    ) -> JsonPatch | None:
         """Processing JsonPatch types. This class acts as an adapter for the
         JsonPatchTypeFactory.
 
         Parameters
         ----------
         obj
-            OpenAPIModel instance
+            OpenAPIModel instance.
         field
-            Field object of dataclass attribute
+            Field object of dataclass attribute.
         factory_classes
-            FactoryClasses instance which acts as a toolbox of Factory classes
+            FactoryClasses instance which acts as a toolbox of Factory classes.
 
         Returns
         -------
-            An JsonPatch instance
+        JsonPatch | None
+            A JsonPatch instance or None.
         """
         return factory_classes.type_factories["json_patch"].process(
             key=field.name, value=getattr(obj, field.name), cls=field.type
@@ -480,14 +506,15 @@ class AnyClassFactory:
         Parameters
         ----------
         obj
-            OpenAPIModel instance
+            OpenAPIModel instance.
         field
-            Field object of dataclass attribute
+            Field object of dataclass attribute.
         factory_classes
-            FactoryClasses instance which acts as a toolbox of Factory classes
+            FactoryClasses instance which acts as a toolbox of Factory classes.
 
         Returns
         -------
+        Any
             Any value
         """
         value = getattr(obj, field.name, None)

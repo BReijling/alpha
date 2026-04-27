@@ -1,3 +1,3 @@
-# TokenFactory Interface
+# TokenFactory
 
-::: alpha.interfaces.token_factory
+::: alpha.interfaces.token_factory.TokenFactory

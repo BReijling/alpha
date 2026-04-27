@@ -11,6 +11,7 @@ All documentation is auto-generated from docstrings in the source code.
 | [SqlAlchemyDatabase](connectors/sql_alchemy.md) | SQL Alchemy Database Connector |
 | [LDAPConnector](connectors/ldap_connector.md) | LDAP connector |
 | [OIDCConnector](connectors/oidc_connector.md) | OIDC connector |
+| [KeyCloakOIDCConnector](connectors/keycloak_connector.md) | Keycloak OIDC connector |
 
 ## Models
 

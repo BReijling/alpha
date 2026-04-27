@@ -1,3 +1,3 @@
-# SqlDatabase Interface
+# SqlDatabase
 
-::: alpha.interfaces.sql_database
+::: alpha.interfaces.sql_database.SqlDatabase

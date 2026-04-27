@@ -1,3 +1,3 @@
-# Identity Model
+# Identity
 
-::: alpha.providers.models.identity
+::: alpha.providers.models.identity.Identity

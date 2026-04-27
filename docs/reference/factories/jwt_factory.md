@@ -1,3 +1,3 @@
-# JWT Factory
+# JWTFactory
 
-::: alpha.factories.jwt_factory
+::: alpha.factories.jwt_factory.JWTFactory

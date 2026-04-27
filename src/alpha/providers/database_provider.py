@@ -40,7 +40,8 @@ class DatabaseProvider(JWTProviderMixin):
             Token factory instance to generate and validate tokens
         password_factory
             Password factory instance to handle password hashing and
-            verification, by default None
+            verification, by default None. If None, a default PasswordFactory
+            will be used.
         user_name_attribute
             Attribute name to identify the user, by default "username"
         users_repository_name

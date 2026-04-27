@@ -63,13 +63,65 @@ class Role(Enum):
     VIEWER = auto()
 
     def __lt__(self, obj: Self) -> bool:
+        """Check if the current role has lower permissions than another role.
+
+        Parameters
+        ----------
+        obj
+            The role to compare with.
+
+        Returns
+        -------
+        bool
+            True if the current role has lower permissions, False otherwise.
+        """
         return self.value < obj.value
 
     def __le__(self, obj: Self) -> bool:
+        """Check if the current role has lower or equal permissions than
+        another role.
+
+        Parameters
+        ----------
+        obj
+            The role to compare with.
+
+        Returns
+        -------
+        bool
+            True if the current role has lower or equal permissions, False
+            otherwise.
+        """
         return self.value <= obj.value
 
     def __gt__(self, obj: Self) -> bool:
+        """Check if the current role has higher permissions than another role.
+
+        Parameters
+        ----------
+        obj
+            The role to compare with.
+
+        Returns
+        -------
+        bool
+            True if the current role has higher permissions, False otherwise.
+        """
         return self.value > obj.value
 
     def __ge__(self, obj: Self) -> bool:
+        """Check if the current role has higher or equal permissions than
+        another role.
+
+        Parameters
+        ----------
+        obj
+            The role to compare with.
+
+        Returns
+        -------
+        bool
+            True if the current role has higher or equal permissions, False
+            otherwise.
+        """
         return self.value >= obj.value

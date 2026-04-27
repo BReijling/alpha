@@ -1,3 +1,3 @@
-# Request Factory
+# RequestFactory
 
-::: alpha.factories.request_factory
+::: alpha.factories.request_factory.RequestFactory

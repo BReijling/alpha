@@ -8,8 +8,10 @@ All documentation is auto-generated from docstrings in the source code.
 
 | Provider | Description |
 |---|---|
-| [OidcProvider](oidc_provider.md) | OpenID Connect and Keycloak authentication provider |
-| [LdapProvider](ldap_provider.md) | LDAP / Active Directory authentication provider |
+| [OIDCProvider](oidc_provider.md) | OpenID Connect and Keycloak authentication provider |
+| [KeyCloakProvider](keycloak_provider.md) | Keycloak authentication provider |
+| [LDAPProvider](ldap_provider.md) | LDAP / Active Directory authentication provider |
+| [ADProvider](ad_provider.md) | Active Directory authentication provider |
 | [DatabaseProvider](database_provider.md) | Database connection and session provider |
 <!-- | [ApiKeyProvider](api_key_provider.md) | API key authentication provider | -->
 

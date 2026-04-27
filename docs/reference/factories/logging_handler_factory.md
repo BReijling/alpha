@@ -1,3 +1,3 @@
-# Logging Handler Factory
+# LoggingHandlerFactory
 
-::: alpha.factories.logging_handler_factory
+::: alpha.factories.logging_handler_factory.LoggingHandlerFactory

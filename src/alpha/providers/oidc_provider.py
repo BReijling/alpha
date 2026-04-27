@@ -41,22 +41,11 @@ DEFAULT_KEYCLOAK_MAPPINGS: dict[str, str | Sequence[str]] = {
 class OIDCProvider(JWTProviderMixin):
     """OIDC identity provider.
 
-    Parameters
-    ----------
-    connector
-        Connector to use for OIDC operations.
-    token_factory
-        Factory used to issue/validate local tokens.
-    claim_mappings
-        Mapping of OIDC claims to Identity fields.
-    populate_groups
-        Whether to populate group memberships on the Identity.
-    populate_permissions
-        Whether to populate permissions on the Identity.
-    populate_claims
-        Whether to include raw claims on the Identity.
-    change_password_supported
-        Whether this provider supports changing passwords.
+    This provider authenticates users using the OIDC password flow, retrieves
+    user information from OIDC claims, and validates tokens using either a
+    token factory or OIDC token introspection. It can be configured with custom
+    claim mappings and options to populate groups, permissions, and raw claims
+    on the Identity object.
     """
 
     protocol = "oidc"
@@ -72,6 +61,29 @@ class OIDCProvider(JWTProviderMixin):
         populate_claims: bool = False,
         change_password_supported: bool = False,
     ) -> None:
+        """Initialize OIDCProvider.
+
+        Parameters
+        ----------
+        connector
+            Connector to use for OIDC operations.
+        token_factory
+            Factory used to issue/validate local tokens.
+        claim_mappings
+            Mapping of OIDC claims to Identity fields. Defaults to common OIDC
+            claim mappings. The mapping values can be either a single claim
+            name or a sequence of claim names. If a sequence is provided, the
+            claims will be checked in order and the first non-empty value will
+            be used.
+        populate_groups
+            Whether to populate group memberships on the Identity.
+        populate_permissions
+            Whether to populate permissions on the Identity.
+        populate_claims
+            Whether to include raw claims on the Identity.
+        change_password_supported
+            Whether this provider supports changing passwords.
+        """
         self._connector = connector
         self.token_factory = token_factory
         self._claim_mappings = (
@@ -379,22 +391,8 @@ class OIDCProvider(JWTProviderMixin):
 class KeyCloakProvider(OIDCProvider):
     """Keycloak identity provider based on OIDC.
 
-    Parameters
-    ----------
-    connector
-            Connector to use for OIDC operations.
-    token_factory
-            Factory used to issue/validate local tokens.
-    claim_mappings
-            Mapping of OIDC claims to Identity fields.
-    populate_groups
-            Whether to populate group memberships on the Identity.
-    populate_permissions
-            Whether to populate permissions on the Identity.
-    populate_claims
-            Whether to include raw claims on the Identity.
-    change_password_supported
-            Whether this provider supports changing passwords.
+    Inherits from OIDCProvider with default claim mappings tailored for
+    Keycloak.
     """
 
     protocol = "oidc"
@@ -409,6 +407,31 @@ class KeyCloakProvider(OIDCProvider):
         populate_claims: bool = False,
         change_password_supported: bool = False,
     ) -> None:
+        """Initialize KeyCloakProvider.
+
+        Uses `DEFAULT_KEYCLOAK_MAPPINGS` by default for claim mappings.
+
+        Parameters
+        ----------
+        connector
+            Connector to use for OIDC operations.
+        token_factory
+            Factory used to issue/validate local tokens.
+        claim_mappings
+            Mapping of OIDC claims to Identity fields. Defaults to common
+            Keycloak claim mappings. The mapping values can be either a single
+            claim name or a sequence of claim names. If a sequence is provided,
+            the claims will be checked in order and the first non-empty value
+            will be used.
+        populate_groups
+            Whether to populate group memberships on the Identity.
+        populate_permissions
+            Whether to populate permissions on the Identity.
+        populate_claims
+            Whether to include raw claims on the Identity.
+        change_password_supported
+            Whether this provider supports changing passwords.
+        """
         super().__init__(
             connector=connector,
             token_factory=token_factory,

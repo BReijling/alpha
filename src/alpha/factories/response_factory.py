@@ -10,6 +10,7 @@ from alpha.encoder import JSONEncoder
 from alpha.interfaces.dataclass_instance import DataclassInstance
 from alpha.interfaces.openapi_model import OpenAPIModel
 from alpha.utils.is_attrs import is_attrs
+from alpha.utils.is_pydantic import is_pydantic
 
 
 class ResponseFactory:
@@ -32,7 +33,8 @@ class ResponseFactory:
 
         Returns
         -------
-            OpenAPI model instance or a list of instances
+        object
+            An OpenAPI model instance or a list of instances
 
         Raises
         ------
@@ -152,6 +154,7 @@ class ResponseFactory:
 
         Returns
         -------
+        Any
             Any value which corresponds to the attributes name
 
         Raises
@@ -162,7 +165,7 @@ class ResponseFactory:
         if hasattr(obj, attr_name):
             return getattr(obj, attr_name, None)
 
-        if is_dataclass(obj) or is_attrs(obj):
+        if is_dataclass(obj) or is_attrs(obj) or is_pydantic(obj):
             attrs = getattr(obj, "__match_args__", [])
 
             for attr in attrs:

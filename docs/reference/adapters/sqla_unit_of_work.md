@@ -1,1 +1,3 @@
-::: alpha.adapters.sqla_unit_of_work
+# SqlAlchemyUnitOfWork
+
+::: alpha.adapters.sqla_unit_of_work.SqlAlchemyUnitOfWork

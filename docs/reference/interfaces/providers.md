@@ -1,3 +1,3 @@
-# Providers Interface
+# Providers
 
 ::: alpha.interfaces.providers

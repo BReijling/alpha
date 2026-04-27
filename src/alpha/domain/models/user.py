@@ -83,7 +83,8 @@ class User(LifeCycleBase, BaseDomainModel):
 
         Returns
         -------
-            User instance created from the Identity.
+        Self
+            A new User instance created from the Identity.
         """
         return cls(
             id=identity.subject,
@@ -97,6 +98,7 @@ class User(LifeCycleBase, BaseDomainModel):
 
         Returns
         -------
+        dict[str, Any]
             A dictionary representation of the User instance.
         """
         return {
@@ -120,6 +122,11 @@ class User(LifeCycleBase, BaseDomainModel):
         ----------
         obj
             User object to update from.
+
+        Returns
+        -------
+        DomainModel
+            The updated instance of the User.
         """
         if not isinstance(obj, User):
             raise TypeError("User.update expects a User instance.")

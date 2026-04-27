@@ -1,3 +1,3 @@
-# Repository Model
+# RepositoryModel
 
-::: alpha.repositories.models.repository_model
+::: alpha.repositories.models.repository_model.RepositoryModel

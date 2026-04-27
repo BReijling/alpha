@@ -1,3 +1,3 @@
-# PydanticInstance Protocol
+# PydanticInstance
 
-::: alpha.interfaces.pydantic_instance
+::: alpha.interfaces.pydantic_instance.PydanticInstance

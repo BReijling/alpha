@@ -1,6 +1,7 @@
-"""Contains the SqlMapper protocol, which defines the interface for SQLAlchemy 
+"""Contains the SqlMapper protocol, which defines the interface for SQLAlchemy
 ORM mapping.
 """
+
 from typing import Any, ClassVar, Protocol, runtime_checkable
 
 import sqlalchemy as sa
@@ -22,3 +23,4 @@ class SqlMapper(Protocol):
     @classmethod
     def start_mapping(cls) -> None:
         """Start the SQLAlchemy ORM mapping process."""
+        ...

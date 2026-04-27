@@ -1,3 +1,3 @@
-# SqlMapper Interface
+# SqlMapper
 
-::: alpha.interfaces.sql_mapper
+::: alpha.interfaces.sql_mapper.SqlMapper

@@ -1,3 +1,3 @@
-# SqlRepository Interface
+# SqlRepository
 
-::: alpha.interfaces.sql_repository
+::: alpha.interfaces.sql_repository.SqlRepository

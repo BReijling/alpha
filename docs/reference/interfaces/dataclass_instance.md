@@ -1,3 +1,3 @@
-# DataclassInstance Protocol
+# DataclassInstance
 
-::: alpha.interfaces.dataclass_instance
+::: alpha.interfaces.dataclass_instance.DataclassInstance

@@ -12,7 +12,12 @@ UOW = TypeVar("UOW", bound="SqlAlchemyUnitOfWork")
 
 
 class SqlAlchemyUnitOfWork:
-    """Unit of Work implementation for SQLAlchemy databases."""
+    """Unit of Work implementation for SQLAlchemy databases.
+
+    This class manages the lifecycle of a SQLAlchemy session and provides
+    access to configured repositories for database interactions. It supports
+    transactional operations such as commit, flush, rollback, and refresh.
+    """
 
     def __init__(
         self,
@@ -45,6 +50,7 @@ class SqlAlchemyUnitOfWork:
 
         Returns
         -------
+        UOW
             The Unit of Work instance.
 
         Raises
@@ -107,7 +113,13 @@ class SqlAlchemyUnitOfWork:
         self._session.rollback()
 
     def refresh(self, obj: object) -> None:
-        """Refresh the state of a given object."""
+        """Refresh the state of a given object.
+
+        Parameters
+        ----------
+        obj
+            The object to refresh.
+        """
         if not self._session:
             raise exceptions.DatabaseSessionError(
                 "No active database session is defined"
@@ -116,5 +128,11 @@ class SqlAlchemyUnitOfWork:
 
     @property
     def session(self) -> Session | None:
-        """Get the current database session."""
+        """Get the current database session.
+
+        Returns
+        -------
+        Session | None
+            The current database session.
+        """
         return self._session

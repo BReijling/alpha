@@ -20,36 +20,15 @@ from alpha import exceptions
 
 
 class LDAPProvider(JWTProviderMixin):
-    """LDAP Identity Provider
+    """LDAP Identity Provider that uses an LDAPConnector to authenticate users
+    against an LDAP directory. This provider supports retrieving user
+    information and optionally populating groups, permissions, and claims based
+    on the LDAP entry. It also provides a method for changing user passwords if
+    supported by the LDAP server.
 
-    Parameters
-    ----------
-    connector
-        Connector to use for LDAP operations
-    search_filter_key
-        Key to use for LDAP search filter, by default "uid"
-    search_base
-        Base DN for LDAP search, by default "cn=users,dc=example,dc=com"
-    search_attributes
-        Attributes to retrieve during LDAP search, by default
-        [ALL_ATTRIBUTES]
-    identity_mappings
-        Mappings from LDAP attributes to Identity fields, by default
-        DEFAULT_LDAP_MAPPINGS
-    populate_groups
-        Whether to populate groups in the Identity, by default True
-    populate_permissions
-        Whether to populate permissions in the Identity, by default False
-    populate_claims
-        Whether to populate claims in the Identity, by default True
-    auto_connect
-        Whether to automatically connect using the connector, by default
-        True
-    change_password_supported
-        Whether the provider supports changing passwords, by default False
-    additional_connector_params
-        Additional parameters to pass to the LDAP connection, by default
-        {"receive_timeout": 5}
+    The provider can be configured with various parameters such as search
+    filter key, search base, and identity mappings to customize how user
+    information is retrieved and mapped to the Identity model.
     """
 
     protocol = "ldap"
@@ -70,7 +49,37 @@ class LDAPProvider(JWTProviderMixin):
         change_password_supported: bool = False,
         additional_connector_params: dict[str, Any] | None = None,
     ) -> None:
-        """Initialize LDAPProvider"""
+        """Initialize LDAPProvider.
+
+        Parameters
+        ----------
+        connector
+            Connector to use for LDAP operations
+        search_filter_key
+            Key to use for LDAP search filter, by default "uid"
+        search_base
+            Base DN for LDAP search, by default "cn=users,dc=example,dc=com"
+        search_attributes
+            Attributes to retrieve during LDAP search, by default
+            [ALL_ATTRIBUTES]
+        identity_mappings
+            Mappings from LDAP attributes to Identity fields, by default
+            DEFAULT_LDAP_MAPPINGS
+        populate_groups
+            Whether to populate groups in the Identity, by default True
+        populate_permissions
+            Whether to populate permissions in the Identity, by default False
+        populate_claims
+            Whether to populate claims in the Identity, by default True
+        auto_connect
+            Whether to automatically connect using the connector, by default
+            True
+        change_password_supported
+            Whether the provider supports changing passwords, by default False
+        additional_connector_params
+            Additional parameters to pass to the LDAP connection, by default
+            {"receive_timeout": 5}
+        """
         self._connector = connector
         self.token_factory = token_factory
         self._search_filter_key = search_filter_key
@@ -293,43 +302,15 @@ class LDAPProvider(JWTProviderMixin):
 
 
 class ADProvider(LDAPProvider):
-    """Active Directory Identity Provider
+    """Active Directory Identity Provider.
 
     Inherits from LDAPProvider with default settings for Active Directory.
 
-    Parameters
-    ----------
-    connector
-        Connector to use for LDAP operations.
-    token_factory
-        Factory used to create tokens, by default ``None``.
-    search_filter_key
-        Key to use for Active Directory search filter, by default
-        ``"sAMAccountName"``.
-    search_base
-        Base distinguished name (DN) for Active Directory searches, by default
-        ``"CN=users,DC=example,DC=com"``.
-    search_attributes
-        Attributes to retrieve during Active Directory searches, by default
-        ``AD_SEARCH_ATTRIBUTES``.
-    identity_mappings
-        Mapping of Active Directory attributes to :class:`Identity` fields, by
-        default ``DEFAULT_AD_MAPPINGS``.
-    populate_groups
-        Whether to populate group memberships on the :class:`Identity`, by
-        default ``True``.
-    populate_permissions
-        Whether to populate permissions on the :class:`Identity`, by default
-        ``False``.
-    populate_claims
-        Whether to populate claims on the :class:`Identity`, by default
-        ``True``.
-    auto_connect
-        Whether to automatically open the LDAP connection on first use, by
-        default ``True``.
-    change_password_supported
-        Whether this provider supports changing passwords, by default
-        ``False``.
+    Active Directory (AD) is a directory service developed by Microsoft for
+    Windows domain networks. It is widely used in enterprise environments for
+    managing user accounts, groups, and permissions. The ADProvider class is a
+    specialized implementation of the LDAPProvider that is tailored for
+    authenticating users against an Active Directory server.
     """
 
     def __init__(
@@ -346,7 +327,42 @@ class ADProvider(LDAPProvider):
         auto_connect: bool = True,
         change_password_supported: bool = False,
     ) -> None:
-        """Initialize ADProvider"""
+        """Initialize ADProvider
+
+        Parameters
+        ----------
+        connector
+            Connector to use for LDAP operations.
+        token_factory
+            Factory used to create tokens, by default None.
+        search_filter_key
+            Key to use for Active Directory search filter, by default
+            "sAMAccountName".
+        search_base
+            Base distinguished name (DN) for Active Directory searches, by default
+            "CN=users,DC=example,DC=com".
+        search_attributes
+            Attributes to retrieve during Active Directory searches, by default
+            AD_SEARCH_ATTRIBUTES.
+        identity_mappings
+            Mapping of Active Directory attributes to :class:`Identity` fields, by
+            default DEFAULT_AD_MAPPINGS.
+        populate_groups
+            Whether to populate group memberships on the :class:`Identity`, by
+            default True.
+        populate_permissions
+            Whether to populate permissions on the :class:`Identity`, by default
+            False.
+        populate_claims
+            Whether to populate claims on the :class:`Identity`, by default
+            True.
+        auto_connect
+            Whether to automatically open the LDAP connection on first use, by
+            default True.
+        change_password_supported
+            Whether this provider supports changing passwords, by default
+            False.
+        """
         super().__init__(
             connector=connector,
             token_factory=token_factory,

@@ -13,8 +13,10 @@ All documentation is auto-generated from docstrings in the source code.
 | [Factories](factories/index.md) | Object creation factories |
 | [Infra](infra/index.md) | Infrastrucure related components |
 | [Interfaces](interfaces/index.md) | Abstract interfaces and protocols |
+| [Mixins](mixins/index.md) | Mixin classes providing reusable methods for common tasks |
 | [Providers](providers/index.md) | Authentication & configuration providers |
 | [Repositories](repositories/index.md) | Repository pattern implementations |
 | [Services](services/index.md) | Business logic services |
 | [Utilities](utils/index.md) | Logging, headers and response utilities |
-| [JSON Encoder](encoder.md) | Enhanced JSON serialization for complex types |
+| [Encoder](encoder.md) | Enhanced JSON serialization for complex types |
+| [Exceptions](exceptions.md) | Custom exception classes |

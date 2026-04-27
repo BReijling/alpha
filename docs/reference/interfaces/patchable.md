@@ -1,3 +1,3 @@
-# Patchable Interface
+# Patchable
 
-::: alpha.interfaces.patchable
+::: alpha.interfaces.patchable.Patchable

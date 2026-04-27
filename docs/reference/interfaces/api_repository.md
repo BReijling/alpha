@@ -1,3 +1,3 @@
-# ApiRepository Interface
+# ApiRepository
 
-::: alpha.interfaces.api_repository
+::: alpha.interfaces.api_repository.ApiRepository

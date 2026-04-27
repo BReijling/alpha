@@ -115,6 +115,8 @@ class ModelClassFactory:
         self.typing_classes = typing_classes
         self.factory_classes = factory_classes
 
+        # Set the model_class_factory reference in factory_classes to self if
+        # it is not already set
         if self.factory_classes.model_class_factory is None:
             self.factory_classes.model_class_factory = self  # type: ignore
 
@@ -136,7 +138,9 @@ class ModelClassFactory:
 
         Returns
         -------
+        DataclassInstance | AttrsInstance | PydanticInstance | None
             Dataclass, attrs, or pydantic instance
+
         Raises
         ------
         exceptions.ModelClassFactoryException
@@ -148,7 +152,6 @@ class ModelClassFactory:
         try:
             fields = FieldIterator(cls)
         except TypeError:
-
             raise exceptions.ModelClassFactoryException(
                 "cls argument has to be a dataclass or attrs decorated class"
             )

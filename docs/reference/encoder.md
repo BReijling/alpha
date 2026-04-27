@@ -1,3 +1,3 @@
-# JSON Encoder
+# JSONEncoder
 
 ::: alpha.encoder.JSONEncoder
