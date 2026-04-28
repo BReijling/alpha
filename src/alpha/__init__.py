@@ -45,6 +45,8 @@ from alpha.interfaces.providers import (
 )
 from alpha.interfaces.token_factory import TokenFactory
 from alpha.mixins.jwt_provider import JWTProviderMixin
+from alpha.mixins.user_lifecycle import UserLifecycleMixin
+from alpha.mixins.group_lifecycle import GroupLifecycleMixin
 from alpha.providers.models.identity import (
     Identity,
     DEFAULT_LDAP_MAPPINGS,
@@ -138,6 +140,8 @@ __all__ = [
     "TokenIssuer",
     "TokenFactory",
     "JWTProviderMixin",
+    "UserLifecycleMixin",
+    "GroupLifecycleMixin",
     "Identity",
     "DEFAULT_LDAP_MAPPINGS",
     "DEFAULT_AD_MAPPINGS",

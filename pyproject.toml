@@ -6,6 +6,18 @@ readme = "README.md"
 authors = [
     { name = "Bart Reijling", email = "bart@reijling.eu" }
 ]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+license = "MIT"
 requires-python = ">=3.11, <3.15"
 dependencies = [
     "attrs>=25.4.0",
@@ -23,6 +35,10 @@ dependencies = [
     "httpx",
     "cryptography",
 ]
+
+[project.urls]
+Homepage = "https://github.com/breijling/alpha"
+Issues = "https://github.com/breijling/alpha/issues"
 
 [project.scripts]
 alpha = "alpha.cli:init"
