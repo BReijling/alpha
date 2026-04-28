@@ -1,4 +1,4 @@
-"""Contains JSONEncoder class for encoding OpenAPIModel instances and other 
+"""Contains JSONEncoder class for encoding OpenAPIModel instances and other
 complex types into JSON format.
 """
 
@@ -18,10 +18,10 @@ from alpha.interfaces.openapi_model import OpenAPIModel
 
 
 class JSONEncoder(encoder.JSONEncoder):
-    """Custom JSON encoder that extends the default JSONEncoder to handle 
+    """Custom JSON encoder that extends the default JSONEncoder to handle
     additional types such as OpenAPIModel instances, dataclasses, Enums, UUIDs,
     and various NumPy and pandas types.
-    """    
+    """
 
     include_nulls = False
 
@@ -35,8 +35,9 @@ class JSONEncoder(encoder.JSONEncoder):
 
         Returns
         -------
+        Any
             The JSON-serializable representation of the object.
-        """        
+        """
         if isinstance(o, list):
             return [self.default(item) for item in o]  # type: ignore
         if isinstance(o, OpenAPIModel):

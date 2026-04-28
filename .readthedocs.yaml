@@ -12,9 +12,9 @@ python:
   install:
     - method: pip
       path: .
-      extra_requirements:
-        - flask
-        - postgresql
-        - mysql
-        - ldap
+      # extra_requirements:
+      #   - flask
+      #   - postgresql
+      #   - mysql
+      #   - ldap
     - requirements: docs/requirements.txt

@@ -8,19 +8,6 @@ repo_url: https://github.com/breijling/alpha
 
 theme:
   name: readthedocs
-  palette:
-    - scheme: default
-      primary: cyan
-      accent: cyan
-      toggle:
-        icon: material/brightness-7
-        name: Switch to dark mode
-    - scheme: slate
-      primary: cyan
-      accent: cyan
-      toggle:
-        icon: material/brightness-4
-        name: Switch to light mode
   features:
     - navigation.tabs
     - navigation.sections
