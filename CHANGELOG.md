@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Extended exception handling to also catch 405, 501, 502, 503 and 504 status codes and return a proper response with the correct status code and error message.
 - Additional unit and integration tests for the API templates and the generated code.
 - Support for python 3.14 by patching an issue with the `ast` library. This allows the generated API code to be compatible with python 3.14.
+- Documentation for all relevant classes and functions in the codebase.
 
 ### Changed
 
