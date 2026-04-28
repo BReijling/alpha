@@ -1,3 +1,4 @@
+from alpha.utils.cookie import Cookie
 from alpha.utils.is_attrs import is_attrs
 from alpha.utils.is_pydantic import is_pydantic
 from alpha.utils.logging_configurator import (
@@ -11,6 +12,7 @@ from alpha.utils.verify_identity import verify_identity
 from alpha.utils.version_checker import minor_version_gte
 
 __all__ = [
+    "Cookie",
     "is_attrs",
     "is_pydantic",
     "LoggingConfigurator",

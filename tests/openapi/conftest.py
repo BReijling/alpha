@@ -159,6 +159,15 @@ def test_user(user_credentials) -> dict[str, Any]:
     )
 
 
+@pytest.fixture
+def test_group() -> dict[str, Any]:
+    return dict(
+        name="test_group",
+        permissions=["TEST_PERMISSION"],
+        description="A test group",
+    )
+
+
 @pytest.fixture(scope="session", autouse=True)
 def psql_database() -> Generator[SqlAlchemyDatabase, None, None]:
     db = SqlAlchemyDatabase(

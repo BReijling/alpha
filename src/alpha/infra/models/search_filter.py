@@ -10,6 +10,71 @@ from alpha.infra.models.query_clause import QueryClause
 
 
 class Operator(Enum):
+    """An enumeration of possible operators for search filters.
+
+    Can be used for the `op` attribute of the `SearchFilter` class to specify
+    the operator for the filter.
+
+    Attributes
+    ----------
+    LT
+        Represents the "less than" operator.
+    LTE
+        Represents the "less than or equal to" operator.
+    EQ
+        Represents the "equal to" operator.
+    NEQ
+        Represents the "not equal to" operator.
+    GT
+        Represents the "greater than" operator.
+    GTE
+        Represents the "greater than or equal to" operator.
+    IN
+        Represents the "in" operator for checking if a value is in a list.
+    NIN
+        Represents the "not in" operator for checking if a value is not in a
+        list.
+    LIKE
+        Represents the "like" operator for pattern matching.
+    NLIKE
+        Represents the "not like" operator for pattern matching.
+    ILIKE
+        Represents the "case-insensitive like" operator for pattern matching.
+    NILIKE
+        Represents the "case-insensitive not like" operator for pattern
+        matching.
+    STARTSWITH
+        Represents the "starts with" operator for pattern matching.
+    ISTARTSWITH
+        Represents the "case-insensitive starts with" operator for pattern
+        matching.
+    NSTARTSWITH
+        Represents the "not starts with" operator for pattern matching.
+    NISTARTSWITH
+        Represents the "case-insensitive not starts with" operator for pattern
+        matching.
+    ENDSWITH
+        Represents the "ends with" operator for pattern matching.
+    IENDSWITH
+        Represents the "case-insensitive ends with" operator for pattern
+        matching.
+    NENDSWITH
+        Represents the "not ends with" operator for pattern matching.
+    NIENDSWITH
+        Represents the "case-insensitive not ends with" operator for pattern
+        matching.
+    CONTAINS
+        Represents the "contains" operator for pattern matching.
+    ICONTAINS
+        Represents the "case-insensitive contains" operator for pattern
+        matching.
+    NCONTAINS
+        Represents the "not contains" operator for pattern matching.
+    NICONTAINS
+        Represents the "case-insensitive not contains" operator for pattern
+        matching.
+    """
+
     LT = auto()
     LTE = auto()
     EQ = auto()
@@ -38,11 +103,41 @@ class Operator(Enum):
 
 @dataclass
 class SearchFilter(QueryClause):
+    """A class representing a search filter for SQLAlchemy queries. This class
+    extends the `QueryClause` class and adds attributes for the operator,
+    field, and value of the filter.
+
+    An instance of this class represents a single filter condition that can be
+    applied to a call to the `filters` parameter of any method of a
+    `SqlRepository` subclass. Keep in mind that this `filters` parameter is
+    expected to be a sequence of `SearchFilter` instances, so multiple filters
+    can be applied to a query by including multiple instances of this class in
+    the sequence.
+
+    Use a FilterOperator class to define AND or OR combinations of multiple
+    SearchFilter instances for more complex filtering logic.
+
+    Attributes
+    ----------
+    op
+        An instance of the `Operator` enum specifying the type of comparison to
+        be performed.
+    field
+        A string representing the name of the field to filter on, or an
+        `InstrumentedAttribute` from SQLAlchemy representing the field.
+    value
+        The value to compare the field against in the filter.
+    """
+
     op: Operator = Operator.EQ
     field: str | InstrumentedAttribute[Any] = ""
     value: Any = ""
 
     def __post_init__(self) -> None:
+        """Post-initialization method to set up the search filter. This method
+        calls the parent class's post-initialization method and then determines
+        the appropriate subclass based on the operator attribute.
+        """
         super().__post_init__()
         self.__class__ = self._get_filter_class()  # type: ignore
 
@@ -54,6 +149,7 @@ class SearchFilter(QueryClause):
 
         Returns
         -------
+        BinaryExpression | ColumnOperators
             Filter statement
 
         Raises

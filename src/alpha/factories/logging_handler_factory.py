@@ -9,11 +9,12 @@ class LoggingHandlerFactory:
     """For creating a valid logging handler from a dict object.
 
     Supported handlers:
-        - logging.StreamHandler
-        - logging.FileHandler
-        - logging.handlers.RotatingFileHandler
-        - logging.handlers.TimedRotatingFileHandler
-        - logging.handlers.WatchedFileHandler
+
+    - logging.StreamHandler
+    - logging.FileHandler
+    - logging.handlers.RotatingFileHandler
+    - logging.handlers.TimedRotatingFileHandler
+    - logging.handlers.WatchedFileHandler
     """
 
     @classmethod
@@ -30,6 +31,7 @@ class LoggingHandlerFactory:
 
         Returns
         -------
+        dict[str, Any]
             A handler dictionary which can be used in the handlers section of a
             logging.config.dictConfig compatible dictionary.
 

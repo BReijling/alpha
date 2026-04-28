@@ -11,7 +11,13 @@ UOW = TypeVar("UOW", bound="RestApiUnitOfWork")
 
 
 class RestApiUnitOfWork:
-    """Unit of Work implementation for REST API interactions."""
+    """Unit of Work implementation for REST API interactions.
+
+    This class manages the lifecycle of a shared HTTP session and provides
+    access to configured repositories for API interactions. It does not support
+    transactional operations like commit, flush, rollback, or refresh, as these
+    concepts do not apply to REST API interactions.
+    """
 
     def __init__(
         self,
@@ -22,9 +28,9 @@ class RestApiUnitOfWork:
 
         Parameters
         ----------
-        repos : list[RepositoryModel]
+        repos
             The list of repository models to use.
-        session : requests.sessions.Session | None
+        session
             The requests session (or compatible HTTP client, e.g., httpx) to
             use for context management, by default None
 

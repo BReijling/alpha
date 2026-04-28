@@ -1,16 +1,25 @@
+from importlib.metadata import version
+
 from alpha.adapters.rest_api_unit_of_work import RestApiUnitOfWork
 from alpha.adapters.sqla_unit_of_work import SqlAlchemyUnitOfWork
 from alpha.factories.jwt_factory import JWTFactory
 from alpha.factories.logging_handler_factory import LoggingHandlerFactory
 from alpha.factories.model_class_factory import ModelClassFactory
 from alpha.domain.models.user import User
-from alpha.domain.models.base_model import BaseDomainModel, DomainModel
+from alpha.domain.models.group import Group
+from alpha.domain.models.role import Role
+from alpha.domain.models.base_model import (
+    BaseDomainModel,
+    DomainModel,
+    DomainModelCovariant,
+    DomainModelContravariant,
+)
 from alpha.domain.models.life_cycle_base import LifeCycleBase
 from alpha.infra.connectors.oidc_connector import (
     OIDCConnector,
     KeyCloakOIDCConnector,
 )
-from alpha.infra.databases.sql_alchemy import SqlAlchemyDatabase
+from alpha.infra.connectors.sql_alchemy import SqlAlchemyDatabase
 from alpha.infra.models.filter_operators import And, Or
 from alpha.infra.models.json_patch import JsonPatch
 from alpha.infra.models.order_by import OrderBy, Order
@@ -19,7 +28,7 @@ from alpha.interfaces.attrs_instance import AttrsInstance
 from alpha.interfaces.dataclass_instance import DataclassInstance
 from alpha.interfaces.pydantic_instance import PydanticInstance
 from alpha.interfaces.openapi_model import OpenAPIModel
-from alpha.interfaces.updateable import Updateable
+from alpha.interfaces.updatable import Updatable
 from alpha.interfaces.patchable import Patchable
 from alpha.interfaces.api_repository import ApiRepository
 from alpha.interfaces.sql_repository import SqlRepository
@@ -36,6 +45,8 @@ from alpha.interfaces.providers import (
 )
 from alpha.interfaces.token_factory import TokenFactory
 from alpha.mixins.jwt_provider import JWTProviderMixin
+from alpha.mixins.user_lifecycle import UserLifecycleMixin
+from alpha.mixins.group_lifecycle import GroupLifecycleMixin
 from alpha.providers.models.identity import (
     Identity,
     DEFAULT_LDAP_MAPPINGS,
@@ -44,7 +55,12 @@ from alpha.providers.models.identity import (
 )
 from alpha.providers.models.credentials import PasswordCredentials
 from alpha.providers.models.token import Token
-from alpha.providers.oidc_provider import OIDCProvider, KeyCloakProvider
+from alpha.providers.oidc_provider import (
+    OIDCProvider,
+    KeyCloakProvider,
+    DEFAULT_OIDC_MAPPINGS,
+    DEFAULT_KEYCLOAK_MAPPINGS,
+)
 from alpha.repositories.models.repository_model import RepositoryModel
 from alpha.repositories.rest_api_repository import RestApiRepository
 from alpha.repositories.sql_alchemy_repository import SqlAlchemyRepository
@@ -63,6 +79,7 @@ from alpha.utils.verify_identity import verify_identity
 from alpha.utils.version_checker import minor_version_gte
 from alpha.encoder import JSONEncoder
 
+
 # Optional LDAP support - only import if ldap3 is available
 try:
     from alpha.infra.connectors.ldap_connector import (
@@ -77,6 +94,9 @@ try:
 except ImportError:
     _LDAP_AVAILABLE = False  # type: ignore
 
+
+__version__ = version("alpha-python")
+
 __all__ = [
     "RestApiUnitOfWork",
     "SqlAlchemyUnitOfWork",
@@ -85,8 +105,12 @@ __all__ = [
     "ModelClassFactory",
     "BaseDomainModel",
     "DomainModel",
+    "DomainModelCovariant",
+    "DomainModelContravariant",
     "LifeCycleBase",
     "User",
+    "Group",
+    "Role",
     "OIDCConnector",
     "KeyCloakOIDCConnector",
     "SqlAlchemyDatabase",
@@ -101,7 +125,7 @@ __all__ = [
     "DataclassInstance",
     "PydanticInstance",
     "OpenAPIModel",
-    "Updateable",
+    "Updatable",
     "Patchable",
     "ApiRepository",
     "SqlRepository",
@@ -116,6 +140,8 @@ __all__ = [
     "TokenIssuer",
     "TokenFactory",
     "JWTProviderMixin",
+    "UserLifecycleMixin",
+    "GroupLifecycleMixin",
     "Identity",
     "DEFAULT_LDAP_MAPPINGS",
     "DEFAULT_AD_MAPPINGS",
@@ -124,6 +150,8 @@ __all__ = [
     "Token",
     "OIDCProvider",
     "KeyCloakProvider",
+    "DEFAULT_OIDC_MAPPINGS",
+    "DEFAULT_KEYCLOAK_MAPPINGS",
     "RepositoryModel",
     "RestApiRepository",
     "SqlAlchemyRepository",

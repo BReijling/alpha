@@ -1,0 +1,16 @@
+/* Add spacing after function documentation blocks. */
+.doc-function {
+  margin-bottom: 2rem;
+}
+
+.doc-function-name {
+  color: #2980b9;;
+}
+
+.doc-attribute-name {
+  color: #ffaa00;;
+}
+
+.quote {
+  margin-bottom: 2rem;
+}

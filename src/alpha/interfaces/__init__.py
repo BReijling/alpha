@@ -3,7 +3,7 @@ from alpha.interfaces.attrs_instance import AttrsInstance
 from alpha.interfaces.dataclass_instance import DataclassInstance
 from alpha.interfaces.pydantic_instance import PydanticInstance
 from alpha.interfaces.openapi_model import OpenAPIModel
-from alpha.interfaces.updateable import Updateable
+from alpha.interfaces.updatable import Updatable
 from alpha.interfaces.patchable import Patchable
 
 # import all repository related interfaces
@@ -31,7 +31,7 @@ __all__ = [
     "DataclassInstance",
     "PydanticInstance",
     "OpenAPIModel",
-    "Updateable",
+    "Updatable",
     "Patchable",
     "ApiRepository",
     "SqlRepository",

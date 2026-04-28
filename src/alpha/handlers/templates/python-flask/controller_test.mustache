@@ -48,7 +48,7 @@ class {{#operations}}Test{{classname}}(BaseTestCase):
             content_type='{{{mediaType}}}'{{/-first}}{{/consumes}}{{#queryParams}}{{#-first}},
             query_string=query_string{{/-first}}{{/queryParams}})
         self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
+                       'Response body is: ' + response.data.decode('utf-8'))
 
    {{/operation}}
 {{/operations}}

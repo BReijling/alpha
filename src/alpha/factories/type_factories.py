@@ -1,4 +1,5 @@
 """Contains these TypeFactory classes:
+
 - GenericTypeFactory
 - DatetimeTypeFactory
 - EnumTypeFactory
@@ -36,6 +37,7 @@ class GenericTypeFactory:
 
         Returns
         -------
+        Any
             An instance of the targeted class
 
         Raises
@@ -108,6 +110,7 @@ class DatetimeTypeFactory:
 
         Returns
         -------
+        datetime.datetime | datetime.date
             A datetime instance
         """
         if isinstance(value, cls):
@@ -189,6 +192,7 @@ class JsonPatchTypeFactory:
 
         Returns
         -------
+        Any
             An instance of the targeted class
 
         Raises

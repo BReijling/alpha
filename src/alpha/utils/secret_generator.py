@@ -8,8 +8,8 @@ def generate_secret(length: int = 32) -> str:
 
     Parameters
     ----------
-    length : int, optional
-        The length of the generated secret, by default 32
+    length
+        The desired length of the generated secret, by default 32
 
     Returns
     -------

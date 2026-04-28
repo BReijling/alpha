@@ -141,22 +141,6 @@ def init_container():
                 "db_name": os.getenv("TEST_PSQL_DB_NAME", "postgres"),
                 "db_type": os.getenv("TEST_PSQL_DB_TYPE", "postgresql"),
             },
-            "ldap": {
-                "server_url": os.getenv(
-                    "TEST_LDAP_SERVER_URL", "ldap://localhost"
-                ),
-                "server_port": int(os.getenv("TEST_LDAP_SERVER_PORT", "389")),
-                "use_tls": False,
-                "bind_dn": os.getenv(
-                    "TEST_LDAP_SERVER_BIND_DN", "cn=admin,dc=example,dc=org"
-                ),
-                "bind_password": os.getenv(
-                    "TEST_LDAP_SERVER_BIND_PASSWORD", "test_password"
-                ),
-                "search_base": os.getenv(
-                    "TEST_LDAP_SERVER_SEARCH_BASE", "dc=example,dc=org"
-                ),
-            },
             "authentication": {
                 "use_cookies": True,
                 "use_refresh_tokens": True,

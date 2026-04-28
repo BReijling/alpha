@@ -6,7 +6,7 @@ def is_pydantic(obj: Any) -> bool:
 
     Parameters
     ----------
-    obj : Any
+    obj
         An object which will be checked to be a pydantic class or instance
 
     Returns

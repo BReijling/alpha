@@ -8,13 +8,18 @@ from alpha.handlers.models.argument import Argument
 
 
 class Container(containers.DeclarativeContainer):
-    """Dependency injection container for the alpha package."""
+    """Dependency injection container for the alpha package.
+
+    The container is used to manage the dependencies of the alpha package,
+    including the API generation and running commands. It allows for easy
+    configuration and extension of the commands and their dependencies.
+    """
 
     config = providers.Configuration()
 
     api_gen_command = providers.Factory(
         Command,
-        name='gen',
+        name="gen",
         help=(
             "Generate the API code and watch OpenAPI spec file. The API code "
             "will be generated into the ./api folder."
@@ -23,46 +28,46 @@ class Container(containers.DeclarativeContainer):
         arguments=providers.List(
             providers.Factory(
                 Argument,
-                default='specification/openapi.yaml',
-                name='--spec-file',
-                help='Path to the specification file',
+                default="specification/openapi.yaml",
+                name="--spec-file",
+                help="Path to the specification file",
                 args={
-                    'type': str,
-                    'nargs': '?',
+                    "type": str,
+                    "nargs": "?",
                 },
             ),
             providers.Factory(
                 Argument,
                 default=config.api_package_name,
-                name='--api-package',
+                name="--api-package",
                 help=(
                     "Name of the API package to generate. Automatically "
                     "determined or guessed. If incorrect, "
                     "just use this argument."
                 ),
                 args={
-                    'type': str,
-                    'nargs': '?',
+                    "type": str,
+                    "nargs": "?",
                 },
             ),
             providers.Factory(
                 Argument,
                 default=config.service_package_name,
-                name='--service-package',
+                name="--service-package",
                 help=(
                     "Name of the service package to use. Automatically "
                     "determined or guessed. If incorrect, "
                     "just use this argument."
                 ),
                 args={
-                    'type': str,
-                    'nargs': '?',
+                    "type": str,
+                    "nargs": "?",
                 },
             ),
             providers.Factory(
                 Argument,
                 default=config.container_import,
-                name='--container-import',
+                name="--container-import",
                 help=(
                     "Name of the container to use. Automatically "
                     "determined or guessed. If incorrect, "
@@ -70,76 +75,76 @@ class Container(containers.DeclarativeContainer):
                     "use empty string for this variable"
                 ),
                 args={
-                    'type': str,
-                    'nargs': '?',
+                    "type": str,
+                    "nargs": "?",
                 },
             ),
             providers.Factory(
                 Argument,
                 default=config.init_container_from,
-                name='--init-container-from',
+                name="--init-container-from",
                 help=(
                     "Location of where the container initialize function "
                     "should be imported from."
                 ),
                 args={
-                    'type': str,
-                    'nargs': '?',
+                    "type": str,
+                    "nargs": "?",
                 },
             ),
             providers.Factory(
                 Argument,
                 default=config.init_container_function,
-                name='--init-container-function',
+                name="--init-container-function",
                 help="Name of the container initialize function.",
                 args={
-                    'type': str,
-                    'nargs': '?',
+                    "type": str,
+                    "nargs": "?",
                 },
             ),
             providers.Factory(
                 Argument,
-                default='post_process.py',
-                name='--post-process-file',
+                default="post_process.py",
+                name="--post-process-file",
                 help="Path to the post process file to use after generation",
                 args={
-                    'type': str,
-                    'nargs': '?',
+                    "type": str,
+                    "nargs": "?",
                 },
             ),
             providers.Factory(
                 Argument,
-                default='python-flask',
-                name='--generator-name',
+                default="python-flask",
+                name="--generator-name",
                 help="Name of the openapi generator to use",
                 args={
-                    'type': str,
-                    'nargs': '?',
+                    "type": str,
+                    "nargs": "?",
                 },
             ),
             providers.Factory(
                 Argument,
                 default=False,
-                name='--no-watch',
+                name="--no-watch",
                 help=(
                     "To prevent watching the spec file for changes and only "
                     "run the generation once."
                 ),
                 args={
-                    'action': 'store_true',
+                    "action": "store_true",
                 },
             ),
             providers.Factory(
                 Argument,
                 default=False,
-                name='--templates-only',
+                name="--templates-only",
                 help=(
                     "Only create a templates folder containing openapi "
                     "mustache templates in the current working directory. "
                     "Skip generation of API code."
                 ),
                 args={
-                    'action': 'store_true',
+                    "action": "store_true",
                 },
             ),
         ),
@@ -147,28 +152,28 @@ class Container(containers.DeclarativeContainer):
 
     api_run_command = providers.Factory(
         Command,
-        name='run',
-        help='Run API in development mode',
+        name="run",
+        help="Run API in development mode",
         handler=providers.Factory(ApiRunHandler),
         arguments=providers.List(
             providers.Factory(
                 Argument,
                 default=config.api_package_name,
-                name='--api-package',
-                help='Name of the API package to generate',
+                name="--api-package",
+                help="Name of the API package to generate",
                 args={
-                    'type': str,
-                    'nargs': '?',
+                    "type": str,
+                    "nargs": "?",
                 },
             ),
             providers.Factory(
                 Argument,
-                default='8080',
-                name='--port',
-                help='Port to run server on',
+                default="8080",
+                name="--port",
+                help="Port to run server on",
                 args={
-                    'type': str,
-                    'nargs': '?',
+                    "type": str,
+                    "nargs": "?",
                 },
             ),
         ),
@@ -176,8 +181,8 @@ class Container(containers.DeclarativeContainer):
 
     api_section = providers.Factory(
         Section,
-        name='api',
-        description='OpenAPI development commands.',
+        name="api",
+        description="OpenAPI development commands.",
         help=(
             "All commands for generating and developing an API using the "
             "OpenAPI standards"

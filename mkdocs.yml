@@ -1,0 +1,188 @@
+site_name: Alpha
+site_description: A foundational Python library providing standard building blocks for Python applications that use APIs and/or database interactions.
+site_author: Bart Reijling
+site_url: https://alpha-python.readthedocs.io/
+
+repo_name: breijling/alpha
+repo_url: https://github.com/breijling/alpha
+
+theme:
+  name: readthedocs
+  # palette:
+  #   - scheme: default
+  #     primary: cyan
+  #     accent: cyan
+  #     toggle:
+  #       icon: material/brightness-7
+  #       name: Switch to dark mode
+  #   - scheme: slate
+  #     primary: cyan
+  #     accent: cyan
+  #     toggle:
+  #       icon: material/brightness-4
+  #       name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+  icon:
+    repo: fontawesome/brands/github
+
+extra_css:
+  - stylesheets/mkdocstrings.css
+
+plugins:
+  - search
+  - mermaid2
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: numpy
+            show_source: true
+            show_root_heading: false
+            show_root_full_path: false
+            show_category_heading: true
+            show_submodules: false
+            members_order: source
+            separate_signature: true
+            merge_init_into_class: false
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets:
+      base_path: ['.']
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:mermaid2.fence_mermaid
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+  - tables
+  - attr_list
+  - md_in_html
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Quickstart: quickstart.md
+  - Concepts:
+    - Overview: concepts/index.md
+    - Design Principles: concepts/design-principles.md
+    - Dependency Injection: concepts/dependency-injection.md
+  - Guides:
+    - Overview: guides/index.md
+    - API Generation: guides/api-generation.md
+    - Authentication: guides/authentication.md
+    - Database Interaction: guides/database-interaction.md
+  - API Reference:
+    - Overview: reference/index.md
+    - Adapters: 
+      - Overview: reference/adapters/index.md
+      - REST API Unit-of-Work: reference/adapters/rest_api_unit_of_work.md
+      - SQLAlchemy Unit-of-Work: reference/adapters/sqla_unit_of_work.md
+    - Domain: 
+      - Overview: reference/domain/index.md
+      - Models:
+        - BaseDomainModel: reference/domain/models/base_model.md
+        - LifeCycleBase: reference/domain/models/life_cycle_base.md
+        - User: reference/domain/models/user.md
+        - Role: reference/domain/models/role.md
+        - Group: reference/domain/models/group.md
+    - Factories:
+      - Overview: reference/factories/index.md
+      - JWT Factory: reference/factories/jwt_factory.md
+      - Password Factory: reference/factories/password_factory.md
+      - Logging Handler Factory: reference/factories/logging_handler_factory.md
+      - Request Factory: reference/factories/request_factory.md
+      - Response Factory: reference/factories/response_factory.md
+      - Model Class Factory: reference/factories/model_class_factory.md
+    - Infra:
+      - Overview: reference/infra/index.md
+      - Connectors:
+        - SQLAlchemy Database: reference/infra/connectors/sql_alchemy.md
+        - LDAP Connector: reference/infra/connectors/ldap_connector.md
+        - OIDC Connector: reference/infra/connectors/oidc_connector.md
+        - Keycloak Connector: reference/infra/connectors/keycloak_connector.md
+      - Models:
+        - Search Filter: reference/infra/models/search_filter.md
+        - Operator: reference/infra/models/operator.md
+        - Filter Operators: reference/infra/models/filter_operators.md
+        - Order By: reference/infra/models/order_by.md
+        - Order: reference/infra/models/order.md
+        - JSON Patch: reference/infra/models/json_patch.md
+        - Query Clause: reference/infra/models/query_clause.md
+    - Interfaces:
+      - Overview: reference/interfaces/index.md
+      - UnitOfWork: reference/interfaces/unit_of_work.md
+      - SqlDatabase: reference/interfaces/sql_database.md
+      - SqlRepository: reference/interfaces/sql_repository.md
+      - ApiRepository: reference/interfaces/api_repository.md
+      - SqlMapper: reference/interfaces/sql_mapper.md
+      - OpenAPIModel: reference/interfaces/openapi_model.md
+      - AttrsInstance: reference/interfaces/attrs_instance.md
+      - DataclassInstance: reference/interfaces/dataclass_instance.md
+      - PydanticInstance: reference/interfaces/pydantic_instance.md
+      - Updatable: reference/interfaces/updatable.md
+      - Patchable: reference/interfaces/patchable.md
+      - Providers: reference/interfaces/providers.md
+      - TokenFactory: reference/interfaces/token_factory.md
+    - Mixins:
+      - Overview: reference/mixins/index.md
+      - UserLifecycleMixin: reference/mixins/user_lifecycle.md
+      - GroupLifecycleMixin: reference/mixins/group_lifecycle.md
+      - JWTProviderMixin: reference/mixins/jwt_provider.md
+    - Providers:
+      - Overview: reference/providers/index.md
+      - OIDC Provider: reference/providers/oidc_provider.md
+      - Keycloak Provider: reference/providers/keycloak_provider.md
+      - LDAP Provider: reference/providers/ldap_provider.md
+      - AD Provider: reference/providers/ad_provider.md
+      - Database Provider: reference/providers/database_provider.md
+      - Models:
+        - Identity Model: reference/providers/models/identity.md
+        - Credentials Model: reference/providers/models/credentials.md
+        - Token Model: reference/providers/models/token.md
+    - Repositories:
+      - Overview: reference/repositories/index.md
+      - SQLAlchemy Repository: reference/repositories/sql_alchemy_repository.md
+      - REST API Repository: reference/repositories/rest_api_repository.md
+      - Models:
+        - Repository Model: reference/repositories/models/repository_model.md
+    - Services:
+      - Overview: reference/services/index.md
+      - Authentication Service: reference/services/authentication_service.md
+      - User Lifecycle Management: reference/services/user_lifecycle_management.md
+    - Utilities:
+      - Overview: reference/utils/index.md
+      - Logging Configurator: reference/utils/logging_configurator.md
+      - Request Headers: reference/utils/headers.md
+      - Response Object: reference/utils/create_response_object.md
+      - Cookie: reference/utils/cookie.md
+      - Secret Generator: reference/utils/generate_secret.md
+      - Attrs Instance Checker: reference/utils/is_attrs.md
+      - Pydantic Instance Checker: reference/utils/is_pydantic.md
+      - Version Checker: reference/utils/minor_version_gte.md
+      - Logging Level Checker: reference/utils/logging_level_checker.md
+      - Verify Identity: reference/utils/verify_identity.md
+    - Encoder: reference/encoder.md
+    - Exceptions: reference/exceptions.md
+  - Changelog: changelog.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/breijling/alpha
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/alpha-python/

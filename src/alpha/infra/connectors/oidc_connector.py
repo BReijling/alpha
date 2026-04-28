@@ -284,7 +284,7 @@ class OIDCConnector:
         ----------
         data
             Form payload to send to the token endpoint.
-        use_admin, optional
+        use_admin
             Whether to use admin client credentials, by default False.
 
         Returns

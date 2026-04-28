@@ -155,15 +155,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/StringResponse'
                 description: Generated access token
-          headers:
-            X-RateLimit-Limit:
-              $ref: '#/components/headers/X-RateLimit-Limit'
-            X-RateLimit-Remaining:
-              $ref: '#/components/headers/X-RateLimit-Remaining'
       tags: [Authentication]
       x-alpha-service-name: authentication_service
       x-alpha-service-method: login
       x-alpha-request-factory: true
+  /auth/logout:
+    post:
+      description: Logout user and invalidate tokens
+      operationId: logout
+      responses:
+        '204':
+          description: Successfully logged out
+          x-alpha-cookie-support: true
+      tags: [Authentication]
+      x-alpha-service-name: authentication_service
+      x-alpha-service-method: logout
   /auth/password:
     patch:
       description: Update user password
@@ -223,16 +229,6 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-  headers:
-    X-RateLimit-Limit:
-      description: Request limit per hour
-      schema:
-        type: integer
-      example: 100
-    X-RateLimit-Remaining:
-      schema:
-        type: integer
-      example: 94
   parameters:
     token:
       name: token
@@ -256,21 +252,6 @@ components:
         type: string
         format: uuid
       example: acc1485b-2909-4535-8299-1bc6913d6f5b
-    # username:
-    #   name: username
-    #   in: query
-    #   required: true
-    #   schema:
-    #     type: string
-    #   example: name@example.org
-    # password:
-    #   name: password
-    #   in: query
-    #   required: true
-    #   schema:
-    #     type: string
-    #     format: password
-    #   example: welkom123
     new_password:
       name: new_password
       in: query

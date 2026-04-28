@@ -2,7 +2,7 @@
 hash_password & verify_password
 """
 
-from argon2 import PasswordHasher
+import argon2
 from argon2.exceptions import VerifyMismatchError
 
 from alpha import exceptions
@@ -10,27 +10,34 @@ from alpha import exceptions
 
 class PasswordFactory:
     """This class provides methods for hashing and verifying passwords using
-    the argon2 library. It includes the following methods:
-
-    - hash_password: Hashes a given password and returns the hashed value as a
-        hexadecimal string.
-    - verify_password: Verifies a given password against a provided hash and
-        returns True if the password matches the hash, False otherwise.
-
-    Parameters
-    ----------
-    password_hasher
-        An optional password hasher instance. If not provided, a default
-        PasswordHasher with a salt length of 16 will be used.
+    the argon2 library.
     """
 
-    def __init__(self, password_hasher: PasswordHasher | None = None) -> None:
-        self._password_hasher = password_hasher or PasswordHasher(salt_len=16)
+    def __init__(
+        self, password_hasher: argon2.PasswordHasher | None = None
+    ) -> None:
+        """Initialize the PasswordFactory.
+
+        Parameters
+        ----------
+        password_hasher
+            An optional password hasher instance. If not provided, a default
+            argon2.PasswordHasher with a salt length of 16 will be used.
+        """
+        self._password_hasher = password_hasher or argon2.PasswordHasher(
+            salt_len=16
+        )
 
     def hash_password(
         self, password: str | None, convert_to_hex: bool = True
     ) -> str:
         """Hashes the provided password using the password hasher.
+
+        By default the hashed password is converted to hexadecimal format for
+        storage. This ensures that the hashed password can be safely stored in
+        a database or other storage medium. If you prefer to store the hashed
+        password in its original format, you can set the `convert_to_hex`
+        parameter to False.
 
         Parameters
         ----------
@@ -42,6 +49,7 @@ class PasswordFactory:
 
         Returns
         -------
+        str
             The hashed password as a hexadecimal string.
 
         Raises
@@ -67,6 +75,10 @@ class PasswordFactory:
         """Verifies the provided password against the given hash using the
         password hasher.
 
+        By default, it is assumed that the provided hash is in hexadecimal
+        format. If the hash is in its original format, you can set the
+        `convert_from_hex` parameter to False to skip the conversion step.
+
         Parameters
         ----------
         password
@@ -79,7 +91,9 @@ class PasswordFactory:
 
         Returns
         -------
+        bool
             True if the password matches the hash, False otherwise.
+
         Raises
         ------
         exceptions.WrongPasswordException
@@ -112,6 +126,7 @@ class PasswordFactory:
 
         Returns
         -------
+        str
             The hexadecimal representation of the string value.
         """
         return value.encode("utf-8").hex()
@@ -124,8 +139,10 @@ class PasswordFactory:
         ----------
         hex
             The hexadecimal string to be converted back to the original string.
+
         Returns
         -------
+        str
             The original string representation of the hexadecimal input.
         """
         return bytes.fromhex(hex).decode("utf-8")

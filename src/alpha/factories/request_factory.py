@@ -17,12 +17,14 @@ from alpha.factories.type_factories import (
     JsonPatchTypeFactory,
 )
 from alpha.infra.models.json_patch import JsonPatch
+from alpha.interfaces.attrs_instance import AttrsInstance
 from alpha.interfaces.dataclass_instance import DataclassInstance
 from alpha.interfaces.factories import (
     ModelClassFactoryInstance,
     TypeFactory,
 )
 from alpha.interfaces.openapi_model import OpenAPIModel
+from alpha.interfaces.pydantic_instance import PydanticInstance
 
 
 class RequestFactory:
@@ -35,35 +37,35 @@ class RequestFactory:
         use_model_class_factory: bool = True,
         model_class_factory: type[
             ModelClassFactoryInstance
-        ] = ModelClassFactory,
+        ] = ModelClassFactory,  # type: ignore
         generic_type_factory: type[TypeFactory] = GenericTypeFactory,
         enum_type_factory: type[TypeFactory] = EnumTypeFactory,
         json_patch_type_factory: type[TypeFactory] = JsonPatchTypeFactory,
     ) -> None:
-        """Initializing the class with a service function
-        The service function will be called when calling
-        the cls.__call__ function.
+        """Initializing the class with a service function. The service function
+        is the function that will be called when calling the `cls.__call__ `
+        function.
 
         Parameters
         ----------
         func
             A callable service function
-        cast_args, optional
+        cast_args
             Make use of the GenericTypeFactory to cast arguments,
             by default True
-        use_model_class_factory, optional
+        use_model_class_factory
             Make use of the ModelClassFactory to map objects to a dataclass,
             by default True
-        model_class_factory, optional
+        model_class_factory
             A ModelClassFactory class
             by default ModelClassFactory
-        generic_type_factory, optional
+        generic_type_factory
             A TypeFactory that can handle generic types
             by default GenericTypeFactory
-        enum_type_factory, optional
+        enum_type_factory
             A TypeFactory that can handle enum types
             by default EnumTypeFactory
-        json_patch_type_factory, optional
+        json_patch_type_factory
             A TypeFactory that can handle a JsonPatch type
             by default JsonPatchTypeFactory
         """
@@ -178,7 +180,13 @@ class RequestFactory:
 
     def _to_dataclass(
         self, value: OpenAPIModel | Any, cls: DataclassInstance
-    ) -> Any:
+    ) -> (
+        DataclassInstance
+        | AttrsInstance
+        | PydanticInstance
+        | None
+        | OpenAPIModel
+    ):
         """Handling the mapping from an OpenAPI Model instance to a dataclass
         The ModelClassFactory will be used if the cls does not have
         a 'from_dict' method
@@ -192,8 +200,11 @@ class RequestFactory:
 
         Returns
         -------
-        dataclass
-            Dataclass object
+        DataclassInstance | AttrsInstance | PydanticInstance | None
+            Dataclass, attrs, or pydantic instance
+        OpenAPIModel
+            If the `use_model_class_factory` parameter is set to False, the
+            value will be returned as an OpenAPIModel instance.
 
         Raises
         ------

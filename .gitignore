@@ -213,3 +213,4 @@ __marimo__/
 api/
 typings/
 refresh_tokens.json
+.DS_Store

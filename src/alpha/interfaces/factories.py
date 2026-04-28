@@ -11,6 +11,7 @@ from typing import Any, Protocol
 from alpha.interfaces.attrs_instance import AttrsInstance
 from alpha.interfaces.dataclass_instance import DataclassInstance
 from alpha.interfaces.openapi_model import OpenAPIModel
+from alpha.interfaces.pydantic_instance import PydanticInstance
 
 
 class ClassFactory(Protocol):
@@ -38,6 +39,7 @@ class ClassFactory(Protocol):
 
         Returns
         -------
+        Any
             Any object that will be returned by one of the factory classes
             which is called by a ClassFactory implementation
         """
@@ -67,6 +69,7 @@ class TypeFactory(Protocol):
 
         Returns
         -------
+        Any
             Mapped instance of the value
         """
 
@@ -89,8 +92,8 @@ class ModelClassFactoryInstance(Protocol):
     def process(
         self,
         obj: OpenAPIModel,
-        cls: DataclassInstance | AttrsInstance | Any,
-    ) -> DataclassInstance | AttrsInstance | None: ...
+        cls: DataclassInstance | AttrsInstance | PydanticInstance | Any,
+    ) -> DataclassInstance | AttrsInstance | PydanticInstance | None: ...
 
 
 class FactoryClassesInstance(Protocol):

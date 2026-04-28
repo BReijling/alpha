@@ -1,4 +1,4 @@
-# alpha
+# Alpha
 
 Alpha is intended to be the first dependency you need to add to your Python application. It is a Python library which contains standard building blocks that can be used in applications that are used as APIs and/or make use of database interaction.
 
@@ -11,7 +11,9 @@ Alpha is intended to be the first dependency you need to add to your Python appl
 
 ## Documentation
 
-TODO: Add documentation link when available.
+[![Documentation Status](https://readthedocs.org/projects/alpha-python/badge/?version=latest)](https://alpha-python.readthedocs.io/en/latest/)
+
+Full documentation is available at [alpha-python.readthedocs.io](https://alpha-python.readthedocs.io/).
 
 ## Installation
 
