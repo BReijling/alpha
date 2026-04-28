@@ -18,7 +18,9 @@ All documentation is auto-generated from docstrings in the source code.
 | Model | Description |
 |---|---|
 | [SearchFilter](models/search_filter.md) | Query search/filter model |
+| [Operator](models/operator.md) | Enumeration of possible operators for search filters |
 | [FilterOperators](models/filter_operators.md) | Supported query filter operators |
 | [OrderBy](models/order_by.md) | Query ordering model |
+| [Order](models/order.md) | Enumeration of possible ordering directions (ascending/descending) |
 | [JsonPatch](models/json_patch.md) | JSON patch model |
 | [QueryClause](models/query_clause.md) | A base class representing a query clause for SQLAlchemy queries |

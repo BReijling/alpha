@@ -1,3 +1,3 @@
-# JSON Patch
+# JsonPatch
 
-::: alpha.infra.models.json_patch
+::: alpha.infra.models.json_patch.JsonPatch

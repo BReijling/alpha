@@ -1,3 +1,3 @@
-# Search Filter
+# SearchFilter
 
-::: alpha.infra.models.search_filter
+::: alpha.infra.models.search_filter.SearchFilter

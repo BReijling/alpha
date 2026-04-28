@@ -1,3 +1,3 @@
-# Order By
+# OrderBy
 
-::: alpha.infra.models.order_by
+::: alpha.infra.models.order_by.OrderBy

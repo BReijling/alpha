@@ -8,6 +8,19 @@ repo_url: https://github.com/breijling/alpha
 
 theme:
   name: readthedocs
+  # palette:
+  #   - scheme: default
+  #     primary: cyan
+  #     accent: cyan
+  #     toggle:
+  #       icon: material/brightness-7
+  #       name: Switch to dark mode
+  #   - scheme: slate
+  #     primary: cyan
+  #     accent: cyan
+  #     toggle:
+  #       icon: material/brightness-4
+  #       name: Switch to light mode
   features:
     - navigation.tabs
     - navigation.sections
@@ -90,12 +103,11 @@ nav:
     - Factories:
       - Overview: reference/factories/index.md
       - JWT Factory: reference/factories/jwt_factory.md
-      - Model Class Factory: reference/factories/model_class_factory.md
+      - Password Factory: reference/factories/password_factory.md
       - Logging Handler Factory: reference/factories/logging_handler_factory.md
-      - Type Factories: reference/factories/type_factories.md
       - Request Factory: reference/factories/request_factory.md
       - Response Factory: reference/factories/response_factory.md
-      - Password Factory: reference/factories/password_factory.md
+      - Model Class Factory: reference/factories/model_class_factory.md
     - Infra:
       - Overview: reference/infra/index.md
       - Connectors:
@@ -105,8 +117,10 @@ nav:
         - Keycloak Connector: reference/infra/connectors/keycloak_connector.md
       - Models:
         - Search Filter: reference/infra/models/search_filter.md
+        - Operator: reference/infra/models/operator.md
         - Filter Operators: reference/infra/models/filter_operators.md
         - Order By: reference/infra/models/order_by.md
+        - Order: reference/infra/models/order.md
         - JSON Patch: reference/infra/models/json_patch.md
         - Query Clause: reference/infra/models/query_clause.md
     - Interfaces:

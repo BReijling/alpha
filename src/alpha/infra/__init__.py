@@ -1,3 +1,7 @@
+from alpha.infra.connectors.oidc_connector import (
+    OIDCConnector,
+    KeyCloakOIDCConnector,
+)
 from alpha.infra.connectors.sql_alchemy import SqlAlchemyDatabase
 from alpha.infra.models.filter_operators import And, Or
 from alpha.infra.models.json_patch import JsonPatch
@@ -13,6 +17,8 @@ except ImportError:
     _LDAP_AVAILABLE = False  # type: ignore
 
 __all__ = [
+    "OIDCConnector",
+    "KeyCloakOIDCConnector",
     "SqlAlchemyDatabase",
     "And",
     "Or",

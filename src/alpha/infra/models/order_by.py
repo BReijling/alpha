@@ -10,7 +10,17 @@ from alpha.infra.models.query_clause import QueryClause
 
 
 class Order(Enum):
-    """An enumeration of possible orderings for query results."""
+    """An enumeration of possible orderings for query results. This object can
+    be used for the `order` attribute of the `OrderBy` class to specify whether
+    the ordering should be ascending or descending.
+
+    Attributes
+    ----------
+    ASC
+        Represents ascending order.
+    DESC
+        Represents descending order.
+    """
 
     ASC = auto()
     DESC = auto()
@@ -23,6 +33,22 @@ class OrderBy(QueryClause):
     to specify the ordering direction (ascending or descending). The `field`
     attribute can be either a string representing the field name or an
     `InstrumentedAttribute` from SQLAlchemy.
+
+    An instance of this class represents a single order by condition that can
+    be applied to a call to the `order_by` parameter of any method of a
+    `SqlRepository` subclass. Keep in mind that this `order_by` parameter is
+    expected to be a sequence of `OrderBy` instances, so multiple order by
+    conditions can be applied to a query by including multiple instances of
+    this class in the sequence.
+
+    Attributes
+    ----------
+    field
+        Can be a string representing the field name or an
+        `InstrumentedAttribute` from SQLAlchemy.
+    order
+        An instance of the `Order` enumeration specifying the ordering
+        direction (ascending or descending).
     """
 
     field: str | InstrumentedAttribute[Any] = ""
@@ -55,6 +81,7 @@ class AscendingOrder(OrderBy):
 
         Returns
         -------
+        BinaryExpression
             Filter statement
         """
         if self._instrumented_attr:
@@ -68,6 +95,11 @@ class AscendingOrder(OrderBy):
         ----------
         query
             The SQLAlchemy query to apply the order by clause to.
+
+        Returns
+        -------
+        Query
+            The modified SQLAlchemy query with the order by clause applied.
         """
         if self._instrumented_attr:
             return query.order_by(self._instrumented_attr.asc())
@@ -84,6 +116,7 @@ class DescendingOrder(OrderBy):
 
         Returns
         -------
+        BinaryExpression
             Filter statement
         """
         if self._instrumented_attr:
@@ -97,6 +130,11 @@ class DescendingOrder(OrderBy):
         ----------
         query
             The SQLAlchemy query to apply the order by clause to.
+
+        Returns
+        -------
+        Query
+            The modified SQLAlchemy query with the order by clause applied.
         """
         if self._instrumented_attr:
             return query.order_by(self._instrumented_attr.desc())

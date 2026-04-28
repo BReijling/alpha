@@ -1,4 +1,5 @@
 """Contains these FilterOperator classes:
+
 - And
 - Or
 """
@@ -32,7 +33,8 @@ class FilterOperator:
 
         Returns
         -------
-            filter operator
+        Callable[[ColumnElement[bool]], ColumnElement[bool]]
+            Filter operator
 
         Raises
         ------
@@ -54,6 +56,7 @@ class FilterOperator:
 
         Returns
         -------
+        Query
             Query object with filters applied
         """
         filters = [f.filter_statement for f in self.search_filters]  # type: ignore
@@ -74,6 +77,7 @@ class And(FilterOperator):
 
         Returns
         -------
+        Callable[[ColumnElement[bool]], ColumnElement[bool]]
             'and' filter operator
         """
         return and_
@@ -93,6 +97,7 @@ class Or(FilterOperator):
 
         Returns
         -------
+        Callable[[ColumnElement[bool]], ColumnElement[bool]]
             'or' filter operator
         """
         return or_
