@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Extended exception handling to also catch 405, 501, 502, 503 and 504 status codes and return a proper response with the correct status code and error message.
 - Additional unit and integration tests for the API templates and the generated code.
 - Support for python 3.14 by patching an issue with the `ast` library. This allows the generated API code to be compatible with python 3.14.
+- `JWTFactory` class now has a `lifetime_seconds` parameter which can be used to set the lifetime of the generated JWT tokens. This allows for better control over the token expiration and can be useful in different use cases (e.g. short-lived tokens for sensitive operations, long-lived tokens for less sensitive operations). The parameter takes precedence over the `lifetime_hours` parameter if both are provided.
 - Documentation for all relevant classes and functions in the codebase.
 
 ### Changed
@@ -29,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed dependencies for the generated API library. The dependencies are managed separately by the alpha library by specifying the `flask` extra for the `python-flask` generator.
 - `logout` method of the AuthenticationService class now also deletes the refresh token cookie if it exists.
 - The tests run for each supported python version with tox instead of only one version. This allows for better testing of the compatibility of the library with different python versions.
+- `JWTFactory` now defaults to a token lifetime of 900 seconds (15 minutes) instead of 12 hours. This is a more secure default value for the token lifetime, as it reduces the window of opportunity for an attacker to use a stolen token.
 
 ### Fixed
 
