@@ -35,22 +35,22 @@ def verify_identity(
     if isinstance(identity, Identity):
         identity = identity.to_dict()
 
-    identity_subject = identity.get("subject")
-    identity_role = identity.get("role")
-    identity_permissions = identity.get("permissions")
-    identity_groups = identity.get("groups")
+    identity_subject: str | None = identity.get("subject")
+    identity_role: str | None = identity.get("role")
+    identity_permissions: list[str] = identity.get("permissions", [])
+    identity_groups: list[str] = identity.get("groups", [])
 
     # Verify if identity role is present in required roles
     if roles and identity_role not in roles:
         raise InsufficientPermissionsException(
-            f"Role \'{identity_role}\' of \'{identity_subject}\' is not "
+            f"Role '{identity_role}' of '{identity_subject}' is not "
             f"sufficient. Required roles: {roles}"
         )
 
     # Verify if identity groups intersect with required groups
     if groups and not set(identity_groups).intersection(set(groups)):
         raise InsufficientPermissionsException(
-            f"Groups \'{identity_groups}\' of \'{identity_subject}\' do not "
+            f"Groups '{identity_groups}' of '{identity_subject}' do not "
             f"intersect with required groups: {groups}"
         )
 
@@ -59,6 +59,6 @@ def verify_identity(
         set(identity_permissions)
     ):
         raise InsufficientPermissionsException(
-            f"Permissions \'{identity_permissions}\' of \'{identity_subject}\'"
+            f"Permissions '{identity_permissions}' of '{identity_subject}'"
             f" do not include required permissions: {permissions}"
         )

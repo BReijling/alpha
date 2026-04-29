@@ -10,9 +10,10 @@ from json import encoder
 from typing import Any
 from uuid import UUID
 
-import numpy as np
-import pandas as pd
-import six
+import numpy as np  # type: ignore[import-untyped]
+import pandas as pd  # type: ignore[import-untyped]
+import six  # type: ignore[import-untyped]
+
 
 from alpha.interfaces.openapi_model import OpenAPIModel
 

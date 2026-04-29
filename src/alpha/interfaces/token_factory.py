@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 
 @runtime_checkable
@@ -33,7 +33,9 @@ class TokenFactory(Protocol):
         """
         ...
 
-    def validate(self, token: str) -> bool:
+    def validate(
+        self, token: str, options: dict[str, Any] | None = None
+    ) -> bool:
         """Validate an authentication token.
 
         Parameters
@@ -49,7 +51,7 @@ class TokenFactory(Protocol):
         ...
 
     def get_payload(
-        self, token: str, options: dict[str, bool] | None
+        self, token: str, options: dict[str, bool] | None = None
     ) -> dict[str, str]:
         """Retrieve the payload from an authentication token.
 

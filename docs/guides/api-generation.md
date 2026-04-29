@@ -502,16 +502,4 @@ Recommended conventions:
   between OpenAPI operations and service methods.
 - Use `./post_process.py` optionally for deterministic project-specific patching.
 
-## Future Development Directions
 
-### Additional Template Set For FastAPI
-
-Planned direction: add an extra template set so `alpha api gen` can generate
-FastAPI-based code in addition to the current Flask-oriented templates.
-
-Suggested implementation outline:
-
-- add template directory support for a FastAPI generator target
-- expose this target via `--generator-name` (for example `python-fastapi`)
-- document behavioral differences between Flask and FastAPI output
-- provide migration notes for teams switching generator targets

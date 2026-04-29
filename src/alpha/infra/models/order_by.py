@@ -60,15 +60,17 @@ class OrderBy(QueryClause):
         determines the appropriate subclass based on the order attribute.
         """
         super().__post_init__()
-        self.__class__ = self._get_filter_class()
+        self.__class__ = self._get_filter_class()  # type: ignore
 
-    def _get_filter_class(self) -> object:
+    def _get_filter_class(self) -> type["OrderBy"]:
         """Determine the appropriate subclass based on the order attribute."""
         match self.order:
             case Order.ASC:
                 return AscendingOrder
             case Order.DESC:
                 return DescendingOrder
+            case _:
+                return OrderBy
 
 
 class AscendingOrder(OrderBy):

@@ -20,18 +20,18 @@ def main(sections: list[Section] = Provide[Container.sections]) -> None:
 
     # Create the main parser
     parser = argparse.ArgumentParser(
-        description='Alpha command line interface.',
+        description="Alpha command line interface.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     subparsers = parser.add_subparsers(
-        title='Use one of the sub categories to run commands on',
-        dest='section',
+        title="Use one of the sub categories to run commands on",
+        dest="section",
     )
 
     # Parser dict to store in all parsers to match later on when finding a
     # handler.
-    section_parsers = {}
-    command_parsers = {}
+    section_parsers: dict[str, argparse.ArgumentParser] = {}
+    command_parsers: dict[str, dict[str, argparse.ArgumentParser]] = {}
 
     # Create all sections
     for section in sections:
@@ -43,7 +43,7 @@ def main(sections: list[Section] = Provide[Container.sections]) -> None:
             formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         )
         section_subparser = section_parsers[section.name].add_subparsers(
-            dest='command'
+            dest="command"
         )
 
         # Create all commands per section
@@ -88,8 +88,8 @@ def main(sections: list[Section] = Provide[Container.sections]) -> None:
     # Get all arguments and remove the section and command so they can be
     # 'kwarged' into the Handler set_arguments function.
     handler_args = vars(args)
-    del handler_args['section']
-    del handler_args['command']
+    del handler_args["section"]
+    del handler_args["command"]
 
     # Find the right handler
     for section in sections:
@@ -102,7 +102,7 @@ def main(sections: list[Section] = Provide[Container.sections]) -> None:
                 command.handler.handle_command()
                 return
 
-    print('No handler found, you should never read this')
+    print("No handler found, you should never read this")
     return
 
 
@@ -118,53 +118,57 @@ def _guess_current_package_name() -> str:
     """
 
     cwd = os.getcwd()
-    pyproject_path = os.path.join(cwd, 'pyproject.toml')
+    pyproject_path = os.path.join(cwd, "pyproject.toml")
 
     # look for pyproject.toml file in subfolders
     if not os.path.isfile(pyproject_path):
         for entry in os.scandir(cwd):
             if not entry.is_dir():
                 continue
-            possible_path = os.path.join(entry.path, 'pyproject.toml')
+            possible_path = os.path.join(entry.path, "pyproject.toml")
             if os.path.isfile(possible_path):
                 pyproject_path = possible_path
                 break
 
     if os.path.isfile(pyproject_path):
         try:
-            with open(pyproject_path, 'rb') as f:
+            with open(pyproject_path, "rb") as f:
                 pyproject_data = tomllib.load(f)
                 name = None
                 try:
-                    if 'project' in pyproject_data:
-                        name = pyproject_data['project']['name']
-                    elif 'tool' in pyproject_data and 'poetry' in pyproject_data['tool']:
-                        name = pyproject_data['tool']['poetry']['name']
+                    if "project" in pyproject_data:
+                        name = pyproject_data["project"]["name"]
+                    elif (
+                        "tool" in pyproject_data
+                        and "poetry" in pyproject_data["tool"]
+                    ):
+                        name = pyproject_data["tool"]["poetry"]["name"]
                     if name is not None:
-                        return name.replace('-', '_')
+                        return name.replace("-", "_")
                 except KeyError:
-                    print('Could not find project name in pyproject.toml')
+                    print("Could not find project name in pyproject.toml")
         except Exception:
             pass
     else:
-        print('Could not find pyproject.toml')
+        print("Could not find pyproject.toml")
 
     # Fallback to use the current folder name
-    print('Guessing package name from folder')
+    print("Guessing package name from folder")
     return os.path.basename(cwd)
+
 
 def init() -> None:
     """Init the container and wire it to the main function."""
     container = Container()
     guessed_name = _guess_current_package_name()
     if guessed_name:
-        container.config.api_package_name.from_value(f'{guessed_name}_api')
+        container.config.api_package_name.from_value(f"{guessed_name}_api")
         container.config.service_package_name.from_value(guessed_name)
         container.config.container_import.from_value(
-            f'from {guessed_name}.containers.container import Container'
+            f"from {guessed_name}.containers.container import Container"
         )
         container.config.init_container_from.from_value(guessed_name)
-        container.config.init_container_function.from_value('init_container')
+        container.config.init_container_function.from_value("init_container")
     container.wire(modules=[sys.modules[__name__]])
 
     main()

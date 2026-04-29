@@ -267,7 +267,7 @@ class Identity:
         """
         subject = str(user.id) if user.id else user.username
         return cls(
-            subject=subject,
+            subject=subject,  # type: ignore
             username=user.username,
             email=user.email,
             display_name=user.display_name,
@@ -275,7 +275,7 @@ class Identity:
             permissions=user.permissions or [],
             claims={},
             issued_at=datetime.now(tz=timezone.utc),
-            role=user.role,
+            role=user.role,  # type: ignore
             admin=user.admin,
         )
 
@@ -320,7 +320,7 @@ class Identity:
             )
         for group in user.groups or []:
             self.groups = self._append_on_sequence(self.groups, group)
-        self.role = user.role
+        self.role = user.role  # type: ignore
         self.admin = user.admin
 
     def update_from_groups(self, groups: list[Group]) -> None:
@@ -457,8 +457,8 @@ class Identity:
         return groups
 
     def _append_on_sequence(
-        self, sequence: Sequence[str], item: str
-    ) -> Sequence[str]:
+        self, sequence: Sequence[Any], item: Any
+    ) -> Sequence[Any]:
         """Helper method to append an item to a sequence if it's not already
         present.
 

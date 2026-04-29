@@ -187,6 +187,11 @@ class ApiGenerateHandler(BaseHandler):
         """Copy mustache templates to the templates folder in the working
         directory
         """
+        if self.generator_name is None:
+            raise InvalidArgumentsException(
+                "Generator name is required to copy templates."
+            )
+
         shutil.rmtree(self.project_templates_folder, ignore_errors=True)
         shutil.copytree(
             src=os.path.join(
