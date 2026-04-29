@@ -116,7 +116,7 @@ To abstract away the complexities of different authentication methods, you can i
 
 The authentication service can also handle additional responsibilities such as token generation, cookie management and mapping of permissions. By centralizing authentication logic in a service, you can ensure that your application remains modular and that authentication concerns are separated from other business logic.
 
-The service uses a ['TokenFactory'][alpha.interfaces.token_factory.TokenFactory] to create authentication tokens (e.g. JWTs) that can be used for authenticating API requests. It can also manage user sessions and provide functionality for logging out users and refreshing tokens when necessary. Refresh tokens can be used to maintain user sessions without requiring them to log in again, while still ensuring that authentication tokens have a limited lifespan for security purposes.
+The service uses a [`TokenFactory`][alpha.interfaces.token_factory.TokenFactory] to create authentication tokens (e.g. JWTs) that can be used for authenticating API requests. It can also manage user sessions and provide functionality for logging out users and refreshing tokens when necessary. Refresh tokens can be used to maintain user sessions without requiring them to log in again, while still ensuring that authentication tokens have a limited lifespan for security purposes.
 
 Check the API reference for more details on the configuration options and available methods.
 
