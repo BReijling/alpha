@@ -379,12 +379,12 @@ class AuthenticationService:
             "Logout successful",
         )
 
-    def verify(self, token: str) -> Identity:
-        """Verify a token and return the associated identity.
+    def verify(self, auth_token: str) -> Identity:
+        """Verify an auth_token and return the associated identity.
 
         Parameters
         ----------
-        token
+        auth_token
             Authentication token.
 
         Returns
@@ -392,7 +392,7 @@ class AuthenticationService:
         Identity
             Verified Identity instance.
         """
-        return self._identity_provider.validate(Token(value=token))
+        return self._identity_provider.validate(Token(value=auth_token))
 
     def refresh_token(
         self, refresh_token: str, auth_token: str | None = None
@@ -443,6 +443,12 @@ class AuthenticationService:
             identity = self._identity_provider.get_user(
                 subject=stored_refresh_token.subject
             )
+            # If configured to merge with database users and groups, perform
+            # the merge operations on the identity.
+            if self._merge_with_database_users:
+                identity = self._merge_identity_with_user(identity)
+            if self._merge_with_database_groups:
+                identity = self._merge_identity_with_groups(identity)
 
         # If an auth token is provided and the identity could not be retrieved
         # using the refresh token, attempt to retrieve the identity from the

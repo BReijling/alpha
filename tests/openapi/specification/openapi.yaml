@@ -814,7 +814,7 @@ paths:
       description: Refresh authentication token
       operationId: refresh_auth_token
       responses:
-        '201':
+        '200':
           description: Created new authentication token
           x-alpha-cookie-support: true
           content:

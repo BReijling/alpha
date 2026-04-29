@@ -11,6 +11,11 @@ from alpha import exceptions
 class PasswordFactory:
     """This class provides methods for hashing and verifying passwords using
     the argon2 library.
+
+    Keep in mind that changing the password hasher in a production environment
+    may lead to issues with existing password hashes, so it is recommended to
+    use the default hasher unless you have specific requirements. Or configure
+    the password hasher before you deploy your application to production.
     """
 
     def __init__(
@@ -22,7 +27,9 @@ class PasswordFactory:
         ----------
         password_hasher
             An optional password hasher instance. If not provided, a default
-            argon2.PasswordHasher with a salt length of 16 will be used.
+            argon2.PasswordHasher with a salt length of 16 will be used. This
+            allows for flexibility in case you want to use a custom password
+            hasher.
         """
         self._password_hasher = password_hasher or argon2.PasswordHasher(
             salt_len=16

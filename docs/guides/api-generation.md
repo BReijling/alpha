@@ -22,7 +22,7 @@ Install Alpha with API generator support:
 pip install alpha-python[api-generator]
 ```
 
-Or with Poetry/uv:
+Or add it to your project with poetry/uv:
 
 ```shell
 poetry add --dev alpha-python --extras api-generator
@@ -436,7 +436,7 @@ paths:
   /health:
     get:
       operationId: health
-      x-alpha-custom-function: str("ok")
+      x-alpha-custom-function: str(123)
       responses:
         '200':
           description: OK
