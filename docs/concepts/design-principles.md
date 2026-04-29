@@ -43,7 +43,6 @@ The diagram also highlights the use of the Unit of Work pattern, which manages t
 
 ```mermaid
 sequenceDiagram
-
     box rgba(0, 255, 0, 0.2) 🟢 API
     participant 🖥️ Endpoint
     participant 🧩 Controller

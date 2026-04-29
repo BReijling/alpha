@@ -1,7 +1,7 @@
 import datetime
 from contextlib import suppress
 
-import jsonpatch
+import jsonpatch  # type: ignore[import-untyped]
 
 
 class JsonPatch(jsonpatch.JsonPatch):

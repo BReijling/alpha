@@ -14,3 +14,17 @@
 .quote {
   margin-bottom: 2rem;
 }
+
+/* Keep Material emoji SVG icons aligned with surrounding text size. */
+.twemoji {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.125em;
+}
+
+.twemoji svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}

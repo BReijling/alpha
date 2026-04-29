@@ -34,7 +34,10 @@ class JWTFactory:
         Parameters
         ----------
         secret
-            The secret key used to sign the JWT.
+            The secret key used to sign the JWT. A secret value should be a
+            minimum of 32 characters for security reasons. This value should be
+            kept confidential and not exposed in the source code or version
+            control system.
         lifetime_hours
             The lifetime of the JWT in hours, by default None. This parameter
             is ignored if lifetime_seconds is provided. The parameter is
@@ -71,12 +74,12 @@ class JWTFactory:
                 stacklevel=2,
             )
 
-        if lifetime_seconds is None and lifetime_hours is None:
-            lifetime_seconds = (
-                900  # Default to 15 minutes if no lifetime is provided
-            )
-        elif lifetime_seconds is None and lifetime_hours is not None:
+        if lifetime_seconds is None and lifetime_hours is not None:
             lifetime_seconds = 3600 * int(lifetime_hours)
+
+        lifetime_seconds = (
+            900 if lifetime_seconds is None else lifetime_seconds
+        )  # Default to 15 minutes if no lifetime is provided
 
         self.JWT_SECRET: str = secret
         self.JWT_ISSUER = issuer
@@ -113,7 +116,7 @@ class JWTFactory:
             The generated JWT token as a string.
         """
         now = datetime.now(tz=timezone.utc)
-        exp = now + timedelta(seconds=self.JWT_LIFETIME_SECONDS)
+        exp = now + timedelta(seconds=float(self.JWT_LIFETIME_SECONDS))
 
         token_payload: dict[str, Any] = {
             "sub": subject,

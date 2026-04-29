@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, NoReturn
 
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.orm.query import Query
@@ -58,7 +58,7 @@ class QueryClause:
                 self.field,  # type: ignore
             )
 
-    def _raise_instrumented_attr_exception(self):
+    def _raise_instrumented_attr_exception(self) -> NoReturn:
         """Raise an exception indicating that the instrumented attribute is
         missing."""
         raise exceptions.InstrumentedAttributeMissing(

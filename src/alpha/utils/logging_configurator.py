@@ -4,7 +4,7 @@ import logging
 from logging.config import dictConfig
 from typing import Any
 
-from gunicorn import glogging
+from gunicorn import glogging  # type: ignore[import-untyped]
 
 from alpha.factories.logging_handler_factory import LoggingHandlerFactory
 

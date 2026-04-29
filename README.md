@@ -4,14 +4,26 @@ Alpha is intended to be the first dependency you need to add to your Python appl
 
 ## Badges
 
-[![PyPI version](https://img.shields.io/pypi/v/alpha-python.svg)](https://pypi.org/project/alpha-python/)
+[![PyPI version](https://badge.fury.io/py/alpha-python.svg?icon=si%3Apython)](https://badge.fury.io/py/alpha-python)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/alpha-python.svg?label=PyPI%20downloads)](https://pypistats.org/packages/alpha-python)
 [![Build Status](https://github.com/breijling/alpha/actions/workflows/python-app.yml/badge.svg?branch=main)](https://github.com/breijling/alpha/actions/workflows/python-app.yml)
+[![Supported Python versions](https://img.shields.io/pypi/pyversions/alpha-python.svg?color=%2334D058)](https://pypi.org/project/alpha-python)
 [![Coverage Status](https://coveralls.io/repos/github/BReijling/alpha/badge.svg?branch=main)](https://coveralls.io/github/BReijling/alpha?branch=main)
+[![uv](https://img.shields.io/badge/package%20manager-uv-5C4EE5)](https://docs.astral.sh/uv/)
+[![mypy](https://img.shields.io/badge/type%20check-mypy-2A6DB2)](https://mypy-lang.org/)
+[![Pytest](https://img.shields.io/badge/testing-pytest-0A9EDC)](https://docs.pytest.org/)
+[![PEP8](https://img.shields.io/badge/code%20style-pep8-orange.svg)](https://www.python.org/dev/peps/pep-0008/)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Documentation Status](https://readthedocs.org/projects/alpha-python/badge/?version=latest)](https://alpha-python.readthedocs.io/en/latest/)
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
+[![Sponsor](https://img.shields.io/badge/Sponsor-GitHub-pink?logo=github)](https://github.com/sponsors/BReijling)
+
+## TL;DR
+
+Alpha provides a comprehensive set of tools for building Python applications that interact with APIs and databases, including API code generation, authentication and authorization, database access layers, error handling, logging, and more. It is designed to be the first dependency you add to your project, providing a solid foundation for your application's architecture.
 
 ## Documentation
 
-[![Documentation Status](https://readthedocs.org/projects/alpha-python/badge/?version=latest)](https://alpha-python.readthedocs.io/en/latest/)
 
 Full documentation is available at [alpha-python.readthedocs.io](https://alpha-python.readthedocs.io/).
 
@@ -41,19 +53,99 @@ uv add alpha-python --extra flask --extra postgresql
 uv add --dev alpha-python --extra api-generator
 ```
 
-## Usage
-
-The library contains a lot of different components, but the most important ones are:
-
-- `alpha.encoder.JSONEncoder`: A JSON encoder that can be used to serialize complex objects to JSON.
-
 ## Features
 
+- API code generation
+- Authentication and authorization
+- Database interaction
+- Logging
+- Error handling
+- And much more!
 
+## Usage
+
+The library contains many components. Below are a few practical examples that map to the guides in the documentation.
+
+### 1) API code generation using OpenAPI spec
+
+```shell
+alpha api gen --spec-file specification/openapi.yaml --service-package my_app
+
+alpha api run --port 8080
+```
+
+### 2) Authenticate with Keycloak (OIDC)
+
+```python
+from alpha import KeyCloakOIDCConnector, KeyCloakProvider
+
+keycloak_connector = KeyCloakOIDCConnector(
+	base_url="https://keycloak.example.com",
+	realm="myrealm",
+	client_id="myclient",
+	client_secret="myclientsecret",
+)
+
+keycloak_provider = KeyCloakProvider(connector=keycloak_connector)
+identity = keycloak_provider.authenticate(username="user1", password="user1_password")
+```
+
+### 3) Query data using SqlAlchemyDatabase + SqlAlchemyRepository
+
+```python
+from alpha import SqlAlchemyDatabase, SqlAlchemyRepository
+from my_app import User
+
+db = SqlAlchemyDatabase(conn_str="postgresql://user:password@localhost:5432/mydatabase")
+
+with db.get_session() as session:
+	users = SqlAlchemyRepository[User](session=session, default_model=User)
+	user = users.get_by_id(1)
+```
+
+### 4) Use Unit of Work for transactional operations
+
+```python
+from alpha import (
+	RepositoryModel,
+	SqlAlchemyDatabase,
+	SqlAlchemyRepository,
+	SqlAlchemyUnitOfWork,
+)
+from my_app import User, OrmMapper
+
+db = SqlAlchemyDatabase(..., mapper=OrmMapper)
+repositories = [
+	RepositoryModel(
+		name="users",
+		repository=SqlAlchemyRepository[User],
+		default_model=User,
+	)
+]
+
+uow = SqlAlchemyUnitOfWork(db=db, repos=repositories)
+
+with uow:
+	user = uow.users.get_by_id(1)
+```
+
+See also:
+
+- Design principles and patterns: https://alpha-python.readthedocs.io/en/latest/concepts/design-principles/
+- Dependency injection concept: https://alpha-python.readthedocs.io/en/latest/concepts/dependency-injection/
+- API code generation guide: https://alpha-python.readthedocs.io/en/latest/guides/api-generation/
+- Authentication guide: https://alpha-python.readthedocs.io/en/latest/guides/authentication/
+- Database interaction guide: https://alpha-python.readthedocs.io/en/latest/guides/database-interaction/
 
 ## Contributing
 
 If you want to contribute to the development of this library, you can fork the repository and create a pull request with your changes.
+
+## Support
+
+If Alpha saves you time in production, consider supporting development by buying me a coffee! Your support helps me to continue improving the library and adding new features. Thank you!
+
+<a href="https://www.buymeacoffee.com/breijling"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=breijling&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" /></a>
 
 ## License
 

@@ -35,6 +35,43 @@ class Container(containers.DeclarativeContainer):
         ObjectManagementService,
         database=database,
     )
-
 ```
 
+By defining a separate function to instantiate the Container, you create a convenient way to configure and wire the components.
+
+```python
+
+import os
+
+from my_app.containers.container import Container
+
+
+def init_container() -> Container:
+    CONFIG_PATH = os.getenv("CONFIG_YAML", "./config.yaml")
+
+    container = Container()
+    container.config.from_yaml(CONFIG_PATH)
+
+    # Override database config with environment variables if they exist
+    container.config.database.host.from_env(
+        'DATABASE_HOST', container.config.database.host()
+    )
+    container.config.database.port.from_env(
+        'DATABASE_PORT', container.config.database.port()
+    )
+    container.config.database.username.from_env(
+        'DATABASE_USERNAME', container.config.database.username()
+    )
+    container.config.database.password.from_env(
+        'DATABASE_PASSWORD', container.config.database.password()
+    )
+    container.config.database.db_name.from_env(
+        'DATABASE_NAME', container.config.database.db_name()
+    )
+    container.config.database.db_type.from_env(
+        'DATABASE_TYPE', container.config.database.db_type()
+    )
+
+    container.wire(modules=[__name__])
+    return container
+```
