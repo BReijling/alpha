@@ -11,6 +11,8 @@ Alpha is intended to be the first dependency you need to add to your Python appl
 [![Coverage Status](https://coveralls.io/repos/github/BReijling/alpha/badge.svg?branch=main)](https://coveralls.io/github/BReijling/alpha?branch=main)
 [![uv](https://img.shields.io/badge/package%20manager-uv-5C4EE5)](https://docs.astral.sh/uv/)
 [![mypy](https://img.shields.io/badge/type%20check-mypy-2A6DB2)](https://mypy-lang.org/)
+[![Pytest](https://img.shields.io/badge/testing-pytest-0A9EDC)](https://docs.pytest.org/)
+[![PEP8](https://img.shields.io/badge/code%20style-pep8-orange.svg)](https://www.python.org/dev/peps/pep-0008/)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Documentation Status](https://readthedocs.org/projects/alpha-python/badge/?version=latest)](https://alpha-python.readthedocs.io/en/latest/)
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
