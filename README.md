@@ -4,9 +4,9 @@ Alpha is intended to be the first dependency you need to add to your Python appl
 
 ## Badges
 
-[![PyPI version](https://badge.fury.io/py/alpha-python.svg)](https://badge.fury.io/py/alpha-python)
-[![Build Status](https://travis-ci.com/breijling/alpha.svg?branch=main)](https://travis-ci.com/breijling/alpha)
-[![Coverage Status](https://coveralls.io/repos/github/breijling/alpha/badge.svg?branch=main)](https://coveralls.io/github/breijling/alpha?branch=main)
+[![PyPI version](https://img.shields.io/pypi/v/alpha-python.svg)](https://pypi.org/project/alpha-python/)
+[![Build Status](https://github.com/breijling/alpha/actions/workflows/python-app.yml/badge.svg?branch=main)](https://github.com/breijling/alpha/actions/workflows/python-app.yml)
+[![Coverage Status](https://coveralls.io/repos/github/BReijling/alpha/badge.svg?branch=main)](https://coveralls.io/github/BReijling/alpha?branch=main)
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 
 ## Documentation
