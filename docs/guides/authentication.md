@@ -112,11 +112,11 @@ identity = password_provider.authenticate(credentials)
 
 ## Authentication Service
 
-To abstract away the complexities of different authentication methods, you can implement an `AuthenticationService` that provides a unified interface for authenticating users. This service can internally use different providers (OIDC, LDAP, Password) based on the configuration or user preferences. This approach allows for greater flexibility and maintainability in your authentication system.
+To abstract away the complexities of different authentication methods, you can implement an [`AuthenticationService`][alpha.services.authentication_service.AuthenticationService] that provides a unified interface for authenticating users. This service can internally use different providers (OIDC, LDAP, Password) based on the configuration or user preferences. This approach allows for greater flexibility and maintainability in your authentication system.
 
 The authentication service can also handle additional responsibilities such as token generation, cookie management and mapping of permissions. By centralizing authentication logic in a service, you can ensure that your application remains modular and that authentication concerns are separated from other business logic.
 
-The service uses a [TokenFactory][alpha.interfaces.token_factory.TokenFactory] to create authentication tokens (e.g. JWTs) that can be used for authenticating API requests. It can also manage user sessions and provide functionality for logging out users and refreshing tokens when necessary. Refresh tokens can be used to maintain user sessions without requiring them to log in again, while still ensuring that authentication tokens have a limited lifespan for security purposes.
+The service uses a ['TokenFactory'][alpha.interfaces.token_factory.TokenFactory] to create authentication tokens (e.g. JWTs) that can be used for authenticating API requests. It can also manage user sessions and provide functionality for logging out users and refreshing tokens when necessary. Refresh tokens can be used to maintain user sessions without requiring them to log in again, while still ensuring that authentication tokens have a limited lifespan for security purposes.
 
 Check the API reference for more details on the configuration options and available methods.
 
@@ -230,9 +230,9 @@ sequenceDiagram
 
 ### Example Implementation
 
-This section provides a simple example of how to set up an `AuthenticationService` using a Keycloak OIDC provider. The example demonstrates how to configure the necessary connectors and providers in a dependency injection container. Keep in mind that this is just a starting point, and you may need to customize the implementation based on your specific requirements and the authentication providers you choose to use. The example assumes you have already set up Keycloak and have the necessary credentials to connect to it. There is no one-size-fits-all solution for authentication, so make sure to adapt the implementation to fit your application's needs and security requirements. This implementation does not cover the option to configure local user management with permissions, so if you need that functionality, you will need to implement it separately and integrate it with the `AuthenticationService`.
+This section provides a simple example of how to set up an [`AuthenticationService`][alpha.services.authentication_service.AuthenticationService] using a Keycloak OIDC provider. The example demonstrates how to configure the necessary connectors and providers in a dependency injection container. Keep in mind that this is just a starting point, and you may need to customize the implementation based on your specific requirements and the authentication providers you choose to use. The example assumes you have already set up Keycloak and have the necessary credentials to connect to it. There is no one-size-fits-all solution for authentication, so make sure to adapt the implementation to fit your application's needs and security requirements. This implementation does not cover the option to configure local user management with permissions, so if you need that functionality, you will need to implement it separately and integrate it with the [`AuthenticationService`][alpha.services.authentication_service.AuthenticationService].
 
-Here is an example of how to implement an `AuthenticationService` that uses a Keycloak OIDC provider:
+Here is an example of how to implement an [`AuthenticationService`][alpha.services.authentication_service.AuthenticationService] that uses a Keycloak OIDC provider:
 
 ```python
 class Container(containers.DeclarativeContainer):
@@ -273,7 +273,7 @@ class Container(containers.DeclarativeContainer):
 
 ### OpenAPI Endpoints
 
-Once you have your authentication service set up, you can create OpenAPI endpoints for login, logout, and token refresh. These endpoints will interact with the `AuthenticationService` to perform the necessary authentication operations. For example, a login endpoint might look like this:
+Once you have your authentication service set up, you can create OpenAPI endpoints for login, logout, and token refresh. These endpoints will interact with the [`AuthenticationService`][alpha.services.authentication_service.AuthenticationService] to perform the necessary authentication operations. For example, a login endpoint might look like this:
 
 ```yaml
 paths:
