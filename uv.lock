@@ -123,15 +123,15 @@ dev = [
     { name = "isort", specifier = ">=7.0.0" },
     { name = "ldap3", specifier = ">=2.9.1" },
     { name = "mypy", specifier = ">=1.18.2" },
-    { name = "pandas-stubs", specifier = ">=3.0.0.260204" },
+    { name = "pandas-stubs" },
     { name = "psycopg2-binary", specifier = ">=2.9.11" },
     { name = "pymysql", specifier = ">=1.1.2" },
     { name = "pytest", specifier = ">=9.0.1" },
     { name = "pytest-cov", specifier = ">=7.0.0" },
     { name = "ruff", specifier = ">=0.14.7" },
-    { name = "tox", specifier = ">=4.53.0" },
-    { name = "types-ldap3", specifier = ">=2.9.13.20260408" },
-    { name = "types-requests", specifier = ">=2.33.0.20260408" },
+    { name = "tox", specifier = ">=4.0.0" },
+    { name = "types-ldap3" },
+    { name = "types-requests" },
 ]
 
 [[package]]

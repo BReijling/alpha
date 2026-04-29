@@ -68,18 +68,16 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install tox
+        pip install tox ruff mypy uv
+        uv sync --dev --all-extras
     - name: Lint with ruff
       if: matrix.python-version == '3.11'
       run: |
-        # stop the build if there are Python syntax errors or undefined names
-        python -m pip install ruff
-        ruff check --output-format=github ./src
+        uv run ruff check --output-format=github ./src
     - name: Check types with mypy
       if: matrix.python-version == '3.11'
       run: |
-        python -m pip install mypy
-        mypy ./src
+        uv run mypy ./src
     - name: Test with pytest
       run: |
         tox -e ${{ matrix.tox-env }}
