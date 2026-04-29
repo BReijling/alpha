@@ -1,21 +1,30 @@
 # Alpha
 
-**Alpha** is a foundational Python library providing standard building blocks for Python applications that use APIs and/or database interactions.
+**Alpha** is a foundational Python library providing standard building blocks for Python applications that use APIs, authentication and/or database interactions.
 
-[![PyPI version](https://badge.fury.io/py/alpha-python.svg)](https://badge.fury.io/py/alpha-python)
+## Badges
+
+[![PyPI version](https://badge.fury.io/py/alpha-python.svg?icon=si%3Apython)](https://badge.fury.io/py/alpha-python)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/alpha-python.svg?label=PyPI%20downloads)](https://pypistats.org/packages/alpha-python)
+[![Build Status](https://github.com/breijling/alpha/actions/workflows/python-app.yml/badge.svg?branch=main)](https://github.com/breijling/alpha/actions/workflows/python-app.yml)
+[![Supported Python versions](https://img.shields.io/pypi/pyversions/alpha-python.svg?color=%2334D058)](https://pypi.org/project/alpha-python)
+[![Coverage Status](https://coveralls.io/repos/github/BReijling/alpha/badge.svg?branch=main)](https://coveralls.io/github/BReijling/alpha?branch=main)
+[![uv](https://img.shields.io/badge/package%20manager-uv-5C4EE5)](https://docs.astral.sh/uv/)
+[![mypy](https://img.shields.io/badge/type%20check-mypy-2A6DB2)](https://mypy-lang.org/)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Documentation Status](https://readthedocs.org/projects/alpha-python/badge/?version=latest)](https://alpha-python.readthedocs.io/en/latest/)
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
-
----
 
 ## Core features
 
 - **API code generation** — OpenAPI code generation via CLI, Flask integration, request/response utilities
 - **Authentication & Authorization** — OIDC/KeyCloak, LDAP/Active Directory, JWT and password-based authentication
 - **Database access layer** — SQLAlchemy abstraction with Repository and Unit of Work patterns
-- **Dependency Injection** — YAML-configurable DI container built on `dependency-injector`
+- **REST API access layer** — REST API repository implementations for external API interactions
 - **Model support** — Domain models with audit trail, attrs, Pydantic, dataclasses and OpenAPI model support
-- **JSON Serialization** — `JSONEncoder` for complex types: numpy, pandas, datetime, UUID, Enums and objects with `to_dict()`
+- **Error handling** — Custom exceptions, error handlers and standardized error responses
+- **Logging** — Structured logging with context support, log enrichment and integration with logging frameworks
+- **JSON Serialization** — `JSONEncoder` for complex types: numpy, pandas, datetime, UUID, Enums and dataclasses
 
 ## Installation
 
@@ -87,3 +96,25 @@ with SqlAlchemyUnitOfWork(db) as uow:
     [:octicons-arrow-right-24: API Reference](reference/index.md)
 
 </div>
+
+## Future Development Directions
+
+### Additional Template Set For FastAPI
+
+Planned direction: add an extra template set so `alpha api gen` can generate
+FastAPI-based code in addition to the current Flask-oriented templates.
+
+Suggested implementation outline:
+
+- add template directory support for a FastAPI generator target
+- expose this target via `--generator-name` (for example `python-fastapi`)
+- document behavioral differences between Flask and FastAPI output
+- provide migration notes for teams switching generator targets
+
+### Asynchronous API Code Generation
+
+Planned direction: add support for generating asynchronous API code, potentially via FastAPI templates.
+
+### Asynchronous Database Support
+
+Planned direction: add support for asynchronous database interactions, potentially via SQLAlchemy 2.0's async features.
