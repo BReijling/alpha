@@ -16,6 +16,11 @@ Alpha is intended to be the first dependency you need to add to your Python appl
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Documentation Status](https://readthedocs.org/projects/alpha-python/badge/?version=latest)](https://alpha-python.readthedocs.io/en/latest/)
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
+[![Sponsor](https://img.shields.io/badge/Sponsor-GitHub-pink?logo=github)](https://github.com/sponsors/BReijling)
+
+## TL;DR
+
+Alpha provides a comprehensive set of tools for building Python applications that interact with APIs and databases, including API code generation, authentication and authorization, database access layers, error handling, logging, and more. It is designed to be the first dependency you add to your project, providing a solid foundation for your application's architecture.
 
 ## Documentation
 
@@ -135,6 +140,12 @@ See also:
 ## Contributing
 
 If you want to contribute to the development of this library, you can fork the repository and create a pull request with your changes.
+
+## Support
+
+If Alpha saves you time in production, consider supporting development by buying me a coffee! Your support helps me to continue improving the library and adding new features. Thank you!
+
+<a href="https://www.buymeacoffee.com/breijling"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=breijling&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" /></a>
 
 ## License
 

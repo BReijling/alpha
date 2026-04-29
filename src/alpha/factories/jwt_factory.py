@@ -34,7 +34,10 @@ class JWTFactory:
         Parameters
         ----------
         secret
-            The secret key used to sign the JWT.
+            The secret key used to sign the JWT. A secret value should be a
+            minimum of 32 characters for security reasons. This value should be
+            kept confidential and not exposed in the source code or version
+            control system.
         lifetime_hours
             The lifetime of the JWT in hours, by default None. This parameter
             is ignored if lifetime_seconds is provided. The parameter is
