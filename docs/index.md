@@ -86,13 +86,21 @@ with SqlAlchemyUnitOfWork(db) as uow:
 
     [:octicons-arrow-right-24: Quickstart](quickstart.md)
 
--   :material-book-open-variant: **Concepts**
+-   :material-bookshelf: **Concepts**
 
     ---
 
     Architecture overview and explanation of the underlying patterns.
 
     [:octicons-arrow-right-24: Concepts](concepts/index.md)
+
+-   :material-book-open-variant: **Guides**
+
+    ---
+
+    Step-by-step guides for common tasks and use cases.
+
+    [:octicons-arrow-right-24: Guides](guides/index.md)
 
 -   :material-code-tags: **API Reference**
 

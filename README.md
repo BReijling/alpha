@@ -77,7 +77,7 @@ alpha api run --port 8080
 ### 2) Authenticate with Keycloak (OIDC)
 
 ```python
-from alpha import KeyCloakOIDCConnector, KeyCloakProvider
+from alpha import KeyCloakOIDCConnector, KeyCloakProvider, PasswordCredentials
 
 keycloak_connector = KeyCloakOIDCConnector(
 	base_url="https://keycloak.example.com",
@@ -87,7 +87,9 @@ keycloak_connector = KeyCloakOIDCConnector(
 )
 
 keycloak_provider = KeyCloakProvider(connector=keycloak_connector)
-identity = keycloak_provider.authenticate(username="user1", password="user1_password")
+
+credentials = PasswordCredentials(username="user1", password="user1_password")
+identity = keycloak_provider.authenticate(credentials)
 ```
 
 ### 3) Query data using SqlAlchemyDatabase + SqlAlchemyRepository
