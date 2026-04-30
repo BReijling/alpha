@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.1] - 2026-04-30
+
+### Added
+
+- Added a `custom_response_builder` function to the OpenAPI python-flask controller template which can be used to build a custom response object. This can be used for example to return a different response format than the default JSON format or to set custom headers in the response. The function can be specified in the OpenAPI spec using the `x-alpha-custom-response-builder` vendor extension and should be imported using the `x-alpha-import` vendor extension.
+
+### Fixed
+
+- When refreshing an authentication token using the refresh token, the Identity object was not merged with the user and group information from the database, which caused issues when using group-based permissions. This has been fixed by merging the Identity object with the user and group information from the database after refreshing the token. This was only an issue when the `refresh_identity_on_refresh` parameter of the AuthenticationService was set to True.
+
 ## [0.6.0] - 2026-04-28
 
 ### Added
