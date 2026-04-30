@@ -115,7 +115,7 @@ Alpha supports multiple `x-alpha-*` extensions to customize endpoint behavior.
 | `x-alpha-service-additional-parameters` | operation | Forward extra runtime parameters |
 | `x-alpha-import` | operation | Add imports to generated controller |
 | `x-alpha-factory` | operation | Convert request body model to custom object |
-| `x-alpha-custom-response-function` | operation | Use a custom callable/expression for final response object building |
+| `x-alpha-custom-response-builder` | operation | Use a custom callable/expression for final response object building |
 | `x-alpha-verify-roles` | operation | Role based access constraint |
 | `x-alpha-verify-groups` | operation | Group based access constraint |
 | `x-alpha-verify-permissions` | operation | Permission based access constraint |
