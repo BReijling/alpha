@@ -57,6 +57,10 @@ def create_response_object(
 ) -> tuple[Response, int] | tuple[dict[str, Any], int]:
     """Create a HTTP response object.
 
+    The response object can be either a dictionary or a Flask Response object,
+    depending on the value of `response_type`. The response will include the
+    status code, a human-readable message, and optionally additional data.
+
     Parameters
     ----------
     status_code
@@ -79,7 +83,12 @@ def create_response_object(
 
     Returns
     -------
-        A tuple containing the response object and the HTTP status code.
+    tuple[dict[str, Any], int]
+        A tuple containing the response object as a dictionary and the HTTP
+        status code. When response_type is "dict".
+    tuple[Response, int]
+        A tuple containing the flask.Response object and the HTTP status code.
+        When response_type is "flask".
     """
     if response_type is None:
         response_type = "dict"

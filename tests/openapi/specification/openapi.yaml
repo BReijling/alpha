@@ -26,8 +26,10 @@ paths:
                 example: API is running
       x-alpha-import:
         - from alpha.utils.openapi_test.service import TestService
+        - from alpha.utils.openapi_test.response import custom_response_builder
       x-alpha-custom-function: TestService.hello()
       x-alpha-service-method: hello
+      x-alpha-custom-response-builder: custom_response_builder
   /raw_response:
     get:
       description: |

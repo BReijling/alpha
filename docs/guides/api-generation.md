@@ -115,6 +115,7 @@ Alpha supports multiple `x-alpha-*` extensions to customize endpoint behavior.
 | `x-alpha-service-additional-parameters` | operation | Forward extra runtime parameters |
 | `x-alpha-import` | operation | Add imports to generated controller |
 | `x-alpha-factory` | operation | Convert request body model to custom object |
+| `x-alpha-custom-response-function` | operation | Use a custom callable/expression for final response object building |
 | `x-alpha-verify-roles` | operation | Role based access constraint |
 | `x-alpha-verify-groups` | operation | Group based access constraint |
 | `x-alpha-verify-permissions` | operation | Permission based access constraint |
@@ -216,6 +217,21 @@ paths:
       x-alpha-factory: PetModel.factory
       x-alpha-service-name: pet_service
       x-alpha-service-method: add_pet
+```
+
+### `x-alpha-custom-response-builder`
+
+Use a custom function to build the final response object, instead of the default behavior. The custom function receives the service result or response factory result as input. Check the [Response Object reference](../reference/utils/create_response_object.md) for details on expected input and output formats. This value can either be a direct callable (for example `my_response_builder`), a dotted path to a callable (`my_app.utils.response_builder`), a classmethod or a staticmethod.
+
+```yaml
+paths:
+  /users/{user_id}:
+    get:
+      x-alpha-service-name: user_service
+      x-alpha-service-method: get_user
+      x-alpha-import:
+        - from my_app.utils import response_builder
+      x-alpha-custom-response-builder: response_builder
 ```
 
 ### `x-alpha-verify-roles`

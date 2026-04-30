@@ -24,7 +24,6 @@ Alpha provides a comprehensive set of tools for building Python applications tha
 
 ## Documentation
 
-
 Full documentation is available at [alpha-python.readthedocs.io](https://alpha-python.readthedocs.io/).
 
 ## Installation
