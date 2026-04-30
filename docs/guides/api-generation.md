@@ -221,7 +221,7 @@ paths:
 
 ### `x-alpha-custom-response-builder`
 
-Use a custom function to build the final response object, instead of the default behavior. The custom function receives the service result or response factory result as input. Check the [Response Object reference](../reference/utils/create_response_object.md) for details on expected input and output formats. This value can either be a direct callable (for example `my_response_builder`), a dotted path to a callable (`my_app.utils.response_builder`), a classmethod or a staticmethod.
+Use a custom function to build the final response object, instead of the default behavior. The generated controller calls the custom function with the same keyword arguments used to build the response object via `create_response_object(...)`, for example `http_codes`, `status_code`, `status_message`, `data`, and, when applicable, exception-related fields. This means the callable should accept the named arguments the generator provides, either explicitly or via `**kwargs` (for example, `def response_builder(**kwargs): ...`). The same builder is used for both normal and exception responses, so it must be able to handle both cases. Check the [Response Object reference](../reference/utils/create_response_object.md) for details on the expected fields and return format. This value can either be a direct callable (for example `my_response_builder`), a dotted path to a callable (`my_app.utils.response_builder`), a classmethod or a staticmethod.
 
 ```yaml
 paths:
