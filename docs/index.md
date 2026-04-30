@@ -25,7 +25,7 @@ Alpha provides a comprehensive set of tools for building Python applications tha
 ## Status
 
 !!! warning "Development status"
-	Keep in mind that the library is still in development. We are working towards a stable 1.0 release, but in the meantime, you can already use the library in your projects and provide feedback on the features and functionality. The library can be used for productive applications, but be aware that there may be breaking changes in the future as we continue to develop and improve the library. We recommend keeping an eye on the changelog and documentation for updates and changes. To prevent failures in production, we recommend locking the library version in your dependency manager.
+    Keep in mind that the library is still in development. We are working towards a stable 1.0 release, but in the meantime, you can already use the library in your projects and provide feedback on the features and functionality. The library can be used for productive applications, but be aware that there may be breaking changes in the future as we continue to develop and improve the library. We recommend keeping an eye on the changelog and documentation for updates and changes. To prevent failures in production, we recommend locking the library version in your dependency manager.
 
 ## Core features
 
