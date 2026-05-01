@@ -5,10 +5,10 @@ info:
 servers:
   - url: http://localhost:8080
 paths:
-  /health:
+  /:
     get:
       operationId: health_check
-      x-alpha-custom-function: '{"status": "ok"}'
+      x-alpha-custom-function: 'dict(status="ok")'
       responses:
         '200':
           description: OK
