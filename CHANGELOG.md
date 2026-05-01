@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - When refreshing an authentication token using the refresh token, the Identity object was not merged with the user and group information from the database, which caused issues when using group-based permissions. This has been fixed by merging the Identity object with the user and group information from the database after refreshing the token. This was only an issue when the `refresh_identity_on_refresh` parameter of the AuthenticationService was set to True.
+- When using the `x-alpha-custom-function` vendor extension in the OpenAPI spec, it whas not possible to use quotes in the value of the vendor extension because it was not properly escaped in the generated code. This has been fixed by properly escaping the value of the `x-alpha-custom-function` vendor extension in the generated code.
 
 ## [0.6.0] - 2026-04-28
 
