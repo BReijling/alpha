@@ -96,12 +96,6 @@ class TestService:
     def is_list(self, obj: Any) -> bool:
         return isinstance(obj, list)
 
-    # def return_object(self, obj: Any) -> Any:
-    #     return obj
-
-    # def count_unique_items(self, obj: Any) -> int:
-    #     return len(set(obj))
-
     def check_dataclass(self, pet: Pet) -> Pet:
         if isinstance(pet, Pet):
             return pet
