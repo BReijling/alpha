@@ -6,6 +6,7 @@ import os
 import socket
 
 import connexion
+from connexion import request
 {{#featureCORS}}
 from flask_cors import CORS
 {{/featureCORS}}
@@ -56,9 +57,13 @@ LoggingConfigurator(
 )
 {{/disableLoggingConfigurator}}
 {{#featureCORS}}
-# add CORS support
 cors_origins = container.config.cors.origins()
-logging.info(f'Enabling CORS for origins: {cors_origins}')
+if cors_origins is None:
+    logging.info(
+        "CORS origins not configured, defaulting to allow all origins"
+    )
+    cors_origins = ["*"]
+logging.info(f"Enabling CORS for origins: {cors_origins}")
 CORS(app.app, origins=cors_origins)
 {{/featureCORS}}
 
@@ -68,15 +73,27 @@ app.container = container
 
 @app.app.after_request
 def add_headers(response: Response):
-    response.headers["Cache-Control"] = "no-store"
-    # response.headers["Content-Security-Policy"] = "default-src 'self'"
-    response.headers["Strict-Transport-Security"] = (
-        "max-age=31536000; includeSubDomains"
+    response_headers = container.config.response.headers()
+    is_swagger_ui_request = request.path == "/ui" or request.path.startswith(
+        "/ui/"
     )
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "DENY"
-    return response
 
+    if response_headers is None:
+        response_headers = {
+            "Cache-Control": "no-store",
+            "Content-Security-Policy": "default-src 'self'",
+            "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+            "X-Content-Type-Options": "nosniff",
+            "X-Frame-Options": "DENY",
+        }
+    for header, value in response_headers.items():
+        if (
+            is_swagger_ui_request
+            and header.lower() == "content-security-policy"
+        ):
+            continue
+        response.headers[header] = value
+    return response
 
 logging.info(f'Started {{servicePackage}} API on \'{socket.gethostname()}\'')
 

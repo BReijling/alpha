@@ -426,59 +426,7 @@ To see what the generator guessed, run with `--help` to view all options.
 
 ## End-to-End Example Project
 
-This example shows a minimal path from an empty folder to a running generated
-API.
-
-### 1. Create a project skeleton
-
-```text
-my-api-project/
-  pyproject.toml
-  specification/
-    openapi.yaml
-```
-
-Use a package name in `pyproject.toml` (for example `my_api_project`). Alpha
-uses this to guess `--api-package` and `--service-package` defaults.
-
-### 2. Add a minimal OpenAPI file
-
-```yaml
-openapi: 3.0.0
-info:
-  title: Minimal API
-  version: 0.1.0
-paths:
-  /health:
-    get:
-      operationId: health
-      x-alpha-custom-function: str(123)
-      responses:
-        '200':
-          description: OK
-```
-
-### 3. Generate code
-
-```shell
-alpha api gen --no-watch
-```
-
-### 4. Run the generated API
-
-```shell
-alpha api run
-```
-
-### 5. Iterate during development
-
-Switch to watch mode when actively editing the specification:
-
-```shell
-alpha api gen
-```
-
-In another terminal, keep the API running with `alpha api run`.
+Check out the [quickstart guide](../quickstart.md) for a complete example of API generation, including a sample OpenAPI spec and implementation of business logic.
 
 ## Recommended Project Layout
 
@@ -518,4 +466,34 @@ Recommended conventions:
   between OpenAPI operations and service methods.
 - Use `./post_process.py` optionally for deterministic project-specific patching.
 
+## Configuring CORS and Response Headers
 
+The generated API supports CORS and custom response headers via configuration in the DI container. You can set these values in your container configuration, for example:
+
+```python
+# src/my_api_project/__init__.py
+from my_api_project.containers.container import Container
+
+def init_container() -> Container:
+    container = Container()
+
+    container.config.cors.origins = ["https://example.com"]
+    container.config.response.headers = {
+        "X-Custom-Header": "MyValue"
+    }
+
+    container.wire(modules=[__name__])
+    return container
+```
+
+When CORS origins are not configured, the generated API defaults to allowing all origins (`*`) and logs a warning. 
+
+Custom response headers defined in the container configuration are added to all responses. When no custom response headers are configured, the following headers are added:
+
+- `Cache-Control: no-store`
+- `Content-Security-Policy: default-src 'self'`
+- `Strict-Transport-Security: max-age=31536000; includeSubDomains`
+- `X-Content-Type-Options: nosniff`
+- `X-Frame-Options: DENY`
+
+When a request is made to the Swagger UI (`/ui`), the generator skips adding any response headers that have "Content-Security-Policy" in their name to avoid breaking the UI.
