@@ -48,7 +48,7 @@ paths:
               schema:
                 type: string
                 example: "123"
-      x-alpha-custom-function: str(123)
+      x-alpha-custom-function: '"123"'
   /verify_string/{obj}:
     get:
       description: |

@@ -1,0 +1,27 @@
+[project]
+name = "example"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Bart Reijling", email = "bart@reijling.eu" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "alpha-python[flask]",
+]
+
+[project.scripts]
+example = "example:main"
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[tool.uv.sources]
+alpha-python = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "alpha-python[api-generator]",
+]

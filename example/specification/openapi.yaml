@@ -1,0 +1,22 @@
+openapi: 3.0.0
+info:
+  title: Quickstart API
+  version: 0.1.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /health:
+    get:
+      operationId: health_check
+      x-alpha-custom-function: '{"status": "ok"}'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok

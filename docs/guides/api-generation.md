@@ -165,13 +165,13 @@ paths:
 
 ### `x-alpha-custom-function`
 
-Bypasses normal service dispatch and executes a custom callable/expression.
+Bypasses normal service dispatch and executes a custom callable/expression. The value needs to be escaped using single quotes when double quotes are used in the expression, for example `x-alpha-custom-function: '"123"'` or `x-alpha-custom-function: 'str("ok")'`.
 
 ```yaml
 paths:
   /health:
     get:
-      x-alpha-custom-function: str("ok")
+      x-alpha-custom-function: '"ok"'
 ```
 
 ### `x-alpha-service-additional-parameters`
