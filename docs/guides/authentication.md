@@ -248,7 +248,7 @@ class Container(containers.DeclarativeContainer):
     )
 
     # Factories
-    jwt_factory = providers.Factory(
+    token_factory = providers.Factory(
         JWTFactory,
         secret=config.jwt.secret,
         lifetime_hours=config.jwt.lifetime_hours,
@@ -259,7 +259,7 @@ class Container(containers.DeclarativeContainer):
     keycloak_provider = providers.Factory(
         KeyCloakProvider,
         connector=keycloak_connector,
-        token_factory=jwt_factory,
+        token_factory=token_factory,
     )
 
     # Authentication Service

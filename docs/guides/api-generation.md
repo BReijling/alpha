@@ -177,7 +177,7 @@ paths:
 ### `x-alpha-service-additional-parameters`
 
 Passes extra runtime values to the service method. Typical values are
-`auth_token`, `refresh_token`, or `api_key`.
+`identity`, `auth_token`, `refresh_token`, or `api_key`.
 
 ```yaml
 paths:
@@ -188,6 +188,12 @@ paths:
       x-alpha-service-additional-parameters:
         - auth_token
         - refresh_token
+  /objects:
+    get:
+      x-alpha-service-name: object_service
+      x-alpha-service-method: get_objects
+      x-alpha-service-additional-parameters:
+        - identity
 ```
 
 ### `x-alpha-import`
@@ -262,7 +268,7 @@ paths:
 
 ### `x-alpha-verify-permissions`
 
-Requires one or more permissions before the endpoint logic runs.
+Requires one or more permissions before the endpoint logic runs. When multiple permissions are listed, all of them are required (logical AND).
 
 ```yaml
 paths:
@@ -423,6 +429,38 @@ Pass explicit values for:
 - `--init-container-function`
 
 To see what the generator guessed, run with `--help` to view all options.
+
+## Endpoint authentication and authorization
+
+The generated API does not enforce any specific authentication or authorization mechanism by default, but it provides flexible options to implement these features based on your application's needs. You can use the `x-alpha-verify-roles`, `x-alpha-verify-groups`, and `x-alpha-verify-permissions` vendor extensions to define coarse- or fine-grained access constraints on a per-endpoint basis. The generator will then include the necessary checks in the generated controller code, allowing you to integrate with your existing authentication and authorization system.
+
+In order to verify an access token and extract user information for authorization checks, a token factory is required. The generated API looks for a token factory in the DI container under the name `token_factory`. This factory should implement a method to validate the token and a method to get the payload from the token. An example of how to setup the token factory in the container is shown in the [Authentication guide](../guides/authentication.md#example-implementation). In order to use the `x-alpha-verify-roles`, `x-alpha-verify-groups`, or `x-alpha-verify-permissions` extensions, the token factory must be able to extract the relevant information (for example roles, groups, permissions) from the token payload.
+
+To enable authentication, a security scheme needs to be defined in the OpenAPI specification. Furthermore, each endpoint can specify the required security schemes using the `security` field. Below is an example of how to define a bearer token security scheme and require it for an endpoint, along with permission-based access control using `x-alpha-verify-permissions`:
+
+```yaml
+paths:
+  /objects:
+    get:
+      description: Get list of objects
+      operationId: get_objects
+      responses:
+        '200':
+          description: OK
+      tags: [Objects]
+      x-alpha-service-name: object_service
+      x-alpha-service-method: get_objects
+      x-alpha-verify-permissions:
+        - READ_OBJECTS
+      security:
+        - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+```
 
 ## End-to-End Example Project
 
