@@ -4,7 +4,7 @@
 - Or
 """
 
-from typing import Any, Callable, Iterable
+from typing import Any, Callable, Iterable, Self
 
 from sqlalchemy.orm import Query
 from sqlalchemy.sql.expression import ColumnElement, and_, or_
@@ -17,13 +17,11 @@ class FilterOperator:
     search query
     """
 
-    def __init__(self, *search_filters: SearchFilter):
+    def __init__(self, *search_filters: SearchFilter | Self) -> None:
         """Instantiate the filter operator by storing the search filter
         objects
         """
-        self.search_filters: Iterable[SearchFilter | FilterOperator] = (
-            search_filters
-        )
+        self.search_filters: Iterable[SearchFilter | Self] = search_filters
 
     @property
     def filter_operator(

@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- FilterOperator class now supports recursive nesting of filter operators. This allows for more complex search queries by combining multiple filter operators together. For example, you can now create a filter operator that combines an AND operator with an OR operator to create a more complex search query.
+
 ## [0.6.1] - 2026-05-01
 
 ### Added
