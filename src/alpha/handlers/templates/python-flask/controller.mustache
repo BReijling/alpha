@@ -43,9 +43,7 @@ from {{packageName}} import models as api_models
 
 {{#operations}}
 {{#operation}}
-{{#authMethods}}{{#vendorExtensions.x-alpha-service-name}}@inject{{/vendorExtensions.x-alpha-service-name}}{{/authMethods}}
-{{^authMethods}}{{#vendorExtensions.x-alpha-service-name}}@inject{{/vendorExtensions.x-alpha-service-name}}{{/authMethods}}
-{{#authMethods}}{{^vendorExtensions.x-alpha-service-name}}@inject{{/vendorExtensions.x-alpha-service-name}}{{/authMethods}}
+{{#authMethods}}{{#-first}}@inject{{/-first}}{{/authMethods}}{{^authMethods}}{{#vendorExtensions.x-alpha-service-name}}@inject{{/vendorExtensions.x-alpha-service-name}}{{/authMethods}}
 def {{operationId}}(
     {{#allParams}}{{^isBodyParam}}{{paramName}}{{^required}}=None{{/required}},{{/isBodyParam}}{{/allParams}}
     {{#authMethods}}{{#isBasicBearer}}token_factory=Provide[Container.token_factory],{{/isBasicBearer}}{{/authMethods}}
