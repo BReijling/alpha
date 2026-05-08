@@ -5,11 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.6.2] - 2026-05-08
 
 ### Changed
 
 - FilterOperator class now supports recursive nesting of filter operators. This allows for more complex search queries by combining multiple filter operators together. For example, you can now create a filter operator that combines an AND operator with an OR operator to create a more complex search query.
+
+### Fixed
+
+- When using multiple security schemes in the OpenAPI spec, the generated API code added multiple `@inject` decorators to the controller functions, which caused issues when running the API. This has been fixed by only adding one `@inject` decorator to the controller functions, regardless of the number of security schemes defined in the OpenAPI spec.
 
 ## [0.6.1] - 2026-05-01
 
