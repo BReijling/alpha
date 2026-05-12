@@ -1,6 +1,5 @@
 from typing import TYPE_CHECKING, Any, Literal, overload
 import json
-from alpha.encoder import JSONEncoder
 from alpha.utils.cookie import Cookie
 from alpha.utils._http_codes import http_codes_en
 
@@ -52,7 +51,7 @@ def create_response_object(
     data: Any | None = None,
     data_type: str = "application/json",
     http_codes: dict[int, tuple[str, str]] = http_codes_en,
-    json_encoder: type[json.JSONEncoder] | None = JSONEncoder,
+    json_encoder: type[json.JSONEncoder] | None = None,
     response_type: str | None = "dict",
 ) -> tuple[Response, int] | tuple[dict[str, Any], int]:
     """Create a HTTP response object.
@@ -76,7 +75,7 @@ def create_response_object(
         default http_codes_en
     json_encoder
         A custom JSON encoder class to use when encoding the response data, by
-        default alpha.encoder.JSONEncoder
+        default None. If None, the default JSONEncoder will be used.
     response_type
         The type of response to create, either "flask" or "dict", by default
         "dict"
@@ -92,6 +91,12 @@ def create_response_object(
     """
     if response_type is None:
         response_type = "dict"
+
+    if json_encoder is None:
+        # Lazily import to avoid circular import during alpha package init.
+        from alpha.encoder import JSONEncoder
+
+        json_encoder = JSONEncoder
 
     obj: dict[str, Any] = {
         "detail": status_message,
