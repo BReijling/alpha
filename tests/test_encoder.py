@@ -3,11 +3,14 @@ from datetime import date, datetime, time, timezone
 from enum import Enum
 from typing import Any, Type, TypeVar
 from uuid import UUID
+from attrs import define
+from pydantic import BaseModel
+from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
 import pytest
-from alpha.encoder import JSONEncoder
+import alpha
 
 T = TypeVar("T")
 
@@ -15,7 +18,7 @@ T = TypeVar("T")
 @pytest.fixture
 def encoder_factory():
     def run_encoder(obj: Any, key: str):
-        json_ = json.dumps(obj, cls=JSONEncoder)
+        json_ = json.dumps(obj, cls=alpha.JSONEncoder)
         dict_ = json.loads(json_)
         return dict_[key]
 
@@ -73,6 +76,20 @@ class FakeModelToDict:
 class FakeModelToList:
     def to_list(self):
         return [1, 2, 3]
+
+
+@dataclass
+class FakeDataclassModel:
+    dataclass: str
+
+
+@define
+class FakeAttrsModel:
+    attrs: str
+
+
+class FakePydanticModel(BaseModel):
+    pydantic: str
 
 
 @pytest.fixture
@@ -168,3 +185,27 @@ def test_open_api_model(encoder_factory, obj):
 def test_open_api_model_list(encoder_factory, obj):
     value = encoder_factory(obj, "open_api_model_list")
     assert value == [{"value": "abc"}]
+
+
+def test_dataclass_model_type(encoder_factory):
+    model = FakeDataclassModel
+    obj = json.dumps(model, cls=alpha.JSONEncoder)
+    assert obj == '"FakeDataclassModel"'
+
+
+def test_dataclass_model(encoder_factory):
+    model = FakeDataclassModel(dataclass="abc")
+    obj = encoder_factory(model, "dataclass")
+    assert obj == "abc"
+
+
+def test_attrs_model(encoder_factory):
+    model = FakeAttrsModel(attrs="abc")
+    obj = encoder_factory(model, "attrs")
+    assert obj == "abc"
+
+
+def test_pydantic_model(encoder_factory):
+    model = FakePydanticModel(pydantic="abc")
+    obj = encoder_factory(model, "pydantic")
+    assert obj == "abc"

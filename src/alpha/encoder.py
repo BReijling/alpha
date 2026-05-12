@@ -4,6 +4,7 @@ complex types into JSON format.
 
 import json
 from dataclasses import asdict, is_dataclass
+from attrs import asdict as attrs_asdict
 from datetime import date, datetime, time
 from enum import Enum
 from json import encoder
@@ -14,8 +15,9 @@ import numpy as np  # type: ignore[import-untyped]
 import pandas as pd  # type: ignore[import-untyped]
 import six  # type: ignore[import-untyped]
 
-
 from alpha.interfaces.openapi_model import OpenAPIModel
+from alpha.utils.is_attrs import is_attrs
+from alpha.utils.is_pydantic import is_pydantic
 
 
 class JSONEncoder(encoder.JSONEncoder):
@@ -72,11 +74,15 @@ class JSONEncoder(encoder.JSONEncoder):
             return o.isoformat()
         if isinstance(o, time):
             return o.isoformat()
+        if isinstance(o, type):
+            cls = getattr(o, "__name__", None)
+            return cls if cls is not None else str(o)
         if is_dataclass(o):
-            if isinstance(o, type):
-                cls = getattr(o, "__class__")
-                return cls.__name__
             return asdict(o)
+        if is_attrs(o):
+            return attrs_asdict(o)
+        if is_pydantic(o):
+            return o.model_dump()
 
         try:
             return json.JSONEncoder.default(self, o)
