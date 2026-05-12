@@ -78,7 +78,7 @@ class JSONEncoder(encoder.JSONEncoder):
             cls = getattr(o, "__name__", None)
             return cls if cls is not None else str(o)
         if is_dataclass(o):
-            return asdict(o)
+            return asdict(o)  # type: ignore
         if is_attrs(o):
             return attrs_asdict(o)
         if is_pydantic(o):
