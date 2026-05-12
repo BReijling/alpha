@@ -1,6 +1,5 @@
 from typing import TYPE_CHECKING, Any, Literal, overload
 import json
-import alpha
 from alpha.utils.cookie import Cookie
 from alpha.utils._http_codes import http_codes_en
 
@@ -94,7 +93,10 @@ def create_response_object(
         response_type = "dict"
 
     if json_encoder is None:
-        json_encoder = alpha.JSONEncoder
+        # Lazily import to avoid circular import during alpha package init.
+        from alpha.encoder import JSONEncoder
+
+        json_encoder = JSONEncoder
 
     obj: dict[str, Any] = {
         "detail": status_message,
