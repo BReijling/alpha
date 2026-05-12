@@ -3,7 +3,7 @@
 import json
 from dataclasses import MISSING, is_dataclass
 from enum import Enum
-from typing import Any, Iterable, get_args, get_origin
+from typing import Any, Sequence, get_args, get_origin
 
 from alpha import exceptions
 from alpha.encoder import JSONEncoder
@@ -21,12 +21,12 @@ class ResponseFactory:
     def process(
         self,
         response: DataclassInstance
-        | Iterable[DataclassInstance]
+        | Sequence[DataclassInstance]
         | AttrsInstance
-        | Iterable[AttrsInstance]
+        | Sequence[AttrsInstance]
         | PydanticInstance
-        | Iterable[PydanticInstance],
-        cls: OpenAPIModel | Iterable[OpenAPIModel],
+        | Sequence[PydanticInstance],
+        cls: OpenAPIModel | Sequence[OpenAPIModel],
     ) -> object:
         """Mapping a dataclass instance or a collection of instances to an
         OpenAPI model
@@ -61,7 +61,7 @@ class ResponseFactory:
 
         # When the source instance and target class are of an iterable type
         if cls_origin in [list, tuple, set]:
-            if isinstance(response, Iterable):
+            if isinstance(response, Sequence):
                 arg = get_args(cls)[0]
                 return [
                     self.process(response=obj, cls=arg) for obj in response
