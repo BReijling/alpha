@@ -213,39 +213,6 @@ def {{operationId}}(
     {{/vendorExtensions.x-alpha-factory}}
 
     response_object_function = {{^vendorExtensions.x-alpha-custom-response-builder}}create_response_object{{/vendorExtensions.x-alpha-custom-response-builder}}{{#vendorExtensions.x-alpha-custom-response-builder}}{{vendorExtensions.x-alpha-custom-response-builder}}{{/vendorExtensions.x-alpha-custom-response-builder}}
-    {{^vendorExtensions.x-content-type}}
-    supported_response_types = [{{#produces}}'{{mediaType}}',{{/produces}}{{^produces}}{{#vendorExtensions.x-preferred-produce}}'{{mediaType}}',{{/vendorExtensions.x-preferred-produce}}{{/produces}}]
-    if not supported_response_types:
-        supported_response_types = ['application/json']
-    accept_header = connexion.request.headers.get("Accept", "").lower()
-    if supported_response_types and accept_header:
-        # If accept header matches supported type exactly, use that
-        if accept_header in supported_response_types:
-            response_data_type = accept_header
-        # If accepts all, default to first supported type
-        elif accept_header == "*/*":
-            response_data_type = supported_response_types[0]
-        # If accept postfix is wildcard, choose first supported type with the same prefix
-        elif accept_header.endswith("/*"):
-            accepted_prefix = accept_header.split("/", maxsplit=1)[0] + "/"
-            matched_supported_types = [
-                item
-                for item in supported_response_types
-                if item.lower().startswith(accepted_prefix)
-            ]
-            if matched_supported_types:
-                response_data_type = matched_supported_types[0]
-            else:
-                response_data_type = 'application/json'
-        # Default to application/json
-        else:
-            response_data_type = 'application/json'
-    else:
-        response_data_type = 'application/json'
-    {{/vendorExtensions.x-content-type}}
-    {{#vendorExtensions.x-content-type}}
-    response_data_type = '{{vendorExtensions.x-content-type}}'
-    {{/vendorExtensions.x-content-type}}
     
     try:
         # Objects used for authorization
@@ -340,7 +307,8 @@ def {{operationId}}(
             status_code={{code}},
             status_message='{{message}}',
             data=result,
-            data_type=response_data_type,
+            data_type={{#vendorExtensions.x-content-type}}'{{vendorExtensions.x-content-type}}'{{/vendorExtensions.x-content-type}}{{^vendorExtensions.x-content-type}}connexion.request.headers.get("Accept", None){{/vendorExtensions.x-content-type}},
+            supported_data_types=[{{#produces}}'{{mediaType}}',{{/produces}}{{^produces}}{{#vendorExtensions.x-preferred-produce}}'{{mediaType}}',{{/vendorExtensions.x-preferred-produce}}{{/produces}}],
             {{#vendorExtensions.x-alpha-cookie-support}}response_type='flask'{{/vendorExtensions.x-alpha-cookie-support}}
         )
         {{/returnType}}
