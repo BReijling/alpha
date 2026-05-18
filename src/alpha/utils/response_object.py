@@ -1,7 +1,8 @@
-from typing import TYPE_CHECKING, Any, Literal, overload
 import json
-from alpha.utils.cookie import Cookie
+from typing import TYPE_CHECKING, Any, Literal, overload
+
 from alpha.utils._http_codes import http_codes_en
+from alpha.utils.cookie import Cookie
 
 if TYPE_CHECKING:
     from flask.wrappers import Response
@@ -15,9 +16,11 @@ def create_response_object(
     status_message: str,
     data: Any | None,
     data_type: str,
+    supported_data_types: list[str] | None,
     http_codes: dict[int, tuple[str, str]],
     json_encoder: type[json.JSONEncoder] | None,
     response_type: Literal["dict"],
+    **kwargs: Any,
 ) -> tuple[dict[str, Any], int]: ...
 
 
@@ -27,9 +30,11 @@ def create_response_object(
     status_message: str,
     data: Any | None,
     data_type: str,
+    supported_data_types: list[str] | None,
     http_codes: dict[int, tuple[str, str]],
     json_encoder: type[json.JSONEncoder] | None,
     response_type: Literal["flask"],
+    **kwargs: Any,
 ) -> tuple[Response, int]: ...
 
 
@@ -39,9 +44,11 @@ def create_response_object(
     status_message: str,
     data: Any | None,
     data_type: str,
+    supported_data_types: list[str] | None,
     http_codes: dict[int, tuple[str, str]],
     json_encoder: type[json.JSONEncoder] | None,
     response_type: None = None,
+    **kwargs: Any,
 ) -> tuple[dict[str, Any], int]: ...
 
 
@@ -50,15 +57,19 @@ def create_response_object(
     status_message: str,
     data: Any | None = None,
     data_type: str = "application/json",
+    supported_data_types: list[str] | None = None,
     http_codes: dict[int, tuple[str, str]] = http_codes_en,
     json_encoder: type[json.JSONEncoder] | None = None,
     response_type: str | None = "dict",
+    **kwargs: Any,
 ) -> tuple[Response, int] | tuple[dict[str, Any], int]:
     """Create a HTTP response object.
 
     The response object can be either a dictionary or a Flask Response object,
     depending on the value of `response_type`. The response will include the
     status code, a human-readable message, and optionally additional data.
+    Only supports JSON responses. For other types, use custom function with
+    x-alpha-custom-response-builder in the OpenAPI specification.
 
     Parameters
     ----------
@@ -70,6 +81,8 @@ def create_response_object(
         Additional data to include in the response, by default None
     data_type
         The MIME type of the response, by default "application/json"
+    supported_data_types
+        A list of supported MIME types for the data_type parameter.
     http_codes
         A dictionary mapping HTTP status codes to their descriptions, by
         default http_codes_en
@@ -89,6 +102,8 @@ def create_response_object(
         A tuple containing the flask.Response object and the HTTP status code.
         When response_type is "flask".
     """
+    data_type = _resolve_data_type(data_type, supported_data_types)
+
     if response_type is None:
         response_type = "dict"
 
@@ -180,3 +195,44 @@ def _split_cookies_from_object(
             data = data[0]
         return data, cookies
     return obj, []
+
+def _resolve_data_type(
+    data_type: str | None,
+    supported_data_types: list[str] | None,
+    default: str = 'application/json',
+) -> str:
+    """Resolve the data type for the response by matching against the supported types.
+
+    Match wildcards like "*/*" or "application/*" with first match in supported
+    types. If the data type is not supported, resort to default type.
+
+    Parameters
+    ----------
+    data_type
+        The MIME type of the response.
+    supported_data_types
+        A list of supported MIME types. If None, all types are supported.
+    default
+        The default MIME type to use if the provided data_type is not supported.
+
+    Returns
+    -------
+        The resolved MIME type to use for the response.
+    """
+    # If no data type provided or no supported types, return default
+    if not data_type or not supported_data_types:
+        return default
+    # Return provided type if it matches supported type
+    if data_type.lower() in supported_data_types:
+        return data_type.lower()
+    # If wildcard is provided, return first supported type
+    if data_type == "*/*":
+        return supported_data_types[0]
+    # If postfix wildcard is provided, match prefix
+    if data_type.endswith("/*"):
+        prefix = data_type[:-2].lower()
+        for supported in supported_data_types:
+            if supported.startswith(prefix):
+                return supported
+    # If not matched, return default
+    return default

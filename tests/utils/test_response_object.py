@@ -1,7 +1,8 @@
 import json
 
-from flask.wrappers import Response
 import pytest
+from flask.wrappers import Response
+
 from alpha.utils.response_object import create_response_object
 
 
@@ -39,6 +40,7 @@ def test_create_response_object_with_flask_response():
         status_message="test",
         data="string_data",
         data_type="application/text",
+        supported_data_types=["application/text"],
         response_type="flask",
     )
 
