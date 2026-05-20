@@ -10,10 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added support for Attrs and Pydantic models to the JSONEncoder class. This allows for easier serialization of Attrs and Pydantic models to JSON format.
+- In the OpenAPI python-flask controller template, the supported response data types for an endpoint are now given as parameter `supported_data_types` to the response object builder function. In the default response builder, this is used to resolve the requested `data_type` by matching it against the `supported_data_types` list, defaulting to `application/json` when no match is found. This also allows for wildcards such as `*/*` or `application/*` data types.
 
 ### Changed
 
 - Updated typing of the `ResponseFactory.process` to allow for more flexible parameter types.
+- The `Accept` request header is now given as `data_type` parameter to the `create_response_object` function instead of always being given `application/json` or `x-content-type` as the data type, allowing support for dynamically requesting the response in different data types.
 
 ## [0.6.2] - 2026-05-08
 
