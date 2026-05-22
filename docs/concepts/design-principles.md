@@ -1,4 +1,4 @@
-# Concepts
+# Design Principles
 
 ## Domain Driven Design
 
@@ -27,6 +27,8 @@ In software architecture, we often talk about different layers or components tha
 By organizing our code into these components, we can create a clear separation of concerns and make it easier to maintain, evolve our software over time and increase testability. Each component has a specific role and responsibility, which helps to keep our codebase organized and manageable as it grows in complexity. 
 
 Alpha components are designed to work together seamlessly, allowing you to build robust and scalable applications that are aligned with the principles of Domain-Driven Design. Whether you are building a small application or a large enterprise system, the architectural patterns and components provided by Alpha can help you to create software that is maintainable, scalable, and closely aligned with your business needs.
+
+A very useful resource for understanding these concepts is [Architecture Patterns with Python: Enabling Test-Driven Development, Domain-Driven Design, and Event-Driven Microservices](https://www.amazon.com/Architecture-Patterns-Python-Domain-Driven-Microservices/dp/1492052205). This book provides practical insights and examples for implementing these architectural patterns in Python, making it a valuable resource for developers looking to build robust and maintainable software systems.
 
 ## Architectural Overview
 
