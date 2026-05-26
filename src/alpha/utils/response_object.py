@@ -196,7 +196,12 @@ def _split_cookies_from_object(
         return data, cookies
     return obj, []
 
-def _resolve_data_type(data_type: str | None, supported_data_types: list[str] | None, default: str = 'application/json') -> str:
+
+def _resolve_data_type(
+    data_type: str | None,
+    supported_data_types: list[str] | None,
+    default: str = "application/json",
+) -> str:
     """Resolve the data type for the response by matching against the supported types.
 
     Match wildcards like "*/*" or "application/*" with first match in supported
