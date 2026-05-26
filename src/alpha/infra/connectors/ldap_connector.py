@@ -75,12 +75,12 @@ class LDAPConnector:
         self._bind_password = bind_password
         self._client_strategy = client_strategy
         self._connect_timeout = connect_timeout
-        self._additional_connector_params = (
+        self._additional_connector_params: dict[str, Any] = (
             {"receive_timeout": 5}
             if additional_connector_params is None
             else dict(additional_connector_params)
         )
-        self._additional_server_params = (
+        self._additional_server_params: dict[str, Any] = (
             {}
             if additional_server_params is None
             else dict(additional_server_params)
