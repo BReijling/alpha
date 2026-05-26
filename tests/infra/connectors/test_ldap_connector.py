@@ -15,6 +15,7 @@ def test_ldap_connector_initialization():
     assert connector._bind_dn == "cn=admin,dc=example,dc=com"
     assert connector._bind_password == "password"
     assert connector._client_strategy == SYNC
+    assert connector._server.connect_timeout == 5.0
     assert connector.connection_cls == Connection
 
 
@@ -40,4 +41,5 @@ def test_ldap_connector_connection_properties(ldap_connector):
     assert conn.server.host == "fake"
     assert conn.server.port == 636
     assert conn.server.ssl is False
+    assert conn.server.connect_timeout == 5.0
     assert conn.strategy_type == MOCK_SYNC

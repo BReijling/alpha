@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added support for Attrs and Pydantic models to the JSONEncoder class. This allows for easier serialization of Attrs and Pydantic models to JSON format.
+- Added additional parameters to the `LDAPConnector` class to allow for more flexible configuration of LDAP connection and server parameters. This allows for better compatibility with different LDAP servers and use cases.
 
 ### Changed
 

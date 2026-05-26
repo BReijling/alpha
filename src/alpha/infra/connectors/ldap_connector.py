@@ -31,6 +31,9 @@ class LDAPConnector:
         server_port: int = 636,
         use_tls: bool = True,
         client_strategy: ClientStrategyType = SYNC,
+        connect_timeout: float | None = 5.0,
+        additional_connector_params: dict[str, Any] | None = None,
+        additional_server_params: dict[str, Any] | None = None,
     ) -> None:
         """
         Parameters
@@ -59,12 +62,29 @@ class LDAPConnector:
             - 'MOCK_SYNC': Mock synchronous strategy.
             - 'MOCK_ASYNC': Mock asynchronous strategy.
             - 'ASYNC_STREAM': Asynchronous stream strategy.
+        connect_timeout
+            Maximum number of seconds to wait while opening the socket.
+        additional_connector_params
+            Additional parameters to pass to the LDAP connection, by default
+            {"receive_timeout": 5}
+        additional_server_params
+            Additional parameters to pass to the LDAP server, by default None
         """
         self._server_url = server_url
         self._bind_dn = bind_dn
         self._bind_password = bind_password
         self._client_strategy = client_strategy
-
+        self._connect_timeout = connect_timeout
+        self._additional_connector_params: dict[str, Any] = (
+            {"receive_timeout": 5}
+            if additional_connector_params is None
+            else dict(additional_connector_params)
+        )
+        self._additional_server_params: dict[str, Any] = (
+            {}
+            if additional_server_params is None
+            else dict(additional_server_params)
+        )
         tls = None
         if use_tls:
             tls = Tls(
@@ -78,6 +98,8 @@ class LDAPConnector:
             use_ssl=use_tls,
             tls=tls,
             get_info=ALL,
+            connect_timeout=self._connect_timeout,
+            **self._additional_server_params,
         )
         self._connection: Connection | None = None
 
@@ -97,8 +119,9 @@ class LDAPConnector:
             self._server,
             user=self._bind_dn,
             password=self._bind_password,
-            auto_bind=True,
             client_strategy=self._client_strategy,  # type: ignore
+            auto_bind=True,
+            **self._additional_connector_params,
         )
 
     def disconnect(self) -> None:
