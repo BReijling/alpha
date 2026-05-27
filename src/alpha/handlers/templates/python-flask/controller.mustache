@@ -307,9 +307,9 @@ def {{operationId}}(
             status_code={{code}},
             status_message='{{message}}',
             data=result,
-            data_type={{#vendorExtensions.x-content-type}}'{{vendorExtensions.x-content-type}}'{{/vendorExtensions.x-content-type}}{{^vendorExtensions.x-content-type}}connexion.request.headers.get("Accept", None){{/vendorExtensions.x-content-type}},
+            accept_header={{#vendorExtensions.x-content-type}}'{{vendorExtensions.x-content-type}}'{{/vendorExtensions.x-content-type}}{{^vendorExtensions.x-content-type}}connexion.request.headers.get("Accept", None){{/vendorExtensions.x-content-type}},
             supported_data_types=[{{#produces}}'{{mediaType}}',{{/produces}}{{^produces}}{{#vendorExtensions.x-preferred-produce}}'{{mediaType}}',{{/vendorExtensions.x-preferred-produce}}{{/produces}}],
-            {{#vendorExtensions.x-alpha-cookie-support}}response_type='flask'{{/vendorExtensions.x-alpha-cookie-support}}
+            {{#vendorExtensions.x-alpha-cookie-support}}response_format='flask'{{/vendorExtensions.x-alpha-cookie-support}}
         )
         {{/returnType}}
         {{^returnType}}
@@ -317,19 +317,19 @@ def {{operationId}}(
             http_codes=http_codes,
             status_code=204,
             status_message='{{message}}',
-            {{#vendorExtensions.x-alpha-cookie-support}}data=result, response_type='flask'{{/vendorExtensions.x-alpha-cookie-support}}
+            {{#vendorExtensions.x-alpha-cookie-support}}data=result, response_format='flask'{{/vendorExtensions.x-alpha-cookie-support}}
         )
         {{/returnType}}
         {{/vendorExtensions.x-alpha-raw-response}}
     {{/is2xx}}
-    
     {{#is4xx}}
         {{#vendorExtensions.x-alpha-exception}}
     except {{vendorExtensions.x-alpha-exception}} as exc:
         return response_object_function(
             http_codes=http_codes,
             status_code={{code}},
-            status_message=f'{exc}'
+            status_message=f'{exc}',
+            data_type={{#vendorExtensions.x-content-type}}'{{vendorExtensions.x-content-type}}'{{/vendorExtensions.x-content-type}}{{^vendorExtensions.x-content-type}}connexion.request.headers.get("Accept", None){{/vendorExtensions.x-content-type}},
         )
         {{/vendorExtensions.x-alpha-exception}}
     {{/is4xx}}
@@ -340,6 +340,7 @@ def {{operationId}}(
             http_codes=http_codes,
             status_code={{code}},
             status_message=f'{exc}'
+            data_type={{#vendorExtensions.x-content-type}}'{{vendorExtensions.x-content-type}}'{{/vendorExtensions.x-content-type}}{{^vendorExtensions.x-content-type}}connexion.request.headers.get("Accept", None){{/vendorExtensions.x-content-type}},
         )
         {{/vendorExtensions.x-alpha-exception}}
     {{/is5xx}}
