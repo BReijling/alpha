@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Updated typing of the `ResponseFactory.process` to allow for more flexible parameter types.
 
+### Fixed
+
+- Applied a fix for the identity variable in the generated API controller code, which was not of the correct type. This caused issues when using the identity variable as a service parameter or when parsing it by the ResponseFactory, as it was not recognized as an Identity object. The fix ensures that the identity variable is of the correct type and can be used properly in several functions.
+
 ## [0.6.2] - 2026-05-08
 
 ### Changed
