@@ -12,6 +12,7 @@ from typing import List
 from alpha.factories.request_factory import RequestFactory
 from alpha.factories.response_factory import ResponseFactory
 from alpha.encoder import JSONEncoder
+from alpha.providers.models.identity import Identity
 from alpha.utils.logging_level_checker import logging_level_checker
 from alpha.utils.response_object import create_response_object
 from alpha.utils.request_headers import Headers
@@ -227,7 +228,8 @@ def {{operationId}}(
         token_factory.validate(auth_token)
 
         # Get auth token payload and verify identity
-        identity = token_factory.get_payload(auth_token)
+        payload = token_factory.get_payload(auth_token)
+        identity = Identity.from_dict(payload)
         verify_identity(identity,
             roles=roles,
             groups=groups,
