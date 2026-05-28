@@ -1,7 +1,8 @@
 import json
 
-from flask.wrappers import Response
 import pytest
+from flask.wrappers import Response
+
 from alpha.utils.response_object import create_response_object
 
 
@@ -10,7 +11,7 @@ def test_create_response_object():
         status_code=400,
         status_message="test",
         data="test",
-        response_type=None,
+        response_format=None,
     )
 
     assert isinstance(obj, tuple)
@@ -29,8 +30,62 @@ def test_create_response_object():
         create_response_object(
             status_code=200,
             status_message="test",
-            response_type="invalid_type",
+            response_format="invalid_type",
         )
+
+
+def test_create_response_object_accept_header_all():
+    obj = create_response_object(
+        status_code=200,
+        status_message="test",
+        data="string_data",
+        accept_header="*/*",
+        supported_accept_headers=["application/xml", "application/json"],
+        response_format=None,
+    )
+
+    response_obj, status_code = obj
+    assert isinstance(response_obj, dict)
+    assert status_code == 200
+
+    assert response_obj["type"] == "application/xml"
+    assert response_obj["data"] == "string_data"
+
+
+def test_create_response_object_accept_header_all_subtypes():
+    obj = create_response_object(
+        status_code=200,
+        status_message="test",
+        data="string_data",
+        accept_header="/*",
+        supported_accept_headers=["application/json", "application/xml"],
+        response_format=None,
+    )
+
+    response_obj, status_code = obj
+    assert isinstance(response_obj, dict)
+    assert status_code == 200
+
+    assert response_obj["type"] == "application/json"
+    assert response_obj["data"] == "string_data"
+
+
+def test_create_response_object_accept_header_default():
+    obj = create_response_object(
+        status_code=200,
+        status_message="test",
+        data="string_data",
+        accept_header="/",
+        supported_accept_headers=["application/xml"],
+        response_format=None,
+    )
+
+    response_obj, status_code = obj
+    assert isinstance(response_obj, dict)
+    assert status_code == 200
+
+    assert response_obj["type"] == "application/json"
+    assert response_obj["data"] == "string_data"
 
 
 def test_create_response_object_with_flask_response():
@@ -38,8 +93,9 @@ def test_create_response_object_with_flask_response():
         status_code=200,
         status_message="test",
         data="string_data",
-        data_type="application/text",
-        response_type="flask",
+        accept_header="application/text",
+        supported_accept_headers=["application/text"],
+        response_format="flask",
     )
 
     response_obj, status_code = obj
@@ -63,7 +119,7 @@ def test_create_response_object_with_cookie(
         status_code=200,
         status_message="test",
         data=example_set_cookie1,
-        response_type="flask",
+        response_format="flask",
     )
 
     response_obj, _ = obj
@@ -90,7 +146,7 @@ def test_create_response_object_with_cookies(
         status_code=200,
         status_message="test",
         data=(example_set_cookie1, example_set_cookie2, example_delete_cookie),
-        response_type="flask",
+        response_format="flask",
     )
 
     response_obj, _ = obj
@@ -110,7 +166,7 @@ def test_create_response_object_with_mixed_data_string(example_set_cookie1):
         status_code=200,
         status_message="test",
         data=(example_set_cookie1, "string_data"),
-        response_type="flask",
+        response_format="flask",
     )
 
     response_obj, _ = obj
@@ -135,7 +191,7 @@ def test_create_response_object_with_mixed_data_list(example_set_cookie1):
         status_code=200,
         status_message="test",
         data=(example_set_cookie1, ["string_data"]),
-        response_type="flask",
+        response_format="flask",
     )
 
     response_obj, _ = obj
@@ -155,7 +211,7 @@ def test_create_response_object_with_mixed_data_empty_list(
         status_code=200,
         status_message="test",
         data=(example_set_cookie1, []),
-        response_type="flask",
+        response_format="flask",
     )
 
     response_obj, _ = obj

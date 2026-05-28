@@ -1,5 +1,5 @@
-def test_root_endpoint(get, parse_response_json):
-    response = get("/")
+def test_root_endpoint(client, parse_response_json):
+    response = client.get("/", headers={"Accept": "*/*"})
     assert response.status_code == 200
     data = parse_response_json(response.data)
     assert data["status_code"] == 200
