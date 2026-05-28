@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.6.3] - 2026-05-28
 
 ### Added
 
@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Updated typing of the `ResponseFactory.process` to allow for more flexible parameter types.
+- The Accept header is now forwarded to the response-builder function with a `accept_header` parameter in the API controller template. This allows for better handling of different response formats based on the Accept header sent by the client. This behavior can be used for example to return a different response format than the default JSON format based on the Accept header sent by the client. It can be overruled by using the `x-content-type` vendor extension to specify a specific content type. Keep in mind that the default response builder function does not use the `accept_header` parameter, so you will need to implement your own custom response builder function if you want to use this feature. The custom response builder function can be specified in the OpenAPI spec using the `x-alpha-custom-response-builder` vendor extension and should be imported using the `x-alpha-import` vendor extension as introduced in version 0.6.1.
+- All specified response types are now being forwarded with a `supported_accept_headers` parameter to the response-builder function, which can be used to specify a list of supported response formats for the endpoint.
 
 ### Fixed
 
