@@ -329,7 +329,7 @@ def {{operationId}}(
             http_codes=http_codes,
             status_code={{code}},
             status_message=f'{exc}',
-            data_type={{#vendorExtensions.x-content-type}}'{{vendorExtensions.x-content-type}}'{{/vendorExtensions.x-content-type}}{{^vendorExtensions.x-content-type}}connexion.request.headers.get("Accept", None){{/vendorExtensions.x-content-type}},
+            accept_header={{#vendorExtensions.x-content-type}}'{{vendorExtensions.x-content-type}}'{{/vendorExtensions.x-content-type}}{{^vendorExtensions.x-content-type}}connexion.request.headers.get("Accept", None){{/vendorExtensions.x-content-type}},
         )
         {{/vendorExtensions.x-alpha-exception}}
     {{/is4xx}}
@@ -340,7 +340,7 @@ def {{operationId}}(
             http_codes=http_codes,
             status_code={{code}},
             status_message=f'{exc}'
-            data_type={{#vendorExtensions.x-content-type}}'{{vendorExtensions.x-content-type}}'{{/vendorExtensions.x-content-type}}{{^vendorExtensions.x-content-type}}connexion.request.headers.get("Accept", None){{/vendorExtensions.x-content-type}},
+            accept_header={{#vendorExtensions.x-content-type}}'{{vendorExtensions.x-content-type}}'{{/vendorExtensions.x-content-type}}{{^vendorExtensions.x-content-type}}connexion.request.headers.get("Accept", None){{/vendorExtensions.x-content-type}},
         )
         {{/vendorExtensions.x-alpha-exception}}
     {{/is5xx}}
