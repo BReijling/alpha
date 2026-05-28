@@ -40,7 +40,7 @@ def test_create_response_object_accept_header_all():
         status_message="test",
         data="string_data",
         accept_header="*/*",
-        supported_data_types=["application/xml", "application/json"],
+        supported_accept_headers=["application/xml", "application/json"],
         response_format=None,
     )
 
@@ -58,7 +58,7 @@ def test_create_response_object_accept_header_all_subtypes():
         status_message="test",
         data="string_data",
         accept_header="/*",
-        supported_data_types=["application/json", "application/xml"],
+        supported_accept_headers=["application/json", "application/xml"],
         response_format=None,
     )
 
@@ -76,7 +76,7 @@ def test_create_response_object_accept_header_default():
         status_message="test",
         data="string_data",
         accept_header="/",
-        supported_data_types=["application/xml"],
+        supported_accept_headers=["application/xml"],
         response_format=None,
     )
 
@@ -94,7 +94,7 @@ def test_create_response_object_with_flask_response():
         status_message="test",
         data="string_data",
         accept_header="application/text",
-        supported_data_types=["application/text"],
+        supported_accept_headers=["application/text"],
         response_format="flask",
     )
 

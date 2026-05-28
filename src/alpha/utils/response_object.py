@@ -16,7 +16,7 @@ def create_response_object(
     status_message: str,
     data: Any | None,
     accept_header: str,
-    supported_data_types: list[str] | None,
+    supported_accept_headers: list[str] | None,
     http_codes: dict[int, tuple[str, str]],
     json_encoder: type[json.JSONEncoder] | None,
     response_format: Literal["dict"],
@@ -30,7 +30,7 @@ def create_response_object(
     status_message: str,
     data: Any | None,
     accept_header: str,
-    supported_data_types: list[str] | None,
+    supported_accept_headers: list[str] | None,
     http_codes: dict[int, tuple[str, str]],
     json_encoder: type[json.JSONEncoder] | None,
     response_format: Literal["flask"],
@@ -44,7 +44,7 @@ def create_response_object(
     status_message: str,
     data: Any | None,
     accept_header: str,
-    supported_data_types: list[str] | None,
+    supported_accept_headers: list[str] | None,
     http_codes: dict[int, tuple[str, str]],
     json_encoder: type[json.JSONEncoder] | None,
     response_format: None = None,
@@ -57,7 +57,7 @@ def create_response_object(
     status_message: str,
     data: Any | None = None,
     accept_header: str = "application/json",
-    supported_data_types: list[str] | None = None,
+    supported_accept_headers: list[str] | None = None,
     http_codes: dict[int, tuple[str, str]] = http_codes_en,
     json_encoder: type[json.JSONEncoder] | None = None,
     response_format: str | None = "dict",
@@ -82,7 +82,7 @@ def create_response_object(
     accept_header
         The value of the Accept header from the request,
         by default "application/json"
-    supported_data_types
+    supported_accept_headers
         A list of supported MIME types for the data_type parameter.
     http_codes
         A dictionary mapping HTTP status codes to their descriptions, by
@@ -103,7 +103,7 @@ def create_response_object(
         A tuple containing the flask.Response object and the HTTP status code.
         When response_format is "flask".
     """
-    data_type = _resolve_data_type(accept_header, supported_data_types)
+    data_type = _resolve_data_type(accept_header, supported_accept_headers)
 
     if response_format is None:
         response_format = "dict"
@@ -201,7 +201,7 @@ def _split_cookies_from_object(
 
 def _resolve_data_type(
     accept_header: str | None,
-    supported_data_types: list[str] | None,
+    supported_accept_headers: list[str] | None,
     default: str = "application/json",
 ) -> str:
     """Resolve the data type for the response by matching against the supported
@@ -214,7 +214,7 @@ def _resolve_data_type(
     ----------
     accept_header
         The Accept header from the request.
-    supported_data_types
+    supported_accept_headers
         A list of supported MIME types. If None, all types are supported.
     default
         The default MIME type to use if the provided accept_header is not
@@ -226,18 +226,18 @@ def _resolve_data_type(
         The resolved MIME type to use for the response.
     """
     # If no data type provided or no supported types, return default
-    if not accept_header or not supported_data_types:
+    if not accept_header or not supported_accept_headers:
         return default
     # Return provided type if it matches supported type
-    if accept_header.lower() in supported_data_types:
+    if accept_header.lower() in supported_accept_headers:
         return accept_header.lower()
     # If MIME type wildcard is provided, return first supported type
     if accept_header.startswith("*/"):
-        return supported_data_types[0]
+        return supported_accept_headers[0]
     # If MIME subtype is a wildcard, match prefix
     if accept_header.endswith("/*"):
         prefix = accept_header.split("/")[0].lower()
-        for supported in supported_data_types:
+        for supported in supported_accept_headers:
             if supported.startswith(prefix):
                 return supported
     # If not matched, return default

@@ -308,7 +308,7 @@ def {{operationId}}(
             status_message='{{message}}',
             data=result,
             accept_header={{#vendorExtensions.x-content-type}}'{{vendorExtensions.x-content-type}}'{{/vendorExtensions.x-content-type}}{{^vendorExtensions.x-content-type}}connexion.request.headers.get("Accept", None){{/vendorExtensions.x-content-type}},
-            supported_data_types=[{{#produces}}'{{mediaType}}',{{/produces}}{{^produces}}{{#vendorExtensions.x-preferred-produce}}'{{mediaType}}',{{/vendorExtensions.x-preferred-produce}}{{/produces}}],
+            supported_accept_headers=[{{#produces}}'{{mediaType}}',{{/produces}}{{^produces}}{{#vendorExtensions.x-preferred-produce}}'{{mediaType}}',{{/vendorExtensions.x-preferred-produce}}{{/produces}}],
             {{#vendorExtensions.x-alpha-cookie-support}}response_format='flask'{{/vendorExtensions.x-alpha-cookie-support}}
         )
         {{/returnType}}
@@ -330,6 +330,7 @@ def {{operationId}}(
             status_code={{code}},
             status_message=f'{exc}',
             accept_header={{#vendorExtensions.x-content-type}}'{{vendorExtensions.x-content-type}}'{{/vendorExtensions.x-content-type}}{{^vendorExtensions.x-content-type}}connexion.request.headers.get("Accept", None){{/vendorExtensions.x-content-type}},
+            supported_accept_headers=[{{#produces}}'{{mediaType}}',{{/produces}}{{^produces}}{{#vendorExtensions.x-preferred-produce}}'{{mediaType}}',{{/vendorExtensions.x-preferred-produce}}{{/produces}}],
         )
         {{/vendorExtensions.x-alpha-exception}}
     {{/is4xx}}
@@ -341,6 +342,7 @@ def {{operationId}}(
             status_code={{code}},
             status_message=f'{exc}'
             accept_header={{#vendorExtensions.x-content-type}}'{{vendorExtensions.x-content-type}}'{{/vendorExtensions.x-content-type}}{{^vendorExtensions.x-content-type}}connexion.request.headers.get("Accept", None){{/vendorExtensions.x-content-type}},
+            supported_accept_headers=[{{#produces}}'{{mediaType}}',{{/produces}}{{^produces}}{{#vendorExtensions.x-preferred-produce}}'{{mediaType}}',{{/vendorExtensions.x-preferred-produce}}{{/produces}}],
         )
         {{/vendorExtensions.x-alpha-exception}}
     {{/is5xx}}
