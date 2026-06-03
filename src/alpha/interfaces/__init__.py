@@ -9,6 +9,7 @@ from alpha.interfaces.patchable import Patchable
 # import all repository related interfaces
 from alpha.interfaces.api_repository import ApiRepository
 from alpha.interfaces.sql_repository import SqlRepository
+from alpha.interfaces.refresh_repository import RefreshRepository
 
 # import all database related interfaces
 from alpha.interfaces.sql_mapper import SqlMapper
@@ -35,6 +36,7 @@ __all__ = [
     "Patchable",
     "ApiRepository",
     "SqlRepository",
+    "RefreshRepository",
     "SqlMapper",
     "SqlDatabase",
     "UnitOfWork",
