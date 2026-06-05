@@ -1,6 +1,9 @@
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol, Any
 
-from alpha.providers.models.token import Token
+if TYPE_CHECKING:
+    from alpha.providers.models.token import Token
+else:
+    Token = Any
 
 
 class RefreshRepository(Protocol):

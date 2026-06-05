@@ -1,11 +1,15 @@
 """This module contains interfaces for various types of identity providers."""
 
-from typing import ClassVar, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, ClassVar, Protocol, runtime_checkable, Any
 
 from alpha.interfaces.token_factory import TokenFactory
 from alpha.providers.models.credentials import PasswordCredentials
 from alpha.providers.models.identity import Identity
-from alpha.providers.models.token import Token
+
+if TYPE_CHECKING:
+    from alpha.providers.models.token import Token
+else:
+    Token = Any
 
 
 @runtime_checkable

@@ -1,10 +1,8 @@
-from datetime import datetime, timedelta, timezone
 import json
 from typing import Any
 
 from alpha import exceptions
 from alpha.providers.models.token import Token
-from alpha.utils.secret_generator import generate_secret
 
 
 class FileRefreshRepository:
@@ -101,13 +99,10 @@ class FileRefreshRepository:
         Token
             The newly created token object.
         """
-        token = self._token_model(
-            value=generate_secret(self._token_length),
-            token_type="Refresh",
+        token = self._token_model.create_refresh(
             subject=subject,
-            created_at=datetime.now(tz=timezone.utc),
-            expires_at=datetime.now(tz=timezone.utc)
-            + timedelta(seconds=self._token_max_age_seconds),
+            max_age_seconds=self._token_max_age_seconds,
+            token_length=self._token_length,
         )
 
         with open(self._file_path, "r") as file:

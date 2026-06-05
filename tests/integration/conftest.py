@@ -19,6 +19,9 @@ from alpha.providers.database_provider import DatabaseProvider
 from alpha.providers.ldap_provider import LDAPProvider
 from alpha.providers.models.token import Token
 from alpha.providers.oidc_provider import KeyCloakProvider, OIDCProvider
+from alpha.repositories.refresh.database_refresh_repository import (
+    DatabaseRefreshRepository,
+)
 from alpha.repositories.sql_alchemy_repository import SqlAlchemyRepository
 from alpha.repositories.models.repository_model import RepositoryModel
 from alpha.services.authentication_service import AuthenticationService
@@ -551,8 +554,13 @@ def authentication_service_with_database_provider_and_static_user(
 
 
 @pytest.fixture
+def database_refresh_repository(app_database) -> DatabaseRefreshRepository:
+    return DatabaseRefreshRepository(app_database)
+
+
+@pytest.fixture
 def authentication_service_with_keycloak_provider(
-    uow_auth, keycloak_provider_with_token_factory
+    uow_auth, keycloak_provider_with_token_factory, database_refresh_repository
 ) -> AuthenticationService:
     return AuthenticationService(
         identity_provider=keycloak_provider_with_token_factory,
@@ -561,7 +569,7 @@ def authentication_service_with_keycloak_provider(
         merge_with_database_groups=True,
         use_cookies=True,
         use_refresh_tokens=True,
-        refresh_token_storage="database",
+        refresh_repository=database_refresh_repository,
     )
 
 

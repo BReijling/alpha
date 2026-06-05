@@ -1,10 +1,6 @@
-from calendar import c
-from datetime import datetime, timedelta, timezone
-
 from alpha import exceptions
 from alpha.infra.connectors.sql_alchemy import SqlAlchemyDatabase
 from alpha.providers.models.token import Token
-from alpha.utils.secret_generator import generate_secret
 
 
 class DatabaseRefreshRepository:
@@ -87,14 +83,12 @@ class DatabaseRefreshRepository:
         Token
             The newly created token object.
         """
-        token = self._token_model(
-            value=generate_secret(self._token_length),
-            token_type="Refresh",
+        token = self._token_model.create_refresh(
             subject=subject,
-            created_at=datetime.now(tz=timezone.utc),
-            expires_at=datetime.now(tz=timezone.utc)
-            + timedelta(seconds=self._token_max_age_seconds),
+            max_age_seconds=self._token_max_age_seconds,
+            token_length=self._token_length,
         )
+
         with self._database_connector.get_session() as session:
             session.add(token)
             session.commit()
