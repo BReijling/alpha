@@ -468,7 +468,7 @@ class AuthenticationService:
         if self._identity_provider.authenticate(credentials):
             self._identity_provider.change_password(credentials, new_password)
 
-    def revoke(self, identity: Identity, subject: str) -> None:
+    def revoke_tokens(self, identity: Identity, subject: str) -> None:
         """Revoke all refresh tokens for a given subject.
 
         All refresh tokens associated with the specified subject will be
