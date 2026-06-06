@@ -1,9 +1,10 @@
 from uuid import UUID
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from dataclasses import dataclass
 from typing import Any, Literal
 
 from alpha.domain.models.base_model import BaseDomainModel
+from alpha.utils.secret_generator import generate_secret
 
 
 @dataclass
@@ -79,6 +80,40 @@ class Token(BaseDomainModel):
             ),
         )
 
+    @classmethod
+    def create_refresh(
+        cls,
+        subject: str,
+        max_age_seconds: int = 7 * 24 * 3600,
+        token_length: int = 32,
+    ) -> "Token":
+        """Factory method to create a new Refresh Token instance.
+
+        Parameters
+        ----------
+        subject
+            The subject or user associated with the token.
+        max_age_seconds, optional
+            Optional maximum age of the token in seconds. Defaults to 7 days.
+            If provided, the expires_at will be set to created_at +
+            max_age_seconds.
+        token_length, optional
+            Optional length of the token value. Defaults to 32.
+
+        Returns
+        -------
+        Token
+            A new Refresh Token instance with the provided attributes and generated id and created_at.
+        """
+        return cls(
+            value=generate_secret(token_length),
+            token_type="Refresh",
+            subject=subject,
+            created_at=datetime.now(tz=timezone.utc),
+            expires_at=datetime.now(tz=timezone.utc)
+            + timedelta(seconds=max_age_seconds),
+        )
+
     def to_dict(self) -> dict[str, str | None]:
         """Converts the Token instance to a dictionary.
 
@@ -97,15 +132,18 @@ class Token(BaseDomainModel):
             - "expires_at": ISO format datetime string for when the token
             expires or None.
         """
-        return {
-            "id": str(self.id) if self.id else None,
+
+        obj: dict[str, str | None] = {
             "value": self.value,
             "subject": self.subject,
             "token_type": self.token_type,
-            "created_at": (
-                self.created_at.isoformat() if self.created_at else None
-            ),
-            "expires_at": (
-                self.expires_at.isoformat() if self.expires_at else None
-            ),
         }
+
+        if self.id:
+            obj["id"] = str(self.id)
+        if self.created_at:
+            obj["created_at"] = self.created_at.isoformat()
+        if self.expires_at:
+            obj["expires_at"] = self.expires_at.isoformat()
+
+        return obj

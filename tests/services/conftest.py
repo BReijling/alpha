@@ -5,10 +5,12 @@ import pytest
 
 from alpha.domain.models.group import Group
 from alpha.domain.models.user import User
-from alpha.factories.password_factory import PasswordFactory
 from alpha.providers.models.credentials import PasswordCredentials
 from alpha.providers.models.identity import Identity
 from alpha.providers.models.token import Token
+from alpha.repositories.refresh.file_repository import (
+    FileRefreshRepository,
+)
 from alpha.services.authentication_service import AuthenticationService
 from alpha.services.user_lifecycle_management import UserLifecycleManagement
 from tests.fixtures.fake_provider import FakeIdentityProvider
@@ -93,7 +95,6 @@ def authentication_service(
         uow=fake_uow,
         users_repository_name="authentication_service",
         static_user=fake_static_user,
-        refresh_token_storage="test",
     )
 
 
@@ -169,11 +170,20 @@ def refresh_token_storage_file(
 
 
 @pytest.fixture
+def file_refresh_repository(refresh_token_storage_file):
+    return FileRefreshRepository(
+        file_path=refresh_token_storage_file,
+        token_max_age_seconds=3600,
+        token_length=28,
+    )
+
+
+@pytest.fixture
 def authentication_service_use_refresh_tokens(
     fake_uow,
     fake_static_user,
     fake_identity_provider,
-    refresh_token_storage_file,
+    file_refresh_repository,
 ) -> AuthenticationService:
     return AuthenticationService(
         identity_provider=fake_identity_provider,
@@ -182,59 +192,7 @@ def authentication_service_use_refresh_tokens(
         static_user=fake_static_user,
         use_cookies=True,
         use_refresh_tokens=True,
-        refresh_token_length=28,
-        refresh_token_max_age=3600,
-        refresh_token_storage="file",
-        refresh_token_storage_file_path=refresh_token_storage_file,
-    )
-
-
-@pytest.fixture
-def authentication_service_use_refresh_tokens_memory(
-    fake_uow, fake_static_user, fake_identity_provider
-) -> AuthenticationService:
-    return AuthenticationService(
-        identity_provider=fake_identity_provider,
-        uow=fake_uow,
-        users_repository_name="authentication_service",
-        static_user=fake_static_user,
-        use_cookies=True,
-        use_refresh_tokens=True,
-        refresh_identity_on_refresh=False,
-        refresh_token_storage="memory",
-    )
-
-
-@pytest.fixture
-def authentication_service_use_refresh_tokens_memory_expired(
-    fake_uow, fake_static_user, fake_identity_provider
-) -> AuthenticationService:
-    return AuthenticationService(
-        identity_provider=fake_identity_provider,
-        uow=fake_uow,
-        users_repository_name="authentication_service",
-        static_user=fake_static_user,
-        use_cookies=True,
-        use_refresh_tokens=True,
-        refresh_token_max_age=-1,
-        refresh_identity_on_refresh=False,
-        refresh_token_storage="memory",
-    )
-
-
-@pytest.fixture
-def authentication_service_use_refresh_tokens_database(
-    fake_uow, fake_static_user, fake_identity_provider
-) -> AuthenticationService:
-    return AuthenticationService(
-        identity_provider=fake_identity_provider,
-        uow=fake_uow,
-        users_repository_name="authentication_service",
-        static_user=fake_static_user,
-        use_cookies=True,
-        use_refresh_tokens=True,
-        refresh_identity_on_refresh=False,
-        refresh_token_storage="database",
+        refresh_repository=file_refresh_repository,
     )
 
 

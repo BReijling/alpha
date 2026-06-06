@@ -1,36 +1,37 @@
 """Authentication service module."""
 
-import os
-import json
-from datetime import datetime, timedelta, timezone
-from typing import Any, Literal, NoReturn
+from datetime import datetime, timezone
+from typing import NoReturn
 
 from alpha.domain.models.group import Group
 from alpha.domain.models.user import User
 from alpha.infra.models.search_filter import Operator, SearchFilter
+from alpha.interfaces.refresh_repository import RefreshRepository
 from alpha.interfaces.sql_repository import SqlRepository
 from alpha.interfaces.unit_of_work import UnitOfWork
 from alpha.providers.models.identity import Identity
 from alpha.providers.models.token import Token
 from alpha.providers.models.credentials import PasswordCredentials
 from alpha.interfaces.providers import IdentityProvider
+from alpha.repositories.refresh.memory_repository import (
+    MemoryRefreshRepository,
+)
 from alpha.utils.cookie import Cookie
-from alpha.utils.secret_generator import generate_secret
 from alpha import exceptions
 
 
 class AuthenticationService:
     """This class is responsible for handling authentication operations in an
     application. It provides methods for user authentication, token issuance,
-    token validation, password change, pretending to login as another user,
-    and merging user data with identity data.
+    token validation, password change, revoking tokens, pretending to login as
+    another user and merging user data with identity data.
 
     The service is designed to be flexible and configurable, allowing you to
-    customize various aspects of the authentication process, such as token
-    storage, cookie management, and integration with different identity
-    providers. It can be used in a variety of applications, including web
-    applications, APIs, and microservices, to provide a consistent and secure
-    authentication experience.
+    customize various aspects of the authentication process, such as cookie
+    management and integration with different identity providers. It can be
+    used in a variety of applications, including web applications, APIs, and
+    microservices, to provide a consistent and secure authentication
+    experience.
 
     The service supports both stateless and stateful authentication mechanisms,
     allowing you to choose the approach that best fits your application's
@@ -42,16 +43,12 @@ class AuthenticationService:
     providing a unified view of the authenticated user's information and
     permissions.
 
-    Refresh tokens can be stored using different mechanisms, such as in-memory
-    storage, file storage, or database storage. This flexibility allows you to
-    choose the storage mechanism that best fits your application's requirements
-    and infrastructure. For example, in-memory storage can be used for simple
-    applications or during development, while file storage or database storage
-    can be used for production applications that require persistence and
-    scalability of refresh tokens. The service also provides methods for
-    managing refresh tokens, including creating, storing, retrieving, and
-    deleting refresh tokens as needed to maintain user sessions and ensure
-    security.
+    Refresh tokens can be stored using different mechanisms. By default, the
+    service uses an in-memory repository for refresh tokens, which is suitable
+    for development and testing purposes. However, for production use, it is
+    recommended to implement a more robust storage mechanism, such as a
+    database-backed repository, to ensure that refresh tokens are persisted and
+    can be reliably managed across application restarts and deployments.
     """
 
     def __init__(
@@ -79,15 +76,7 @@ class AuthenticationService:
         token_model: type[Token] = Token,
         users_repository_name: str = "users",
         groups_repository_name: str = "groups",
-        refresh_token_storage: Literal[
-            "database",
-            "memory",
-            "cache",
-            "file",
-        ] = "file",
-        refresh_token_repository_name: str = "refresh_tokens",
-        refresh_token_storage_file_path: str | None = None,
-        refresh_token_length: int = 32,
+        refresh_repository: RefreshRepository | None = None,
         refresh_identity_on_refresh: bool = False,
         static_user: User | None = None,
     ) -> None:
@@ -162,34 +151,22 @@ class AuthenticationService:
             Name of the user repository in the UnitOfWork, by default "users"
         groups_repository_name
             Name of the group repository in the UnitOfWork, by default "groups"
-        refresh_token_storage
-            Storage mechanism for refresh tokens, by default "file". Supported
-            values are "database", "memory", "cache", and "file".
-        refresh_token_repository_name
-            Name of the refresh token repository in the UnitOfWork,
-            by default "refresh_tokens"
-        refresh_token_storage_file_path
-            File path for storing refresh tokens if using file storage,
-            by default None. This is required if refresh_token_storage is set
-            to "file". When the value is None the file will be stored in the
-            current working directory. The file should be a JSON file that
-            stores an object of refresh tokens. If the file does not exist, it
-            will be created automatically. The structure of the JSON file
-            should be as follows:
-            ```json
-            {
-                "<TOKEN_VALUE>": {
-                    "value": "<TOKEN_VALUE>",
-                    "token_type": "Refresh",
-                    "subject": "<SUBJECT>",
-                    "created_at": "<ISO8601_DATETIME>",
-                    "expires_at": "<ISO8601_DATETIME>"
-                },
-                ...
-            }
-            ```
-        refresh_token_length
-            Length of the generated refresh tokens, by default 32
+        refresh_repository
+            Refresh token repository instance, by default None. If not
+            provided, the service will use the MemoryRefreshRepository and
+            forward the token_model and refresh_token_max_age parameters to it.
+            This allows for flexibility in how refresh tokens are stored and
+            managed, enabling the use of different storage mechanisms as needed
+            without being tied to a specific implementation. The
+            MemoryRefreshRepository is suitable for development and testing
+            purposes, but for production use, it is recommended to implement a
+            more robust storage mechanism, such as a database-backed
+            repository, to ensure that refresh tokens are persisted and can be
+            reliably managed across application restarts and deployments. If
+            you choose to provide your own implementation of the
+            RefreshRepository, make sure it adheres to the expected interface
+            and behavior for managing refresh tokens in the context of this
+            authentication service.
         refresh_identity_on_refresh
             Whether to refresh the identity when refreshing the token, by
             default False. This need to be implemented in the
@@ -231,12 +208,13 @@ class AuthenticationService:
         self._token_model = token_model
         self._users_repository_name = users_repository_name
         self._groups_repository_name = groups_repository_name
-        self._refresh_token_storage = refresh_token_storage
-        self._refresh_token_repository_name = refresh_token_repository_name
-        self._refresh_token_storage_file_path = (
-            refresh_token_storage_file_path or "refresh_tokens.json"
+        self._refresh_repository = (
+            refresh_repository
+            or MemoryRefreshRepository(
+                token_model=token_model,
+                token_max_age_seconds=refresh_token_max_age,
+            )
         )
-        self._refresh_token_length = refresh_token_length
         self._refresh_identity_on_refresh = refresh_identity_on_refresh
         self._static_user = static_user
 
@@ -317,7 +295,7 @@ class AuthenticationService:
             return auth_cookie, str(token)
 
         # If using refresh tokens, also create a refresh token and cookie.
-        refresh_token = self._create_refresh_token(
+        refresh_token = self._refresh_repository.create(
             subject=getattr(identity, self._identity_id_attribute)
         )
         refresh_cookie = self._create_token_cookie(
@@ -371,7 +349,14 @@ class AuthenticationService:
         )
 
         if refresh_token:
-            self._delete_refresh_token(refresh_token)
+            try:
+                self._refresh_repository.delete(refresh_token)
+            except exceptions.NotFoundException:
+                # If the refresh token is not found in the repository, we can
+                # ignore it since the goal is to ensure that the token is
+                # invalidated. If it's not found, it means it has already been
+                # invalidated or never existed.
+                pass
 
         return (
             logout_auth_cookie,
@@ -420,7 +405,8 @@ class AuthenticationService:
         exceptions.MissingConfigurationException
             If refresh token authentication is not properly configured.
         exceptions.UnauthorizedException
-            If the refresh token is invalid.
+            If the refresh token is invalid, expired, or the identity cannot be
+            retrieved.
         """
         if not self._use_cookies or not self._use_refresh_tokens:
             raise exceptions.MissingConfigurationException(
@@ -428,9 +414,16 @@ class AuthenticationService:
                 "use_cookies and use_refresh_tokens must be True."
             )
 
-        stored_refresh_token = self._get_refresh_token_from_storage(
-            refresh_token
-        )
+        # Retrieve the stored refresh token from the repository using the
+        # provided refresh token string.
+        try:
+            stored_refresh_token = self._refresh_repository.get(refresh_token)
+        except exceptions.NotFoundException:
+            raise exceptions.UnauthorizedException("Invalid refresh token")
+
+        # Verify the refresh token and raise an exception if it's invalid or
+        # expired.
+        self._verify_refresh_token(stored_refresh_token)
 
         # Set default identity to None.
         identity = None
@@ -504,6 +497,38 @@ class AuthenticationService:
         if self._identity_provider.authenticate(credentials):
             self._identity_provider.change_password(credentials, new_password)
 
+    def revoke_tokens(self, identity: Identity, subject: str) -> None:
+        """Revoke all refresh tokens for a given subject.
+
+        All refresh tokens associated with the specified subject will be
+        deleted from the refresh token repository, effectively revoking any
+        active sessions.
+
+        To be able to use this method, the authenticated identity must have
+        admin privileges. This is a powerful operation that should be used with
+        caution, as it will terminate all active sessions for the specified
+        subject. After revocation, users will need to log in again to obtain
+        new tokens and regain access. Users who are currently logged in with
+        valid access tokens may still have access until their access tokens
+        expire, but they will not be able to refresh their tokens or obtain new
+        ones without logging in again. This method is typically used in
+        scenarios where a user's credentials have been compromised or when an
+        administrator needs to enforce a logout for security reasons.
+
+        Parameters
+        ----------
+        identity
+            Identity of the user attempting to revoke tokens.
+        subject
+            Subject identifier for which to revoke tokens.
+        """
+        if identity.has_admin_privileges is not True:
+            raise exceptions.ForbiddenException(
+                "Only admin users can revoke tokens for a subject"
+            )
+
+        self._refresh_repository.delete_all(subject)
+
     def pretend_login(
         self, identity: Identity, pretend_subject: str
     ) -> str | tuple[Cookie, str]:
@@ -542,7 +567,7 @@ class AuthenticationService:
             If the user to pretend to be is not found.
         """
         if identity.has_admin_privileges is not True:
-            raise exceptions.UnauthorizedException(
+            raise exceptions.ForbiddenException(
                 "Only admin users can pretend to be another user"
             )
 
@@ -672,216 +697,6 @@ class AuthenticationService:
             samesite=self._cookie_samesite,
         )
 
-    def _create_refresh_token(self, subject: str) -> Token:
-        """Create and store a refresh token for a subject.
-
-        Parameters
-        ----------
-        subject
-            Subject identifier to create the refresh token for.
-
-        Returns
-        -------
-        Token
-            Token object representing the refresh token.
-        """
-        token = self._token_model(
-            value=generate_secret(self._refresh_token_length),
-            token_type="Refresh",
-            subject=subject,
-            expires_at=datetime.now(tz=timezone.utc)
-            + timedelta(seconds=self._refresh_token_max_age),
-        )
-
-        if self._refresh_token_storage == "database":
-            token = self._store_refresh_token_to_database(token)
-
-        elif self._refresh_token_storage == "file":
-            self._store_refresh_token_to_file(token)
-
-        elif self._refresh_token_storage == "memory":
-            self._store_refresh_token_to_memory(token)
-
-        elif self._refresh_token_storage == "cache":
-            # Implement cache storage for refresh tokens if needed
-            raise NotImplementedError(
-                "Cache refresh token storage is not implemented yet"
-            )
-
-        else:
-            raise exceptions.InvalidAttributeError(
-                "Invalid refresh token storage mechanism. Configured storage"
-                " mechanism is not supported. Check the configuration of the"
-                " AuthenticationService."
-            )
-
-        return token
-
-    def _delete_refresh_token(self, refresh_token: str) -> None:
-        """Delete a refresh token from the configured storage mechanism.
-
-        Parameters
-        ----------
-        refresh_token
-        The refresh token to delete.
-        """
-        if self._refresh_token_storage == "database":
-            self._delete_refresh_token_from_database(refresh_token)
-
-        elif self._refresh_token_storage == "file":
-            self._delete_refresh_token_from_file(refresh_token)
-
-        elif self._refresh_token_storage == "memory":
-            self._delete_refresh_token_from_memory(refresh_token)
-
-        elif self._refresh_token_storage == "cache":
-            # Implement cache deletion for refresh tokens if needed
-            raise NotImplementedError(
-                "Cache refresh token storage is not implemented yet"
-            )
-
-        else:
-            raise exceptions.InvalidAttributeError(
-                "Invalid refresh token storage mechanism. Configured storage "
-                "mechanism is not supported. Check the configuration of the "
-                "AuthenticationService."
-            )
-
-    def _store_refresh_token_to_database(self, token: Token) -> Token:
-        """Store a refresh token in the database.
-
-        Parameters
-        ----------
-        token
-            Token object representing the refresh token to store.
-
-        Returns
-        -------
-        Token
-            The stored Token object.
-
-        Raises
-        ------
-        exceptions.MissingDependencyException
-            If the UnitOfWork is not configured for the AuthenticationService.
-        """
-        if self.uow is None:
-            self._raise_no_uow()
-
-        with self.uow:
-            refresh_tokens: SqlRepository[Token] = getattr(
-                self.uow, self._refresh_token_repository_name
-            )
-            token = refresh_tokens.add(token)
-            self.uow.commit()
-
-        return token
-
-    def _store_refresh_token_to_file(self, token: Token) -> None:
-        """Store a refresh token in a file.
-
-        Parameters
-        ----------
-        token
-            Token object representing the refresh token to store.
-
-        Returns
-        -------
-        Token
-            The stored Token object.
-
-        Raises
-        ------
-        exceptions.ServerErrorException
-            If the refresh token storage file is not found.
-        """
-        if not os.path.exists(self._refresh_token_storage_file_path):
-            with open(self._refresh_token_storage_file_path, "w") as f:
-                json.dump({}, f)
-
-        with open(self._refresh_token_storage_file_path, "r") as f:
-            tokens_data = json.load(f)
-
-        tokens_data[token.value] = token.to_dict()
-
-        with open(self._refresh_token_storage_file_path, "w") as f:
-            json.dump(tokens_data, f, indent=4)
-
-    def _store_refresh_token_to_memory(self, token: Token) -> None:
-        """Store a refresh token in in-memory storage.
-
-        Parameters
-        ----------
-        token
-            Token object representing the refresh token to store.
-        """
-        self._in_memory_refresh_tokens[token.value] = token
-
-    def _delete_refresh_token_from_database(self, refresh_token: str) -> None:
-        """Delete a refresh token from the database.
-
-        Parameters
-        ----------
-        refresh_token
-            The refresh token string to delete.
-
-        Raises
-        ------
-        exceptions.MissingDependencyException
-            If the UnitOfWork is not configured for the AuthenticationService.
-        """
-        if self.uow is None:
-            self._raise_no_uow()
-
-        with self.uow:
-            refresh_tokens: SqlRepository[Token] = getattr(
-                self.uow, self._refresh_token_repository_name
-            )
-            token = refresh_tokens.get_one_or_none(
-                attr="value", value=refresh_token
-            )
-            if token:
-                refresh_tokens.remove(token)
-                self.uow.commit()
-
-    def _delete_refresh_token_from_file(self, refresh_token: str) -> None:
-        """Delete a refresh token from a file.
-
-        Parameters
-        ----------
-        refresh_token
-            The refresh token string to delete.
-
-        Raises
-        ------
-        exceptions.ServerErrorException
-            If the refresh token storage file is not found.
-        """
-        if not os.path.exists(self._refresh_token_storage_file_path):
-            raise exceptions.ServerErrorException(
-                "Refresh token storage file not found"
-            )
-
-        with open(self._refresh_token_storage_file_path, "r") as f:
-            tokens_data = json.load(f)
-
-        if refresh_token in tokens_data:
-            del tokens_data[refresh_token]
-
-            with open(self._refresh_token_storage_file_path, "w") as f:
-                json.dump(tokens_data, f, indent=4)
-
-    def _delete_refresh_token_from_memory(self, refresh_token: str) -> None:
-        """Delete a refresh token from in-memory storage.
-
-        Parameters
-        ----------
-        refresh_token
-            The refresh token string to delete.
-        """
-        if refresh_token in self._in_memory_refresh_tokens:
-            del self._in_memory_refresh_tokens[refresh_token]
-
     def _create_logout_cookie(self, cookie_name: str) -> Cookie:
         """Create a cookie to clear the authentication cookie on logout.
 
@@ -914,135 +729,13 @@ class AuthenticationService:
             "UnitOfWork is not configured for AuthenticationService"
         )
 
-    def _get_refresh_token_from_storage(self, refresh_token: str) -> Token:
-        """Retrieve a refresh token from the configured storage mechanism.
-
-        Parameters
-        ----------
-        refresh_token
-            Refresh token string to retrieve.
-
-        Returns
-        -------
-        Token
-            Token object representing the refresh token.
-        """
-        if self._refresh_token_storage == "database":
-            token = self._get_refresh_token_from_database(refresh_token)
-
-        elif self._refresh_token_storage == "file":
-            token = self._get_refresh_token_from_file(refresh_token)
-
-        elif self._refresh_token_storage == "memory":
-            token = self._get_refresh_token_from_memory(refresh_token)
-
-        elif self._refresh_token_storage == "cache":
-            # Implement cache retrieval for refresh tokens if needed
-            raise NotImplementedError(
-                "Cache refresh token storage is not implemented yet"
-            )
-
-        else:
-            raise exceptions.InvalidAttributeError(
-                "Invalid refresh token storage mechanism. Configured storage"
-                " mechanism is not supported. Check the configuration of the"
-                " AuthenticationService."
-            )
-
-        token = self._verify_refresh_token(token)
-        return token
-
-    def _get_refresh_token_from_database(
-        self, refresh_token: str
-    ) -> Token | None:
-        """Retrieve a refresh token from the database.
-
-        Parameters
-        ----------
-        refresh_token
-            The refresh token string to retrieve.
-
-        Returns
-        -------
-        Token
-            The retrieved refresh token, or None if not found.
-        """
-        if self.uow is None:
-            self._raise_no_uow()
-
-        with self.uow:
-            refresh_tokens: SqlRepository[Token] = getattr(
-                self.uow, self._refresh_token_repository_name
-            )
-            token = refresh_tokens.get_one_or_none(
-                attr="value", value=refresh_token
-            )
-
-        return token
-
-    def _get_refresh_token_from_file(self, refresh_token: str) -> Token | None:
-        """Retrieve a refresh token from a file.
-
-        Parameters
-        ----------
-        refresh_token
-            The refresh token string to retrieve.
-
-        Returns
-        -------
-        Token
-            The retrieved refresh token, or None if not found.
-
-        Raises
-        ------
-        exceptions.ServerErrorException
-            If the refresh token storage file is not found.
-        """
-        if not os.path.exists(self._refresh_token_storage_file_path):
-            raise exceptions.ServerErrorException(
-                "Refresh token storage file not found"
-            )
-
-        with open(self._refresh_token_storage_file_path, "r") as f:
-            tokens_data: dict[str, dict[str, Any]] = json.load(f)
-
-        token_data = tokens_data.get(refresh_token)
-        if not token_data:
-            return None
-
-        return Token.from_dict(token_data)
-
-    def _get_refresh_token_from_memory(
-        self, refresh_token: str
-    ) -> Token | None:
-        """Retrieve a refresh token from in-memory storage.
-
-        Parameters
-        ----------
-        refresh_token
-            The refresh token string to retrieve.
-
-        Returns
-        -------
-        Token
-            The retrieved refresh token, or None if not found.
-        """
-        token = self._in_memory_refresh_tokens.get(refresh_token)
-
-        return token
-
-    def _verify_refresh_token(self, token: Token | None) -> Token:
+    def _verify_refresh_token(self, token: Token | None) -> NoReturn | None:
         """Verify the validity of a refresh token.
 
         Parameters
         ----------
         token
             The refresh token to verify.
-
-        Returns
-        -------
-        Token
-            The verified refresh token.
 
         Raises
         ------
@@ -1055,4 +748,4 @@ class AuthenticationService:
             tz=timezone.utc
         ):
             raise exceptions.TokenExpiredException("Refresh token has expired")
-        return token
+        return None

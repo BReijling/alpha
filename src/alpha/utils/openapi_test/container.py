@@ -5,6 +5,9 @@ from dependency_injector import containers, providers
 from alpha.adapters.sqla_unit_of_work import SqlAlchemyUnitOfWork
 from alpha.factories.password_factory import PasswordFactory
 from alpha.providers.database_provider import DatabaseProvider
+from alpha.repositories.refresh.database_repository import (
+    DatabaseRefreshRepository,
+)
 from .models import TestGroup
 from .models import TestUser
 from .models import TestToken
@@ -82,6 +85,12 @@ class Container(containers.DeclarativeContainer):
         users_repository_name="test_users",
     )
 
+    refresh_repository = providers.Factory(
+        DatabaseRefreshRepository,
+        database_connector=database,
+        token_model=TestToken,
+    )
+
     authentication_service: providers.Factory[AuthenticationService] = (
         providers.Factory(
             AuthenticationService,
@@ -97,8 +106,7 @@ class Container(containers.DeclarativeContainer):
             token_model=TestToken,
             users_repository_name="test_users",
             groups_repository_name="test_groups",
-            refresh_token_storage="database",
-            refresh_token_repository_name="test_refresh_tokens",
+            refresh_repository=refresh_repository,
             static_user=providers.Factory(
                 TestUser,
                 id=config.authentication.static_user.username,
