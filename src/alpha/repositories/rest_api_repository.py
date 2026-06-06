@@ -112,6 +112,9 @@ class RestApiRepository(Generic[DomainModel]):
         # Expose the underlying client publicly for consistency with other
         # repositories
         self.client = client_obj
+        # Preserve the deprecated public session alias for backward
+        # compatibility
+        self.session = client_obj
         # Preserve the existing private attribute for backward compatibility
         self._session = client_obj
 

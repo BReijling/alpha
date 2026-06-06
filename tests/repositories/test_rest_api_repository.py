@@ -10,6 +10,12 @@ from tests.fixtures._domain_models import TestModel
 def test_rest_api_repository(rest_api_repository):
     assert isinstance(rest_api_repository, ApiRepository)
     assert rest_api_repository is not None
+    assert rest_api_repository.session is not None
+    assert isinstance(
+        rest_api_repository.session, requests.sessions.Session
+    )
+    assert rest_api_repository.session is rest_api_repository.client
+    assert rest_api_repository.session is rest_api_repository._session
     assert rest_api_repository._session is not None
     assert isinstance(rest_api_repository._session, requests.sessions.Session)
     assert rest_api_repository._host.startswith("http://127.0.0.1:")
@@ -21,6 +27,13 @@ def test_rest_api_repository(rest_api_repository):
 
 
 def test_rest_api_repository_httpx(rest_api_repository_httpx):
+    assert rest_api_repository_httpx.session is not None
+    assert isinstance(rest_api_repository_httpx.session, httpx.Client)
+    assert rest_api_repository_httpx.session is rest_api_repository_httpx.client
+    assert (
+        rest_api_repository_httpx.session
+        is rest_api_repository_httpx._session
+    )
     assert rest_api_repository_httpx._session is not None
     assert isinstance(rest_api_repository_httpx._session, httpx.Client)
 
