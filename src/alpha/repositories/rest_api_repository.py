@@ -11,6 +11,7 @@ from typing import Any, Generic, TypeVar, cast
 from alpha import exceptions
 from alpha.domain.models.base_model import BaseDomainModel, DomainModel
 from alpha.infra.models.json_patch import JsonPatch
+from alpha.interfaces.http_client import HTTPClient
 
 T = TypeVar("T", bound=BaseDomainModel)
 
@@ -44,7 +45,7 @@ class RestApiRepository(Generic[DomainModel]):
         serialize: bool = True,
         model_factory_method_name: str = "from_dict",
         model_serialization_method_name: str = "to_dict",
-        session: requests.sessions.Session | None = None,
+        session: HTTPClient | None = None,
         request_headers: dict[str, str] | None = None,
         request_cookies: dict[str, str] | None = None,
         response_data_attribute: str | None = None,
@@ -79,8 +80,11 @@ class RestApiRepository(Generic[DomainModel]):
             The name of the method to use for serializing models to
             dictionaries, by default "to_dict"
         session
-            The requests session (or compatible HTTP client, e.g., httpx) to
-            use for context management, by default None
+            An HTTP client to use for context management, by default None.
+            If None, a new `requests.sessions.Session` will be created and
+            used. This allows for flexibility in using different HTTP client
+            implementations that conform to the `HTTPClient` protocol, while
+            still providing a default option with `requests`.
         request_headers
             Default headers to include in every request, by default None
         request_cookies
@@ -652,7 +656,7 @@ class RestApiRepository(Generic[DomainModel]):
         -------
             The data retrieved from the API response.
         """
-        response = self._session.get(
+        response = self.session.get(
             url=url,
             **(additional_request_params or {}),
         )
@@ -688,7 +692,7 @@ class RestApiRepository(Generic[DomainModel]):
         -------
             The data retrieved from the API response.
         """
-        response = self._session.post(
+        response = self.session.post(
             url=url,
             json=data,
             **(additional_request_params or {}),
@@ -725,7 +729,7 @@ class RestApiRepository(Generic[DomainModel]):
         -------
             The data retrieved from the API response.
         """
-        response = self._session.patch(
+        response = self.session.patch(
             url=url,
             json=data,
             **(additional_request_params or {}),
@@ -762,7 +766,7 @@ class RestApiRepository(Generic[DomainModel]):
         -------
             The data retrieved from the API response.
         """
-        response = self._session.put(
+        response = self.session.put(
             url=url,
             json=data,
             **(additional_request_params or {}),
@@ -772,7 +776,7 @@ class RestApiRepository(Generic[DomainModel]):
 
     def _delete(
         self, url: str, additional_request_params: dict[str, Any] | None = None
-    ) -> None:
+    ) -> dict[str, Any] | None:
         """Call the DELETE method of the API.
 
         Parameters
@@ -788,7 +792,7 @@ class RestApiRepository(Generic[DomainModel]):
             parameters such as headers, authentication tokens, or other request
             options that may be needed for the API call.
         """
-        response = self._session.delete(
+        response = self.session.delete(
             url=url,
             **(additional_request_params or {}),
         )
@@ -930,7 +934,9 @@ class RestApiRepository(Generic[DomainModel]):
             return getattr(obj, self._model_serialization_method_name)()
         return obj
 
-    def _get_data_from_response(self, response: Response) -> Any:
+    def _get_data_from_response(
+        self, response: Response
+    ) -> dict[str, Any] | None:
         """Extract data from the API response. If the response_data_attribute
         is configured, it will return the value of that attribute. Otherwise,
         it will return the entire response data.
@@ -944,7 +950,7 @@ class RestApiRepository(Generic[DomainModel]):
         -------
             The extracted data from the API response.
         """
-        data = response.json()
+        data: dict[str, Any] = response.json()
         if self._response_data_attribute:
             return data.get(self._response_data_attribute)
         return data
@@ -1030,7 +1036,7 @@ class RestApiRepository(Generic[DomainModel]):
 
         return model_to_use
 
-    def _handle_response(self, response: Response) -> Any:
+    def _handle_response(self, response: Response) -> dict[str, Any] | None:
         """Handle the API response and extract the relevant data.
 
         In addition to extracting data from successful responses, this method
