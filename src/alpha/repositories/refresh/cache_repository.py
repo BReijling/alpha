@@ -13,6 +13,9 @@ class CacheRefreshRepository:
     ):
         """Initialize the CacheRefreshRepository with the given cache connector.
 
+        *** This class is not fully implemented yet. The methods are defined
+        but not implemented. ***
+
         Parameters
         ----------
         cache_connector

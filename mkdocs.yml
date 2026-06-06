@@ -119,6 +119,7 @@ nav:
       - SqlDatabase: reference/interfaces/sql_database.md
       - SqlRepository: reference/interfaces/sql_repository.md
       - ApiRepository: reference/interfaces/api_repository.md
+      - HTTPClient: reference/interfaces/http_client.md
       - SqlMapper: reference/interfaces/sql_mapper.md
       - OpenAPIModel: reference/interfaces/openapi_model.md
       - AttrsInstance: reference/interfaces/attrs_instance.md
@@ -150,6 +151,11 @@ nav:
       - REST API Repository: reference/repositories/rest_api_repository.md
       - Models:
         - Repository Model: reference/repositories/models/repository_model.md
+      - Refresh:
+        - Cache Refresh Repository: reference/repositories/refresh/cache_repository.md
+        - Database Refresh Repository: reference/repositories/refresh/database_repository.md
+        - File Refresh Repository: reference/repositories/refresh/file_repository.md
+        - Memory Refresh Repository: reference/repositories/refresh/memory_repository.md
     - Services:
       - Overview: reference/services/index.md
       - Authentication Service: reference/services/authentication_service.md
