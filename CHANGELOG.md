@@ -10,10 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Implementations of a new `RefreshRepository` interface for handling refresh token operations in the AuthenticationService. This includes methods for creating, retrieving, and deleting refresh tokens. Implementations for file-based, in-memory, and database-based refresh token storage are provided.
+- An interface called `HTTPClient` for the `client` and `session` parameters of the `RestApiRepository` class. This allows for more flexible handling of HTTP requests and responses in the API repository, and allows for customized HTTP clients.
 
 ### Changed
 
 - The `AuthenticationService` class has been updated to use the new `RefreshRepository` interface for managing refresh tokens. This includes changes to the login, logout, and token refresh methods to utilize the refresh token storage and retrieval functionality provided by the `RefreshRepository` implementations. This change allows for more flexible management of refresh tokens in the authentication flow and a more modular design.
+- Deprecated the `session` parameter of the `RestApiRepository` class in favor of the new `client` parameter. The `client` parameter is now the preferred way to handle HTTP requests and responses in the API repository, and allows for more flexible handling of HTTP interactions. The `session` parameter is still supported for backward compatibility, but it is recommended to switch to using the `client` parameter for new code and to update existing code to use the `client` parameter.
 
 ### Removed
 

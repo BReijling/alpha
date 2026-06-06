@@ -36,3 +36,9 @@ All documentation is auto-generated from docstrings in the source code.
 |---|---|
 | [Providers](providers.md) | Authentication provider interface |
 | [TokenFactory](token_factory.md) | Token factory interface |
+
+## Additional Interfaces
+
+| Interface | Description |
+|---|---|
+| [HTTPClient](http_client.md) | Interface for HTTP client implementations |
