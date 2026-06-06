@@ -174,6 +174,20 @@ def test_authentication_service_verify(authentication_service):
     assert isinstance(result, Identity)
 
 
+def test_authentication_service_revoke_tokens(
+    authentication_service, test_identity
+):
+    with pytest.raises(exceptions.ForbiddenException):
+        authentication_service.revoke_tokens(test_identity, "fake_subject")
+
+    test_identity.admin = True
+
+    assert (
+        authentication_service.revoke_tokens(test_identity, "fake_subject")
+        is None
+    )
+
+
 def test_authentication_service_pretend_login(
     authentication_service, authentication_service_use_cookies, test_identity
 ):
