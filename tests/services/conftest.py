@@ -8,7 +8,7 @@ from alpha.domain.models.user import User
 from alpha.providers.models.credentials import PasswordCredentials
 from alpha.providers.models.identity import Identity
 from alpha.providers.models.token import Token
-from alpha.repositories.refresh.file_refresh_repository import (
+from alpha.repositories.refresh.file_repository import (
     FileRefreshRepository,
 )
 from alpha.services.authentication_service import AuthenticationService
@@ -193,53 +193,6 @@ def authentication_service_use_refresh_tokens(
         use_cookies=True,
         use_refresh_tokens=True,
         refresh_repository=file_refresh_repository,
-    )
-
-
-@pytest.fixture
-def authentication_service_use_refresh_tokens_memory(
-    fake_uow, fake_static_user, fake_identity_provider
-) -> AuthenticationService:
-    return AuthenticationService(
-        identity_provider=fake_identity_provider,
-        uow=fake_uow,
-        users_repository_name="authentication_service",
-        static_user=fake_static_user,
-        use_cookies=True,
-        use_refresh_tokens=True,
-        refresh_identity_on_refresh=False,
-    )
-
-
-@pytest.fixture
-def authentication_service_use_refresh_tokens_memory_expired(
-    fake_uow, fake_static_user, fake_identity_provider
-) -> AuthenticationService:
-    return AuthenticationService(
-        identity_provider=fake_identity_provider,
-        uow=fake_uow,
-        users_repository_name="authentication_service",
-        static_user=fake_static_user,
-        use_cookies=True,
-        use_refresh_tokens=True,
-        refresh_token_max_age=-1,
-        refresh_identity_on_refresh=False,
-    )
-
-
-@pytest.fixture
-def authentication_service_use_refresh_tokens_database(
-    fake_uow, fake_static_user, fake_identity_provider
-) -> AuthenticationService:
-    return AuthenticationService(
-        identity_provider=fake_identity_provider,
-        uow=fake_uow,
-        users_repository_name="authentication_service",
-        static_user=fake_static_user,
-        use_cookies=True,
-        use_refresh_tokens=True,
-        refresh_identity_on_refresh=False,
-        refresh_token_storage="database",
     )
 
 

@@ -31,4 +31,4 @@ def test_authentication_flow(auth_path, admin_credentials, client):
 
     # Verify that the old refresh token is invalidated
     refresh_response = client.get("/auth/refresh", headers=headers)
-    assert refresh_response.status_code == 401
+    assert refresh_response.status_code == 404

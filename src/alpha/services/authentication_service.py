@@ -13,7 +13,7 @@ from alpha.providers.models.identity import Identity
 from alpha.providers.models.token import Token
 from alpha.providers.models.credentials import PasswordCredentials
 from alpha.interfaces.providers import IdentityProvider
-from alpha.repositories.refresh.memory_refresh_repository import (
+from alpha.repositories.refresh.memory_repository import (
     MemoryRefreshRepository,
 )
 from alpha.utils.cookie import Cookie
@@ -23,15 +23,15 @@ from alpha import exceptions
 class AuthenticationService:
     """This class is responsible for handling authentication operations in an
     application. It provides methods for user authentication, token issuance,
-    token validation, password change, pretending to login as another user,
-    and merging user data with identity data.
+    token validation, password change, revoking tokens, pretending to login as
+    another user and merging user data with identity data.
 
     The service is designed to be flexible and configurable, allowing you to
-    customize various aspects of the authentication process, such as token
-    storage, cookie management, and integration with different identity
-    providers. It can be used in a variety of applications, including web
-    applications, APIs, and microservices, to provide a consistent and secure
-    authentication experience.
+    customize various aspects of the authentication process, such as cookie
+    management and integration with different identity providers. It can be
+    used in a variety of applications, including web applications, APIs, and
+    microservices, to provide a consistent and secure authentication
+    experience.
 
     The service supports both stateless and stateful authentication mechanisms,
     allowing you to choose the approach that best fits your application's
@@ -43,16 +43,12 @@ class AuthenticationService:
     providing a unified view of the authenticated user's information and
     permissions.
 
-    Refresh tokens can be stored using different mechanisms, such as in-memory
-    storage, file storage, or database storage. This flexibility allows you to
-    choose the storage mechanism that best fits your application's requirements
-    and infrastructure. For example, in-memory storage can be used for simple
-    applications or during development, while file storage or database storage
-    can be used for production applications that require persistence and
-    scalability of refresh tokens. The service also provides methods for
-    managing refresh tokens, including creating, storing, retrieving, and
-    deleting refresh tokens as needed to maintain user sessions and ensure
-    security.
+    Refresh tokens can be stored using different mechanisms. By default, the
+    service uses an in-memory repository for refresh tokens, which is suitable
+    for development and testing purposes. However, for production use, it is
+    recommended to implement a more robust storage mechanism, such as a
+    database-backed repository, to ensure that refresh tokens are persisted and
+    can be reliably managed across application restarts and deployments.
     """
 
     def __init__(

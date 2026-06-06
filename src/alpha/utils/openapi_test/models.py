@@ -1,10 +1,11 @@
 from dataclasses import dataclass
-from datetime import datetime
-from typing import Literal, Self, Sequence
+from datetime import datetime, timedelta, timezone
+from typing import Any, Literal, Self, Sequence
 from uuid import UUID
 
 from alpha.domain.models.base_model import BaseDomainModel
 from alpha.providers.models.identity import Identity
+from alpha.utils.secret_generator import generate_secret
 
 
 @dataclass
@@ -68,16 +69,53 @@ class TestToken(BaseDomainModel):
     created_at: datetime | None = None
     expires_at: datetime | None = None
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "TestToken":
+        return cls(
+            id=UUID(data["id"]) if data.get("id") else None,
+            value=data["value"],
+            subject=data.get("subject"),
+            token_type=data.get("token_type", "Bearer"),
+            created_at=(
+                datetime.fromisoformat(data["created_at"])
+                if data.get("created_at")
+                else None
+            ),
+            expires_at=(
+                datetime.fromisoformat(data["expires_at"])
+                if data.get("expires_at")
+                else None
+            ),
+        )
+
+    @classmethod
+    def create_refresh(
+        cls,
+        subject: str,
+        max_age_seconds: int = 7 * 24 * 3600,
+        token_length: int = 32,
+    ) -> "TestToken":
+        return cls(
+            value=generate_secret(token_length),
+            token_type="Refresh",
+            subject=subject,
+            created_at=datetime.now(tz=timezone.utc),
+            expires_at=datetime.now(tz=timezone.utc)
+            + timedelta(seconds=max_age_seconds),
+        )
+
     def to_dict(self) -> dict[str, str | None]:
-        return {
-            "id": str(self.id) if self.id else None,
+        obj: dict[str, str | None] = {
             "value": self.value,
             "subject": self.subject,
             "token_type": self.token_type,
-            "created_at": (
-                self.created_at.isoformat() if self.created_at else None
-            ),
-            "expires_at": (
-                self.expires_at.isoformat() if self.expires_at else None
-            ),
         }
+
+        if self.id:
+            obj["id"] = str(self.id)
+        if self.created_at:
+            obj["created_at"] = self.created_at.isoformat()
+        if self.expires_at:
+            obj["expires_at"] = self.expires_at.isoformat()
+
+        return obj

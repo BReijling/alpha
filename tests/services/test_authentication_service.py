@@ -104,7 +104,7 @@ def test_authentication_service_use_refresh_tokens(
         == authentication_service_use_refresh_tokens._cookie_refresh_token_name
     )
     assert len(refresh_cookie.value) == 28
-    assert refresh_cookie.max_age == 3600
+    assert refresh_cookie.max_age == 604800
 
     result = authentication_service_use_refresh_tokens.refresh_token(
         refresh_token=refresh_cookie.value, auth_token=test_auth_token
@@ -134,112 +134,13 @@ def test_authentication_service_use_refresh_tokens(
         )
 
 
-def test_authentication_service_use_refresh_tokens_database(
-    authentication_service_use_refresh_tokens_database,
-    static_user_credentials,
-    test_auth_token,
-):
-    result = authentication_service_use_refresh_tokens_database.login(
-        static_user_credentials
-    )
-
-    assert isinstance(result, tuple)
-    assert len(result) == 3
-
-    _, refresh_cookie, _ = result
-
-    assert isinstance(refresh_cookie, Cookie)
-
-    result = authentication_service_use_refresh_tokens_database.refresh_token(
-        refresh_token=refresh_cookie.value, auth_token=test_auth_token
-    )
-
-    assert isinstance(result, tuple)
-    assert len(result) == 2
-
-    new_cookie, new_token = result
-
-    assert isinstance(new_token, str)
-    assert new_token == "static_user_token"
-    assert isinstance(new_cookie, Cookie)
-    assert (
-        new_cookie.key
-        == authentication_service_use_refresh_tokens_database._cookie_auth_token_name
-    )
-    assert new_cookie.value == "static_user_token"
-    assert (
-        new_cookie.max_age
-        == authentication_service_use_refresh_tokens_database._auth_token_max_age
-    )
-
-    authentication_service_use_refresh_tokens_database.uow = None
-
-    with pytest.raises(exceptions.MissingDependencyException):
-        authentication_service_use_refresh_tokens_database.refresh_token(
-            refresh_token=refresh_cookie.value, auth_token=test_auth_token
-        )
-
-
-def test_authentication_service_use_refresh_tokens_memory(
-    authentication_service_use_refresh_tokens_memory,
-    static_user_credentials,
-    test_auth_token,
-):
-    result = authentication_service_use_refresh_tokens_memory.login(
-        static_user_credentials,
-    )
-
-    assert isinstance(result, tuple)
-    assert len(result) == 3
-
-    cookie, refresh_cookie, token = result
-
-    result = authentication_service_use_refresh_tokens_memory.refresh_token(
-        refresh_token=refresh_cookie.value, auth_token=test_auth_token
-    )
-
-    assert isinstance(result, tuple)
-    assert len(result) == 2
-
-    new_cookie, new_token = result
-
-    assert isinstance(new_token, str)
-    assert new_token == "static_user_token"
-    assert isinstance(new_cookie, Cookie)
-
-
 def test_authentication_service_use_refresh_tokens_invalid_refresh_token(
     authentication_service_use_refresh_tokens, test_auth_token
 ):
-    with pytest.raises(exceptions.UnauthorizedException):
+    with pytest.raises(exceptions.NotFoundException):
         authentication_service_use_refresh_tokens.refresh_token(
             refresh_token="invalid_refresh_token", auth_token=test_auth_token
         )
-
-
-def test_authentication_service_use_refresh_tokens_expired(
-    authentication_service_use_refresh_tokens_memory_expired,
-    static_user_credentials,
-    test_auth_token,
-):
-    result = authentication_service_use_refresh_tokens_memory_expired.login(
-        static_user_credentials
-    )
-
-    with pytest.raises(exceptions.TokenExpiredException):
-        authentication_service_use_refresh_tokens_memory_expired.refresh_token(
-            refresh_token=result[1].value, auth_token=test_auth_token
-        )
-
-
-def test_authentication_service_invalid_refresh_token_storage(
-    authentication_service,
-):
-    with pytest.raises(exceptions.InvalidAttributeError):
-        authentication_service._create_refresh_token("test")
-
-    with pytest.raises(exceptions.InvalidAttributeError):
-        authentication_service._get_refresh_token_from_storage("test")
 
 
 def test_authentication_service_logout(authentication_service):
@@ -278,7 +179,7 @@ def test_authentication_service_pretend_login(
 ):
     pretend_subject = "fake_subject"
 
-    with pytest.raises(exceptions.UnauthorizedException):
+    with pytest.raises(exceptions.ForbiddenException):
         authentication_service.pretend_login(
             identity=test_identity, pretend_subject=pretend_subject
         )

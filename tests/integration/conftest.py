@@ -19,7 +19,7 @@ from alpha.providers.database_provider import DatabaseProvider
 from alpha.providers.ldap_provider import LDAPProvider
 from alpha.providers.models.token import Token
 from alpha.providers.oidc_provider import KeyCloakProvider, OIDCProvider
-from alpha.repositories.refresh.database_refresh_repository import (
+from alpha.repositories.refresh.database_repository import (
     DatabaseRefreshRepository,
 )
 from alpha.repositories.sql_alchemy_repository import SqlAlchemyRepository

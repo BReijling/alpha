@@ -4,14 +4,15 @@ import json
 import pytest
 
 from alpha.providers.models.token import Token
-from alpha.repositories.refresh.database_refresh_repository import (
+from alpha.repositories.refresh.cache_repository import CacheRefreshRepository
+from alpha.repositories.refresh.database_repository import (
     DatabaseRefreshRepository,
 )
 
-from alpha.repositories.refresh.file_refresh_repository import (
+from alpha.repositories.refresh.file_repository import (
     FileRefreshRepository,
 )
-from alpha.repositories.refresh.memory_refresh_repository import (
+from alpha.repositories.refresh.memory_repository import (
     MemoryRefreshRepository,
 )
 from tests.fixtures.fake_database_connector import FakeSqlAlchemyConnector
@@ -25,6 +26,12 @@ def token():
 @pytest.fixture
 def subject():
     return "fake_subject_value"
+
+
+@pytest.fixture
+def cache_refresh_repository():
+    repo = CacheRefreshRepository(cache_connector="test_cache_connector")
+    return repo
 
 
 @pytest.fixture

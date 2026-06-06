@@ -64,6 +64,18 @@ from alpha.providers.oidc_provider import (
 from alpha.repositories.models.repository_model import RepositoryModel
 from alpha.repositories.rest_api_repository import RestApiRepository
 from alpha.repositories.sql_alchemy_repository import SqlAlchemyRepository
+from alpha.repositories.refresh.cache_repository import (
+    CacheRefreshRepository,
+)
+from alpha.repositories.refresh.database_repository import (
+    DatabaseRefreshRepository,
+)
+from alpha.repositories.refresh.file_repository import (
+    FileRefreshRepository,
+)
+from alpha.repositories.refresh.memory_repository import (
+    MemoryRefreshRepository,
+)
 from alpha.services.authentication_service import AuthenticationService
 from alpha.services.user_lifecycle_management import UserLifecycleManagement
 from alpha.utils.is_attrs import is_attrs
@@ -156,6 +168,10 @@ __all__ = [
     "RepositoryModel",
     "RestApiRepository",
     "SqlAlchemyRepository",
+    "CacheRefreshRepository",
+    "DatabaseRefreshRepository",
+    "FileRefreshRepository",
+    "MemoryRefreshRepository",
     "AuthenticationService",
     "UserLifecycleManagement",
     "is_attrs",

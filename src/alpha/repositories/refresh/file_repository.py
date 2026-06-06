@@ -43,7 +43,8 @@ class FileRefreshRepository:
             structure as the token data in the JSON file. The model class
             should also have a `to_dict` method that converts an instance of
             the model to a dictionary with the same structure as the token data
-            in the JSON file.
+            in the JSON file. The model class should also have a
+            `create_refresh` class method that creates a new refresh token.
         token_max_age_seconds, optional
             The maximum age of a token in seconds, by default the equivalent of
             7 days in seconds
