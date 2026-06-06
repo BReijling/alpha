@@ -11,13 +11,12 @@ class CacheRefreshRepository:
         token_max_age_seconds: int = 7 * 24 * 3600,
         token_length: int = 32,
     ):
-        """Initialize the DatabaseRefreshRepository with the given database
-        connector and token model.
+        """Initialize the CacheRefreshRepository with the given cache connector.
 
         Parameters
         ----------
-        database_connector
-            The database connector instance to use for database operations.
+        cache_connector
+            The cache connector instance to use for cache operations.
         token_model, optional
             The model class for tokens, by default Token. The model class
             should have a `from_dict` class method that takes a dictionary and
