@@ -1044,7 +1044,7 @@ class RestApiRepository(Generic[DomainModel]):
 
         return model_to_use
 
-    def _handle_response(self, response: Response) -> dict[str, Any] | None:
+    def _handle_response(self, response: Response) -> Any | None:
         """Handle the API response and extract the relevant data.
 
         In addition to extracting data from successful responses, this method
