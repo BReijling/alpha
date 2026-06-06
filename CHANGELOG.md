@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Implementations of a new `RefreshRepository` interface for handling refresh token operations in the AuthenticationService. This includes methods for creating, retrieving, and deleting refresh tokens. Implementations for file-based, in-memory, and database-based refresh token storage are provided.
+
+### Changed
+
+- The `AuthenticationService` class has been updated to use the new `RefreshRepository` interface for managing refresh tokens. This includes changes to the login, logout, and token refresh methods to utilize the refresh token storage and retrieval functionality provided by the `RefreshRepository` implementations. This change allows for more flexible management of refresh tokens in the authentication flow and a more modular design.
+
+### Removed
+
+- The `refresh_token_storage`, `refresh_token_repository_name`, `refresh_token_storage_file_path`, and `refresh_token_length` configuration options have been removed in favor of the new `RefreshRepository` implementations. This creates a break in backward compatibility. Following the semantic versioning guidelines, this change should be considered a major change, but since the library is still in development and has not yet reached a stable 1.0 release, this change is included in a minor release. This allows for more flexibility in making changes to the library during the development phase while still following semantic versioning principles.
+
 ## [0.6.3] - 2026-05-28
 
 ### Added
