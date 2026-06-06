@@ -45,6 +45,7 @@ class RestApiRepository(Generic[DomainModel]):
         serialize: bool = True,
         model_factory_method_name: str = "from_dict",
         model_serialization_method_name: str = "to_dict",
+        client: HTTPClient | None = None,
         session: HTTPClient | None = None,
         request_headers: dict[str, str] | None = None,
         request_cookies: dict[str, str] | None = None,
@@ -79,12 +80,16 @@ class RestApiRepository(Generic[DomainModel]):
         model_serialization_method_name
             The name of the method to use for serializing models to
             dictionaries, by default "to_dict"
-        session
+        client
             An HTTP client to use for context management, by default None.
             If None, a new `requests.sessions.Session` will be created and
             used. This allows for flexibility in using different HTTP client
             implementations that conform to the `HTTPClient` protocol, while
             still providing a default option with `requests`.
+        session
+            Deprecated: An HTTP client session to use for making requests, by
+            default None. Use `client` instead. This parameter is still
+            supported for backward compatibility.
         request_headers
             Default headers to include in every request, by default None
         request_cookies
@@ -103,21 +108,21 @@ class RestApiRepository(Generic[DomainModel]):
         self._model_factory_method_name = model_factory_method_name
         self._model_serialization_method_name = model_serialization_method_name
 
-        session_obj = session or requests.sessions.Session()
-        # Expose the underlying session publicly for consistency with other
+        client_obj = client or session or requests.sessions.Session()
+        # Expose the underlying client publicly for consistency with other
         # repositories
-        self.session = session_obj
+        self.client = client_obj
         # Preserve the existing private attribute for backward compatibility
-        self._session = session_obj
+        self._session = client_obj
 
         self._request_headers = request_headers or {}
         self._request_cookies = request_cookies or {}
         self._response_data_attribute = response_data_attribute
-        # Update session with default headers and cookies
-        self.session.headers.update(request_headers or {})
+        # Update client with default headers and cookies
+        self.client.headers.update(request_headers or {})
         cookiejar_from_dict(
             request_cookies or {},
-            cookiejar=self.session.cookies,
+            cookiejar=self.client.cookies,
             overwrite=True,
         )
 
@@ -656,7 +661,7 @@ class RestApiRepository(Generic[DomainModel]):
         -------
             The data retrieved from the API response.
         """
-        response = self.session.get(
+        response = self.client.get(
             url=url,
             **(additional_request_params or {}),
         )
@@ -692,7 +697,7 @@ class RestApiRepository(Generic[DomainModel]):
         -------
             The data retrieved from the API response.
         """
-        response = self.session.post(
+        response = self.client.post(
             url=url,
             json=data,
             **(additional_request_params or {}),
@@ -729,7 +734,7 @@ class RestApiRepository(Generic[DomainModel]):
         -------
             The data retrieved from the API response.
         """
-        response = self.session.patch(
+        response = self.client.patch(
             url=url,
             json=data,
             **(additional_request_params or {}),
@@ -766,7 +771,7 @@ class RestApiRepository(Generic[DomainModel]):
         -------
             The data retrieved from the API response.
         """
-        response = self.session.put(
+        response = self.client.put(
             url=url,
             json=data,
             **(additional_request_params or {}),
@@ -792,7 +797,7 @@ class RestApiRepository(Generic[DomainModel]):
             parameters such as headers, authentication tokens, or other request
             options that may be needed for the API call.
         """
-        response = self.session.delete(
+        response = self.client.delete(
             url=url,
             **(additional_request_params or {}),
         )
