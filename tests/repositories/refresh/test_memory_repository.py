@@ -1,5 +1,3 @@
-import json
-
 import pytest
 
 from alpha import exceptions
