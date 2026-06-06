@@ -27,7 +27,7 @@ class DatabaseRefreshRepository:
         ----------
         database_connector
             The database connector instance to use for database operations.
-        token_model, optional
+        token_model
             The model class for tokens, by default Token. The model class
             should have a `from_dict` class method that takes a dictionary and
             returns an instance of the model. The dictionary will have the same
@@ -36,10 +36,10 @@ class DatabaseRefreshRepository:
             the model to a dictionary with the same structure as the token data
             in the JSON file. The model class should also have a
             `create_refresh` class method that creates a new refresh token.
-        token_max_age_seconds, optional
+        token_max_age_seconds
             The maximum age of a token in seconds, by default the equivalent of
             7 days in seconds
-        token_length, optional
+        token_length
             The length of the generated token string, by default 32 characters
         """
         self._database_connector = database_connector

@@ -93,11 +93,11 @@ class Token(BaseDomainModel):
         ----------
         subject
             The subject or user associated with the token.
-        max_age_seconds, optional
+        max_age_seconds
             Optional maximum age of the token in seconds. Defaults to 7 days.
             If provided, the expires_at will be set to created_at +
             max_age_seconds.
-        token_length, optional
+        token_length
             Optional length of the token value. Defaults to 32.
 
         Returns
