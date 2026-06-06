@@ -137,7 +137,7 @@ def test_authentication_service_use_refresh_tokens(
 def test_authentication_service_use_refresh_tokens_invalid_refresh_token(
     authentication_service_use_refresh_tokens, test_auth_token
 ):
-    with pytest.raises(exceptions.NotFoundException):
+    with pytest.raises(exceptions.UnauthorizedException):
         authentication_service_use_refresh_tokens.refresh_token(
             refresh_token="invalid_refresh_token", auth_token=test_auth_token
         )

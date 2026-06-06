@@ -153,8 +153,20 @@ class AuthenticationService:
             Name of the group repository in the UnitOfWork, by default "groups"
         refresh_repository
             Refresh token repository instance, by default None. If not
-            provided, the service will use the MemoryRefreshRepository with
-            default settings.
+            provided, the service will use the MemoryRefreshRepository and
+            forward the token_model and refresh_token_max_age parameters to it.
+            This allows for flexibility in how refresh tokens are stored and
+            managed, enabling the use of different storage mechanisms as needed
+            without being tied to a specific implementation. The
+            MemoryRefreshRepository is suitable for development and testing
+            purposes, but for production use, it is recommended to implement a
+            more robust storage mechanism, such as a database-backed
+            repository, to ensure that refresh tokens are persisted and can be
+            reliably managed across application restarts and deployments. If
+            you choose to provide your own implementation of the
+            RefreshRepository, make sure it adheres to the expected interface
+            and behavior for managing refresh tokens in the context of this
+            authentication service.
         refresh_identity_on_refresh
             Whether to refresh the identity when refreshing the token, by
             default False. This need to be implemented in the
@@ -197,7 +209,11 @@ class AuthenticationService:
         self._users_repository_name = users_repository_name
         self._groups_repository_name = groups_repository_name
         self._refresh_repository = (
-            refresh_repository or MemoryRefreshRepository()
+            refresh_repository
+            or MemoryRefreshRepository(
+                token_model=token_model,
+                token_max_age_seconds=refresh_token_max_age,
+            )
         )
         self._refresh_identity_on_refresh = refresh_identity_on_refresh
         self._static_user = static_user
@@ -333,7 +349,14 @@ class AuthenticationService:
         )
 
         if refresh_token:
-            self._refresh_repository.delete(refresh_token)
+            try:
+                self._refresh_repository.delete(refresh_token)
+            except exceptions.NotFoundException:
+                # If the refresh token is not found in the repository, we can
+                # ignore it since the goal is to ensure that the token is
+                # invalidated. If it's not found, it means it has already been
+                # invalidated or never existed.
+                pass
 
         return (
             logout_auth_cookie,
@@ -382,7 +405,8 @@ class AuthenticationService:
         exceptions.MissingConfigurationException
             If refresh token authentication is not properly configured.
         exceptions.UnauthorizedException
-            If the refresh token is invalid.
+            If the refresh token is invalid, expired, or the identity cannot be
+            retrieved.
         """
         if not self._use_cookies or not self._use_refresh_tokens:
             raise exceptions.MissingConfigurationException(
@@ -390,7 +414,16 @@ class AuthenticationService:
                 "use_cookies and use_refresh_tokens must be True."
             )
 
-        stored_refresh_token = self._refresh_repository.get(refresh_token)
+        # Retrieve the stored refresh token from the repository using the
+        # provided refresh token string.
+        try:
+            stored_refresh_token = self._refresh_repository.get(refresh_token)
+        except exceptions.NotFoundException:
+            raise exceptions.UnauthorizedException("Invalid refresh token")
+
+        # Verify the refresh token and raise an exception if it's invalid or
+        # expired.
+        self._verify_refresh_token(stored_refresh_token)
 
         # Set default identity to None.
         identity = None
@@ -696,18 +729,13 @@ class AuthenticationService:
             "UnitOfWork is not configured for AuthenticationService"
         )
 
-    def _verify_refresh_token(self, token: Token | None) -> Token:
+    def _verify_refresh_token(self, token: Token | None) -> NoReturn | None:
         """Verify the validity of a refresh token.
 
         Parameters
         ----------
         token
             The refresh token to verify.
-
-        Returns
-        -------
-        Token
-            The verified refresh token.
 
         Raises
         ------
@@ -720,4 +748,4 @@ class AuthenticationService:
             tz=timezone.utc
         ):
             raise exceptions.TokenExpiredException("Refresh token has expired")
-        return token
+        return None
