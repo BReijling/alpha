@@ -115,8 +115,14 @@ class DatabaseRefreshRepository:
         NotFoundException
             If the token is not found in the database.
         """
-        token_obj = self.get(token)
         with self._database_connector.get_session() as session:
+            token_obj = (
+                session.query(self._token_model)
+                .filter_by(value=token)
+                .one_or_none()
+            )
+            if token_obj is None:
+                raise exceptions.NotFoundException("Refresh token not found")
             session.delete(token_obj)
             session.commit()
 
