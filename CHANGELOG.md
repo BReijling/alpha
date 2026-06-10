@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `HTTPResponse` class to represent HTTP responses in the API repository. This class contains attributes for the status code, headers, and body of the response, and can be used to standardize the handling of HTTP responses in the API repository and the generated API code.
+
+### Changed
+
+- The `RestApiRepository` class has been updated to use the new `HTTPResponse` class for handling API responses. This includes changes to the methods that make HTTP requests to return an `HTTPResponse` object instead of a raw response from the HTTP client. The `_handle_response` method has been added to the `RestApiRepository` class to handle the processing of the `HTTPResponse` object and extract the relevant data or raise exceptions based on the status code and content of the response. This change allows for more standardized and consistent handling of API responses in the repository and the generated API code.
+
 ## [0.7.0] - 2026-06-06
 
 ### Added

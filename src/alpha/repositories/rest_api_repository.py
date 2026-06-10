@@ -5,13 +5,12 @@ from uuid import UUID
 
 import requests
 from requests.cookies import cookiejar_from_dict  # type: ignore
-from requests.models import Response
 from typing import Any, Generic, TypeVar, cast
 
 from alpha import exceptions
 from alpha.domain.models.base_model import BaseDomainModel, DomainModel
 from alpha.infra.models.json_patch import JsonPatch
-from alpha.interfaces.http_client import HTTPClient
+from alpha.interfaces.http_client import HTTPClient, HTTPResponse
 
 T = TypeVar("T", bound=BaseDomainModel)
 
@@ -108,7 +107,9 @@ class RestApiRepository(Generic[DomainModel]):
         self._model_factory_method_name = model_factory_method_name
         self._model_serialization_method_name = model_serialization_method_name
 
-        client_obj = client or session or requests.sessions.Session()
+        client_obj = cast(
+            HTTPClient, client or session or requests.sessions.Session()
+        )
         # Expose the underlying client publicly for consistency with other
         # repositories
         self.client = client_obj
@@ -128,6 +129,48 @@ class RestApiRepository(Generic[DomainModel]):
             cookiejar=self.client.cookies,
             overwrite=True,
         )
+
+    def request(
+        self,
+        method: str,
+        url: str,
+        **kwargs: Any,
+    ) -> Any | None:
+        """Make a custom API request.
+
+        This method allows for making custom API requests using any HTTP method
+        supported by the underlying HTTP client. It provides flexibility for
+        making requests that may not fit the standard CRUD operations defined
+        in the repository. The method accepts the HTTP method, URL, and any
+        additional parameters that should be passed to the HTTP client's
+        request method.
+
+        Parameters
+        ----------
+        method
+            The HTTP method to use for the request (e.g., "GET", "POST", "PUT",
+            "DELETE", etc.).
+        url
+            The URL to which the request should be sent. This can be a fully
+            constructed URL or a relative URL that will be combined with the
+            base host and path of the repository.
+        **kwargs
+            Additional parameters to include in the function call which handles
+            the API request. This allows for flexibility in specifying
+            parameters such as headers, authentication tokens, or other request
+            options that may be needed for the API call.
+
+        Returns
+        -------
+            The data retrieved from the API response.
+        """
+        response = self.client.request(
+            method=method.upper(),
+            url=url,
+            **kwargs,
+        )
+
+        return self._handle_response(response)
 
     def add(
         self,
@@ -324,7 +367,7 @@ class RestApiRepository(Generic[DomainModel]):
             Whether to use the model factory method for creating models from
             response data.
         endpoint
-            The API endpoint to which the object should be added.
+            The API endpoint from which the object should be retrieved.
         parent_endpoint
             The parent API endpoint, if the resource is nested under a parent
             resource.
@@ -390,7 +433,7 @@ class RestApiRepository(Generic[DomainModel]):
             Whether to use the model factory method for creating models from
             response data.
         endpoint
-            The API endpoint to which the object should be added.
+            The API endpoint from which the objects should be retrieved.
         parent_endpoint
             The parent API endpoint, if the resource is nested under a parent
             resource.
@@ -462,7 +505,7 @@ class RestApiRepository(Generic[DomainModel]):
             Whether to use the model factory method for creating models from
             response data.
         endpoint
-            The API endpoint to which the object should be added.
+            The API endpoint to which the patch should be applied.
         parent_endpoint
             The parent API endpoint, if the resource is nested under a parent
             resource.
@@ -474,7 +517,7 @@ class RestApiRepository(Generic[DomainModel]):
         param
             The parameter to identify the specific resource. This could be an
             ID or a unique identifier. The parameter will be appended to the
-            endpoint to form the full URL for the GET request.
+            endpoint to form the full URL for the PATCH request.
         model
             The model to use for serialization/deserialization.
         additional_request_params
@@ -525,7 +568,7 @@ class RestApiRepository(Generic[DomainModel]):
         Parameters
         ----------
         endpoint
-            The API endpoint to which the object should be added.
+            The API endpoint from which the object should be removed.
         parent_endpoint
             The parent API endpoint, if the resource is nested under a parent
             resource.
@@ -537,7 +580,7 @@ class RestApiRepository(Generic[DomainModel]):
         param
             The parameter to identify the specific resource. This could be an
             ID or a unique identifier. The parameter will be appended to the
-            endpoint to form the full URL for the GET request.
+            endpoint to form the full URL for the DELETE request.
         additional_request_params
             Additional parameters to include in the function call which handles
             the API request. This allows for flexibility in specifying
@@ -588,7 +631,7 @@ class RestApiRepository(Generic[DomainModel]):
             Whether to use the model factory method for creating models from
             response data.
         endpoint
-            The API endpoint to which the object should be added.
+            The API endpoint from which the object should be updated.
         parent_endpoint
             The parent API endpoint, if the resource is nested under a parent
             resource.
@@ -600,7 +643,7 @@ class RestApiRepository(Generic[DomainModel]):
         param
             The parameter to identify the specific resource. This could be an
             ID or a unique identifier. The parameter will be appended to the
-            endpoint to form the full URL for the GET request.
+            endpoint to form the full URL for the PUT request.
         model
             The model to use for serialization/deserialization.
         additional_request_params
@@ -943,7 +986,7 @@ class RestApiRepository(Generic[DomainModel]):
         return obj
 
     def _get_data_from_response(
-        self, response: Response
+        self, response: HTTPResponse
     ) -> dict[str, Any] | None:
         """Extract data from the API response. If the response_data_attribute
         is configured, it will return the value of that attribute. Otherwise,
@@ -1044,7 +1087,7 @@ class RestApiRepository(Generic[DomainModel]):
 
         return model_to_use
 
-    def _handle_response(self, response: Response) -> Any | None:
+    def _handle_response(self, response: HTTPResponse) -> Any | None:
         """Handle the API response and extract the relevant data.
 
         In addition to extracting data from successful responses, this method
