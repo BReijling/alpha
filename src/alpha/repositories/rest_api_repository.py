@@ -124,11 +124,19 @@ class RestApiRepository(Generic[DomainModel]):
         self._response_data_attribute = response_data_attribute
         # Update client with default headers and cookies
         self.client.headers.update(request_headers or {})
-        cookiejar_from_dict(
-            request_cookies or {},
-            cookiejar=self.client.cookies,
-            overwrite=True,
-        )
+        if request_cookies:
+            cookies = self.client.cookies
+            if (
+                hasattr(cookies, "update")
+                and not isinstance(cookies, requests.cookies.RequestsCookieJar)
+            ):
+                cookies.update(request_cookies)
+            elif isinstance(cookies, requests.cookies.RequestsCookieJar):
+                cookiejar_from_dict(
+                    request_cookies,
+                    cookiejar=cookies,
+                    overwrite=True,
+                )
 
     def request(
         self,
