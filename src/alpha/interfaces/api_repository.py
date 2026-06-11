@@ -263,7 +263,7 @@ class ApiRepository(Protocol[DomainModel]):
             Whether to use the model factory method for creating models from
             response data.
         endpoint
-            The API endpoint to which the object should be added.
+            The API endpoint from which the object should be retrieved.
         parent_endpoint
             The parent API endpoint, if the resource is nested under a parent
             resource.
@@ -340,7 +340,7 @@ class ApiRepository(Protocol[DomainModel]):
             Whether to use the model factory method for creating models from
             response data.
         endpoint
-            The API endpoint to which the object should be added.
+            The API endpoint from which the objects should be retrieved.
         parent_endpoint
             The parent API endpoint, if the resource is nested under a parent
             resource.
@@ -441,7 +441,7 @@ class ApiRepository(Protocol[DomainModel]):
             Whether to use the model factory method for creating models from
             response data.
         endpoint
-            The API endpoint to which the object should be added.
+            The API endpoint to which the patch should be applied.
         parent_endpoint
             The parent API endpoint, if the resource is nested under a parent
             resource.
@@ -485,7 +485,7 @@ class ApiRepository(Protocol[DomainModel]):
         Parameters
         ----------
         endpoint
-            The API endpoint to which the object should be added.
+            The API endpoint from which the object should be removed.
         parent_endpoint
             The parent API endpoint, if the resource is nested under a parent
             resource.
@@ -585,7 +585,7 @@ class ApiRepository(Protocol[DomainModel]):
             Whether to use the model factory method for creating models from
             response data.
         endpoint
-            The API endpoint to which the object should be added.
+            The API endpoint to which the object should be updated.
         parent_endpoint
             The parent API endpoint, if the resource is nested under a parent
             resource.

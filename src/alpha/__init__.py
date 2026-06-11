@@ -30,6 +30,7 @@ from alpha.interfaces.pydantic_instance import PydanticInstance
 from alpha.interfaces.openapi_model import OpenAPIModel
 from alpha.interfaces.updatable import Updatable
 from alpha.interfaces.patchable import Patchable
+from alpha.interfaces.http_client import HTTPClient, HTTPResponse
 from alpha.interfaces.api_repository import ApiRepository
 from alpha.interfaces.sql_repository import SqlRepository
 from alpha.interfaces.sql_mapper import SqlMapper
@@ -140,6 +141,8 @@ __all__ = [
     "OpenAPIModel",
     "Updatable",
     "Patchable",
+    "HTTPClient",
+    "HTTPResponse",
     "ApiRepository",
     "SqlRepository",
     "SqlMapper",

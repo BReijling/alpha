@@ -11,9 +11,7 @@ def test_rest_api_repository(rest_api_repository):
     assert isinstance(rest_api_repository, ApiRepository)
     assert rest_api_repository is not None
     assert rest_api_repository.session is not None
-    assert isinstance(
-        rest_api_repository.session, requests.sessions.Session
-    )
+    assert isinstance(rest_api_repository.session, requests.sessions.Session)
     assert rest_api_repository.session is rest_api_repository.client
     assert rest_api_repository.session is rest_api_repository._session
     assert rest_api_repository._session is not None
@@ -29,10 +27,11 @@ def test_rest_api_repository(rest_api_repository):
 def test_rest_api_repository_httpx(rest_api_repository_httpx):
     assert rest_api_repository_httpx.session is not None
     assert isinstance(rest_api_repository_httpx.session, httpx.Client)
-    assert rest_api_repository_httpx.session is rest_api_repository_httpx.client
     assert (
-        rest_api_repository_httpx.session
-        is rest_api_repository_httpx._session
+        rest_api_repository_httpx.session is rest_api_repository_httpx.client
+    )
+    assert (
+        rest_api_repository_httpx.session is rest_api_repository_httpx._session
     )
     assert rest_api_repository_httpx._session is not None
     assert isinstance(rest_api_repository_httpx._session, httpx.Client)
@@ -53,6 +52,15 @@ def test_rest_api_repository_no_model(rest_api_repository_no_model):
 
     with pytest.raises(AttributeError):
         rest_api_repository_no_model.get(param=1, model=TestModel)
+
+
+def test_rest_api_repository_request(rest_api_repository):
+    response = rest_api_repository.request(
+        method="GET", url=f"{rest_api_repository._host}/objects/1"
+    )
+
+    assert isinstance(response, dict)
+    assert response["value"] == "1"
 
 
 def test_rest_api_repository_get(rest_api_repository):
