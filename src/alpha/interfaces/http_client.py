@@ -19,9 +19,9 @@ class HTTPResponse(Protocol):
     status_code: int
     headers: dict[str, str]
     content: bytes
+    text: str
 
     def json(self) -> Any: ...
-    def text(self) -> str: ...
     def raise_for_status(self) -> None: ...
 
 

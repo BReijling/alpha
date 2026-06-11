@@ -4,7 +4,7 @@ from urllib.parse import urlencode, urljoin
 from uuid import UUID
 
 import requests
-from requests.cookies import cookiejar_from_dict  # type: ignore
+from requests.cookies import cookiejar_from_dict, RequestsCookieJar  # type: ignore
 from typing import Any, Generic, TypeVar, cast
 
 from alpha import exceptions
@@ -126,12 +126,16 @@ class RestApiRepository(Generic[DomainModel]):
         self.client.headers.update(request_headers or {})
         if request_cookies:
             cookies = self.client.cookies
-            if (
-                hasattr(cookies, "update")
-                and not isinstance(cookies, requests.cookies.RequestsCookieJar)
+            # If the client's cookies object supports the `update` method and
+            # is not a `RequestsCookieJar`, use `update`. Otherwise, if it's a
+            # `RequestsCookieJar`, use `cookiejar_from_dict` to update it.
+            # This ensures compatibility with different types of cookie
+            # implementations that may be used by various HTTP clients.
+            if hasattr(cookies, "update") and not isinstance(
+                cookies, RequestsCookieJar
             ):
                 cookies.update(request_cookies)
-            elif isinstance(cookies, requests.cookies.RequestsCookieJar):
+            elif isinstance(cookies, RequestsCookieJar):
                 cookiejar_from_dict(
                     request_cookies,
                     cookiejar=cookies,
