@@ -6,6 +6,9 @@ from alpha.interfaces.openapi_model import OpenAPIModel
 from alpha.interfaces.updatable import Updatable
 from alpha.interfaces.patchable import Patchable
 
+# import all http client related interfaces
+from alpha.interfaces.http_client import HTTPClient, HTTPResponse
+
 # import all repository related interfaces
 from alpha.interfaces.api_repository import ApiRepository
 from alpha.interfaces.sql_repository import SqlRepository
@@ -34,6 +37,8 @@ __all__ = [
     "OpenAPIModel",
     "Updatable",
     "Patchable",
+    "HTTPClient",
+    "HTTPResponse",
     "ApiRepository",
     "SqlRepository",
     "RefreshRepository",
