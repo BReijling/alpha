@@ -9,11 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `HTTPResponse` class to represent HTTP responses in the API repository. This class contains attributes for the status code, headers, and body of the response, and can be used to standardize the handling of HTTP responses in the API repository and the generated API code.
+- `HTTPResponse` protocol to represent HTTP responses in the API repository. This protocol defines common attributes (e.g., status code, headers, content) and methods (e.g., `json()`, `raise_for_status()`) to standardize response handling across HTTP clients.
 
 ### Changed
 
-- The `RestApiRepository` class has been updated to use the new `HTTPResponse` class for handling API responses. This includes changes to the methods that make HTTP requests to return an `HTTPResponse` object instead of a raw response from the HTTP client. The `_handle_response` method has been added to the `RestApiRepository` class to handle the processing of the `HTTPResponse` object and extract the relevant data or raise exceptions based on the status code and content of the response. This change allows for more standardized and consistent handling of API responses in the repository and the generated API code.
+- Updated `RestApiRepository` and the `HTTPClient` protocol typing to use the new `HTTPResponse` abstraction for HTTP client return values, enabling more consistent response processing regardless of the underlying HTTP client implementation.
 
 ## [0.7.0] - 2026-06-06
 
