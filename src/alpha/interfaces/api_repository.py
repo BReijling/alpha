@@ -585,7 +585,7 @@ class ApiRepository(Protocol[DomainModel]):
             Whether to use the model factory method for creating models from
             response data.
         endpoint
-            The API endpoint from which the object should be updated.
+            The API endpoint to which the object should be updated.
         parent_endpoint
             The parent API endpoint, if the resource is nested under a parent
             resource.

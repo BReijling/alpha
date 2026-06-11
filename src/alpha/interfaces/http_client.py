@@ -1,4 +1,4 @@
-from typing import Protocol, Any, runtime_checkable
+from typing import MutableMapping, Protocol, Any, runtime_checkable
 
 
 @runtime_checkable
@@ -40,8 +40,8 @@ class HTTPClient(Protocol):
     parameters to be passed as needed.
     """
 
-    cookies: dict[str, str]
-    headers: dict[str, str]
+    cookies: MutableMapping[str, str]
+    headers: MutableMapping[str, str]
 
     def request(
         self, method: str, url: str, **kwargs: Any

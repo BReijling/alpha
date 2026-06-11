@@ -151,9 +151,8 @@ class RestApiRepository(Generic[DomainModel]):
             The HTTP method to use for the request (e.g., "GET", "POST", "PUT",
             "DELETE", etc.).
         url
-            The URL to which the request should be sent. This can be a fully
-            constructed URL or a relative URL that will be combined with the
-            base host and path of the repository.
+            The URL to which the request should be sent. This has to be a fully
+            constructed URL.
         **kwargs
             Additional parameters to include in the function call which handles
             the API request. This allows for flexibility in specifying
@@ -631,7 +630,7 @@ class RestApiRepository(Generic[DomainModel]):
             Whether to use the model factory method for creating models from
             response data.
         endpoint
-            The API endpoint from which the object should be updated.
+            The API endpoint to which the object should be updated.
         parent_endpoint
             The parent API endpoint, if the resource is nested under a parent
             resource.
