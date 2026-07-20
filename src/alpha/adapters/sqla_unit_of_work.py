@@ -88,6 +88,11 @@ class SqlAlchemyUnitOfWork:
         self.rollback()
         self._session = None  # type: ignore
 
+        for repo in self._repositories:
+            self.__delattr__(
+                repo.name,
+            )
+
     def commit(self) -> None:
         """Commit the current transaction."""
         if not self._session:
