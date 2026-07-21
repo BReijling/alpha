@@ -10,7 +10,7 @@ resolution-markers = [
 
 [[package]]
 name = "alpha-python"
-version = "0.7.2"
+version = "0.7.3"
 source = { editable = "." }
 dependencies = [
     { name = "argon2-cffi" },
@@ -97,7 +97,7 @@ requires-dist = [
     { name = "ldap3", marker = "extra == 'ldap'", specifier = ">=2.9.1" },
     { name = "markupsafe", marker = "extra == 'flask'", specifier = "<2.0.2" },
     { name = "numpy", specifier = ">=2.3.5" },
-    { name = "openapi-generator-cli", marker = "extra == 'api-generator'", specifier = "==7.23.0" },
+    { name = "openapi-generator-cli", marker = "extra == 'api-generator'", specifier = "==7.24.0" },
     { name = "pandas", specifier = ">=1.13" },
     { name = "psycopg2-binary", marker = "extra == 'postgresql'", specifier = ">=2.9.11" },
     { name = "pydantic", specifier = ">=2.12.5" },
@@ -1432,11 +1432,11 @@ wheels = [
 
 [[package]]
 name = "openapi-generator-cli"
-version = "7.23.0"
+version = "7.24.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/a1/4d/ea82fdfb536a8323aad4227ba89876cbfabee637f583aea530c1e0f73262/openapi_generator_cli-7.23.0.tar.gz", hash = "sha256:6af02de4dd2bbd052da2495cc792580bc9f8b245ad1620c2d5d06daaf440ff1a", size = 28423717, upload-time = "2026-06-10T03:51:13.579Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7b/88/a8aeda38d664b7fcacf94f8c26c32b439619c50165e7893e1d7e836a2d70/openapi_generator_cli-7.24.0.tar.gz", hash = "sha256:89493ecf8d8f736b9d137991a8c8d81282fb2fd84cceff1d0975ee477db24bb4", size = 28579058, upload-time = "2026-07-21T02:45:15.525Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e2/d3/b3225ef2c75f70e538c89919ebaddb5a623a07718fca08a19cecd9656107/openapi_generator_cli-7.23.0-py3-none-any.whl", hash = "sha256:4ff9547eff66b74a9349345164df3d8c1c524a378c14700ac202d2f678520b54", size = 28437930, upload-time = "2026-06-10T03:51:09.043Z" },
+    { url = "https://files.pythonhosted.org/packages/cf/c0/8273992c601b2595d54f34315c1a01e4e1b9623575c025499648aedbb44e/openapi_generator_cli-7.24.0-py3-none-any.whl", hash = "sha256:5aa997a45b571afd2d5e3a4553e1fa54cb7beb38c0ad37439f25ddc8a0a4313f", size = 28593838, upload-time = "2026-07-21T02:45:11.308Z" },
 ]
 
 [[package]]
