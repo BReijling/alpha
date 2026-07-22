@@ -46,7 +46,7 @@ class RestApiUnitOfWork:
     def __enter__(self: UOW) -> UOW:
         """Enter the REST API Unit of Work context.
 
-        Initializes a `HTTPClient` session if one was not provided and attaches
+        Initializes an `HTTPClient` session if one was not provided and attaches
         the configured repositories as attributes on the unit of work instance.
         Each repository is constructed using the shared session and its
         associated configuration, and optionally validated against a declared
