@@ -10,7 +10,7 @@ resolution-markers = [
 
 [[package]]
 name = "alpha-python"
-version = "0.7.1"
+version = "0.7.3"
 source = { editable = "." }
 dependencies = [
     { name = "argon2-cffi" },
@@ -97,7 +97,7 @@ requires-dist = [
     { name = "ldap3", marker = "extra == 'ldap'", specifier = ">=2.9.1" },
     { name = "markupsafe", marker = "extra == 'flask'", specifier = "<2.0.2" },
     { name = "numpy", specifier = ">=2.3.5" },
-    { name = "openapi-generator-cli", marker = "extra == 'api-generator'", specifier = "==7.14.0" },
+    { name = "openapi-generator-cli", marker = "extra == 'api-generator'", specifier = "==7.24.0" },
     { name = "pandas", specifier = ">=1.13" },
     { name = "psycopg2-binary", marker = "extra == 'postgresql'", specifier = ">=2.9.11" },
     { name = "pydantic", specifier = ">=2.12.5" },
@@ -1077,17 +1077,17 @@ resolution-markers = [
     "python_full_version < '3.12'",
 ]
 dependencies = [
-    { name = "colorama", marker = "python_full_version < '3.12' and sys_platform == 'win32'" },
-    { name = "decorator", marker = "python_full_version < '3.12'" },
-    { name = "ipython-pygments-lexers", marker = "python_full_version < '3.12'" },
-    { name = "jedi", marker = "python_full_version < '3.12'" },
-    { name = "matplotlib-inline", marker = "python_full_version < '3.12'" },
-    { name = "pexpect", marker = "python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'" },
-    { name = "prompt-toolkit", marker = "python_full_version < '3.12'" },
-    { name = "pygments", marker = "python_full_version < '3.12'" },
-    { name = "stack-data", marker = "python_full_version < '3.12'" },
-    { name = "traitlets", marker = "python_full_version < '3.12'" },
-    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
+    { name = "colorama", marker = "sys_platform == 'win32'" },
+    { name = "decorator" },
+    { name = "ipython-pygments-lexers" },
+    { name = "jedi" },
+    { name = "matplotlib-inline" },
+    { name = "pexpect", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "prompt-toolkit" },
+    { name = "pygments" },
+    { name = "stack-data" },
+    { name = "traitlets" },
+    { name = "typing-extensions" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/a6/60/2111715ea11f39b1535bed6024b7dec7918b71e5e5d30855a5b503056b50/ipython-9.10.0.tar.gz", hash = "sha256:cd9e656be97618a0676d058134cd44e6dc7012c0e5cb36a9ce96a8c904adaf77", size = 4426526, upload-time = "2026-02-02T10:00:33.594Z" }
 wheels = [
@@ -1104,16 +1104,16 @@ resolution-markers = [
     "python_full_version == '3.12.*'",
 ]
 dependencies = [
-    { name = "colorama", marker = "python_full_version >= '3.12' and sys_platform == 'win32'" },
-    { name = "decorator", marker = "python_full_version >= '3.12'" },
-    { name = "ipython-pygments-lexers", marker = "python_full_version >= '3.12'" },
-    { name = "jedi", marker = "python_full_version >= '3.12'" },
-    { name = "matplotlib-inline", marker = "python_full_version >= '3.12'" },
-    { name = "pexpect", marker = "python_full_version >= '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'" },
-    { name = "prompt-toolkit", marker = "python_full_version >= '3.12'" },
-    { name = "pygments", marker = "python_full_version >= '3.12'" },
-    { name = "stack-data", marker = "python_full_version >= '3.12'" },
-    { name = "traitlets", marker = "python_full_version >= '3.12'" },
+    { name = "colorama", marker = "sys_platform == 'win32'" },
+    { name = "decorator" },
+    { name = "ipython-pygments-lexers" },
+    { name = "jedi" },
+    { name = "matplotlib-inline" },
+    { name = "pexpect", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "prompt-toolkit" },
+    { name = "pygments" },
+    { name = "stack-data" },
+    { name = "traitlets" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/86/28/a4698eda5a8928a45d6b693578b135b753e14fa1c2b36ee9441e69a45576/ipython-9.11.0.tar.gz", hash = "sha256:2a94bc4406b22ecc7e4cb95b98450f3ea493a76bec8896cda11b78d7752a6667", size = 4427354, upload-time = "2026-03-05T08:57:30.549Z" }
 wheels = [
@@ -1432,11 +1432,11 @@ wheels = [
 
 [[package]]
 name = "openapi-generator-cli"
-version = "7.14.0"
+version = "7.24.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/57/23/70b408c3565d5cb93ee9f7605654902cdd2a3e3891739859ec304dbd7519/openapi_generator_cli-7.14.0.tar.gz", hash = "sha256:48b5478a83ee09dfd38018da3e1661acafd2ce06627aecce0ec10a66cbd1aa00", size = 27205268, upload-time = "2025-06-26T01:44:11.787Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7b/88/a8aeda38d664b7fcacf94f8c26c32b439619c50165e7893e1d7e836a2d70/openapi_generator_cli-7.24.0.tar.gz", hash = "sha256:89493ecf8d8f736b9d137991a8c8d81282fb2fd84cceff1d0975ee477db24bb4", size = 28579058, upload-time = "2026-07-21T02:45:15.525Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9e/5e/0aca9db4760a6b7d66a2b51dfc04073dcede1b1be505f0e6a30cc2f45b1c/openapi_generator_cli-7.14.0-py3-none-any.whl", hash = "sha256:fbf7b606671fd939ab1ee185942396aa4ba88f8ec211a30a47ce02f81855778e", size = 27219227, upload-time = "2025-06-26T01:44:06.756Z" },
+    { url = "https://files.pythonhosted.org/packages/cf/c0/8273992c601b2595d54f34315c1a01e4e1b9623575c025499648aedbb44e/openapi_generator_cli-7.24.0-py3-none-any.whl", hash = "sha256:5aa997a45b571afd2d5e3a4553e1fa54cb7beb38c0ad37439f25ddc8a0a4313f", size = 28593838, upload-time = "2026-07-21T02:45:11.308Z" },
 ]
 
 [[package]]

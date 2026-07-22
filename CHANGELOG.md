@@ -11,6 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `ApiRepository` interface now includes a `request` method which allows for making custom HTTP requests to the API. This method takes parameters for the HTTP method, endpoint, request body, headers, cookies, and query parameters. This addition provides more flexibility in interacting with the API beyond the standard CRUD operations defined in the `ApiRepository` interface.
 
+## [0.7.3] - 2026-07-21
+
+### Changed
+
+- Updated `openapi-generator-cli` dependency to version 7.24.0
+
+## [0.7.2] - 2026-07-20
+
+### Changed
+
+- Updated `openapi-generator-cli` dependency to version 7.23.0
+
 ## [0.7.1] - 2026-06-11
 
 ### Added
