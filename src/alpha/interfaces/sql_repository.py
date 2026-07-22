@@ -3,7 +3,14 @@ SQLAlchemy ORM repository operations.
 """
 
 from enum import Enum
-from typing import Any, Literal, Protocol, overload, runtime_checkable
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Literal,
+    Protocol,
+    overload,
+    runtime_checkable,
+)
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -12,7 +19,11 @@ from sqlalchemy.orm.attributes import InstrumentedAttribute
 from alpha.domain.models.base_model import BaseDomainModel, DomainModel
 from alpha.infra.models.json_patch import JsonPatch
 from alpha.interfaces.patchable import Patchable
-from alpha.interfaces.updatable import Updatable
+
+if TYPE_CHECKING:
+    from alpha.interfaces.updatable import Updatable
+else:
+    Updatable = Any
 
 
 @runtime_checkable

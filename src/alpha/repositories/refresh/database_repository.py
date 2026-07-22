@@ -1,5 +1,5 @@
 from alpha import exceptions
-from alpha.infra.connectors.sql_alchemy import SqlAlchemyDatabase
+from alpha.interfaces.sql_database import SqlDatabase
 from alpha.providers.models.token import Token
 
 
@@ -15,7 +15,7 @@ class DatabaseRefreshRepository:
 
     def __init__(
         self,
-        database_connector: SqlAlchemyDatabase,
+        database_connector: SqlDatabase,
         token_model: type[Token] = Token,
         token_max_age_seconds: int = 7 * 24 * 3600,
         token_length: int = 32,
