@@ -1,9 +1,10 @@
 """Contains the REST API Unit of Work implementation."""
 
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 
 import requests
 
+from alpha.interfaces.http_client import HTTPClient
 from alpha.repositories.models.repository_model import RepositoryModel
 
 
@@ -22,7 +23,7 @@ class RestApiUnitOfWork:
     def __init__(
         self,
         repos: list[RepositoryModel[Any]],
-        session: requests.sessions.Session | None = None,
+        session: HTTPClient | None = None,
     ) -> None:
         """Initialize the Unit of Work with repositories.
 
@@ -44,11 +45,12 @@ class RestApiUnitOfWork:
 
     def __enter__(self: UOW) -> UOW:
         """Enter the REST API Unit of Work context.
-        Initializes a :class:`requests.sessions.Session` if one was not
-        provided and attaches the configured repositories as attributes on the
-        unit of work instance. Each repository is constructed using the shared
-        session and its associated configuration, and optionally validated
-        against a declared interface.
+
+        Initializes a `HTTPClient` session if one was not provided and attaches
+        the configured repositories as attributes on the unit of work instance.
+        Each repository is constructed using the shared session and its
+        associated configuration, and optionally validated against a declared
+        interface.
 
         Returns
         -------
@@ -56,7 +58,9 @@ class RestApiUnitOfWork:
             The configured :class:`RestApiUnitOfWork` instance to be used
             within the context manager.
         """
-        self._session = self._session or requests.sessions.Session()
+        self._session = cast(
+            HTTPClient, self._session or requests.sessions.Session()
+        )
 
         for repo in self._repositories:
             name: str = repo.name
@@ -100,12 +104,12 @@ class RestApiUnitOfWork:
         raise NotImplementedError("RestApiUnitOfWork does not support refresh")
 
     @property
-    def session(self) -> requests.sessions.Session | None:
+    def session(self) -> HTTPClient | None:
         """Get the current session.
 
         Returns
         -------
-        requests.sessions.Session | None
+        HTTPClient | None
             The current session used for API interactions.
         """
         return self._session

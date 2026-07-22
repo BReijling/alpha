@@ -11,6 +11,27 @@ from alpha.infra.models.json_patch import JsonPatch
 class ApiRepository(Protocol[DomainModel]):
     """Repository contract for remote API resources."""
 
+    def request(
+        self,
+        method: str,
+        url: str,
+        **kwargs: Any,
+    ) -> Any | None:
+        """Make a custom API request.
+
+        Parameters
+        ----------
+        method
+            The HTTP method to use for the request (e.g., 'GET', 'POST',
+            'PATCH', 'PUT', 'DELETE').
+        url
+            The URL to which the request should be made.
+        **kwargs
+            Additional parameters to include in the API request, such as
+            headers, authentication tokens, or other request options.
+        """
+        ...
+
     @overload
     def add(
         self,

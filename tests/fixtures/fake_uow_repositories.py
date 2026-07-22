@@ -9,6 +9,14 @@ class FakeRepository:
     def __init__(self, objs: list[Any] | None = None, *args, **kwargs) -> None:
         self.objs = objs or []
 
+    def request(
+        self,
+        method: str,
+        url: str,
+        **kwargs: Any,
+    ) -> Any | None:
+        pass
+
     def add(self, obj: Any, *args, **kwargs) -> Any:
         self.objs.append(obj)
         return obj
