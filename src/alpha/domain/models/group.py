@@ -1,6 +1,6 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Sequence, cast
+from typing import Any, cast
 from uuid import UUID
 
 from alpha.domain.models.base_model import BaseDomainModel, DomainModel
@@ -36,7 +36,7 @@ class Group(LifeCycleBase, BaseDomainModel):
     id: UUID | int | str | None = None
     name: str | None = None
     description: str | None = None
-    permissions: Sequence[str] | None = None
+    permissions: list[str] = field(default_factory=list[str])
     is_active: bool = True
 
     def to_dict(self) -> dict[str, Any]:

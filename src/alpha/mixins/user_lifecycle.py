@@ -1,6 +1,6 @@
 """Contains the UserLifecycleMixin class"""
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
 from alpha.exceptions import BadRequestException, NotFoundException
@@ -11,6 +11,8 @@ from alpha.providers.models.identity import Identity
 
 if TYPE_CHECKING:
     from alpha.domain.models.user import User
+else:
+    User = Any
 
 
 class UserLifecycleMixin:
@@ -20,15 +22,13 @@ class UserLifecycleMixin:
 
     uow: UnitOfWork
     _users_repository_name: str
-    _user_model: type["User"]
+    _user_model: type[User]
     _password_support: bool
     _password_factory: PasswordFactory
     _user_username_attribute: str
     _user_password_attribute: str
 
-    def add_user(
-        self, user: "User", identity: Identity | None = None
-    ) -> "User":
+    def add_user(self, user: User, identity: Identity | None = None) -> User:
         """Adds a new user object to the repository
 
         Parameters
@@ -79,7 +79,7 @@ class UserLifecycleMixin:
             self.uow.commit()
             return user
 
-    def get_user(self, user_id: str | int | UUID) -> "User":
+    def get_user(self, user_id: str | int | UUID) -> User:
         """Get an user object by id from the repository
 
         Parameters
@@ -110,7 +110,7 @@ class UserLifecycleMixin:
 
             return user
 
-    def get_users(self) -> list["User"]:
+    def get_users(self) -> list[User]:
         """Gets all user objects from the repository
 
         Returns
@@ -119,7 +119,7 @@ class UserLifecycleMixin:
             A collection of all the user objects
         """
         with self.uow:
-            users: SqlRepository["User"] = getattr(
+            users: SqlRepository[User] = getattr(
                 self.uow, self._users_repository_name
             )
             result = users.select()
@@ -136,7 +136,7 @@ class UserLifecycleMixin:
         """
         user = self.get_user(user_id=user_id)
         with self.uow:
-            users: SqlRepository["User"] = getattr(
+            users: SqlRepository[User] = getattr(
                 self.uow, self._users_repository_name
             )
 
@@ -146,9 +146,9 @@ class UserLifecycleMixin:
     def update_user(
         self,
         user_id: str | int | UUID,
-        user: "User",
+        user: User,
         identity: Identity | None = None,
-    ) -> "User":
+    ) -> User:
         """Updates an existing user object in the repository
 
         Parameters

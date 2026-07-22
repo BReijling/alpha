@@ -9,6 +9,8 @@ from alpha.domain.models.group import Group
 
 if TYPE_CHECKING:
     from alpha.domain.models.user import User
+else:
+    User = Any
 
 DEFAULT_LDAP_MAPPINGS = {
     "subject": "uid",
@@ -158,7 +160,7 @@ class Identity:
         populate_groups: bool = True,
         populate_permissions: bool = False,
         populate_claims: bool = True,
-    ) -> "Identity":
+    ) -> Identity:
         """Instantiate an Identity from an LDAP entry dictionary.
 
         Parameters
@@ -211,7 +213,7 @@ class Identity:
         )
 
     @classmethod
-    def from_dict(cls, data: Mapping[str, Any]) -> "Identity":
+    def from_dict(cls, data: Mapping[str, Any]) -> Identity:
         """Instantiate an Identity from a generic dictionary.
 
         Parameters
@@ -252,7 +254,7 @@ class Identity:
         )
 
     @classmethod
-    def from_user(cls, user: User) -> "Identity":
+    def from_user(cls, user: User) -> Identity:
         """Instantiate an Identity from a User instance.
 
         Parameters
