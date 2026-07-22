@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from http import cookies
+from http.cookies import SimpleCookie
 from typing import Mapping, Self
 
 
@@ -16,12 +16,28 @@ class Headers:
 
     This class is designed to be immutable and uses slots for memory
     efficiency.
+
+    Attributes
+    ----------
+    auth_token
+        The authentication token, typically a JWT, extracted from the
+        "Authorization" header or from cookies.
+    auth_token_type
+        The type of the authentication token, typically "Bearer".
+    refresh_token
+        The refresh token, extracted from the "X-Refresh-Token" header or from
+        cookies.
+    api_key
+        The API key, extracted from the "X-API-Key" header or from cookies.
+    cookies
+        A mapping of cookie names to their values, if any cookies are present.
     """
 
     auth_token: str | None = None
     auth_token_type: str | None = None
     refresh_token: str | None = None
     api_key: str | None = None
+    cookies: Mapping[str, str] | None = None
 
     @classmethod
     def from_headers(
@@ -73,8 +89,9 @@ class Headers:
         api_key = headers.get("X-API-Key")
         cookies_header = headers.get("Cookie")
 
+        cookies = None
         if cookies_header is not None:
-            cookie_jar = cookies.SimpleCookie(cookies_header)
+            cookie_jar: SimpleCookie = SimpleCookie(cookies_header)
 
             if not auth_token and auth_token_cookie_name in cookie_jar:
                 auth_token = cookie_jar[auth_token_cookie_name].value
@@ -84,11 +101,14 @@ class Headers:
             if not api_key and api_key_cookie_name in cookie_jar:
                 api_key = cookie_jar[api_key_cookie_name].value
 
+            cookies = cls._cookie_jar_to_dict(cookie_jar)
+
         return cls(
             auth_token=auth_token,
             auth_token_type=auth_token_type,
             refresh_token=refresh_token,
             api_key=api_key,
+            cookies=cookies,
         )
 
     @property
@@ -112,5 +132,22 @@ class Headers:
             f"Headers(auth_token={'***' if self.auth_token else None}, "
             f"auth_token_type={self.auth_token_type}, "
             f"refresh_token={'***' if self.refresh_token else None}, "
-            f"api_key={'***' if self.api_key else None})"
+            f"api_key={'***' if self.api_key else None}, "
+            f"cookies={self.cookies})"
         )
+
+    @staticmethod
+    def _cookie_jar_to_dict(cookie_jar: SimpleCookie) -> dict[str, str]:
+        """Convert a SimpleCookie object to a dictionary.
+
+        Parameters
+        ----------
+        cookie_jar
+            A SimpleCookie object containing the cookies.
+
+        Returns
+        -------
+        dict[str, str]
+            A dictionary mapping cookie names to their values.
+        """
+        return {key: morsel.value for key, morsel in cookie_jar.items()}
