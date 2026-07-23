@@ -67,8 +67,8 @@ class User(LifeCycleBase, BaseDomainModel):
     email: str | None = None
     phone: str | None = None
     display_name: str | None = None
-    permissions: list[str] = field(default_factory=list[str])
-    groups: list[str | Group] = field(default_factory=list[str])  # type: ignore
+    permissions: list[str] = field(default_factory=list)  # type: ignore
+    groups: list[str | Group] = field(default_factory=list)  # type: ignore
     is_active: bool = True
     admin: bool = False
 

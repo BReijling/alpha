@@ -1,3 +1,5 @@
+from http.cookies import SimpleCookie
+
 import pytest
 
 from alpha.utils.request_headers import Headers
@@ -17,7 +19,7 @@ from alpha.utils.request_headers import Headers
                 auth_token_type="Bearer",
                 refresh_token="refresh123",
                 api_key="apikey123",
-                cookies=None,
+                _cookie_jar=None,
             ),
         ),
         (
@@ -29,11 +31,9 @@ from alpha.utils.request_headers import Headers
                 auth_token_type="Bearer",
                 refresh_token="cookie_refresh123",
                 api_key="cookie_apikey123",
-                cookies={
-                    "auth_token": "cookie_auth123",
-                    "refresh_token": "cookie_refresh123",
-                    "api_key": "cookie_apikey123",
-                },
+                _cookie_jar=SimpleCookie(
+                    "auth_token=cookie_auth123; refresh_token=cookie_refresh123; api_key=cookie_apikey123;"
+                ),
             ),
         ),
         (
@@ -46,7 +46,7 @@ from alpha.utils.request_headers import Headers
                 auth_token_type="Bearer",
                 refresh_token="cookie_refresh123",
                 api_key=None,
-                cookies={"refresh_token": "cookie_refresh123"},
+                _cookie_jar=SimpleCookie("refresh_token=cookie_refresh123;"),
             ),
         ),
         (
@@ -59,7 +59,7 @@ from alpha.utils.request_headers import Headers
                 auth_token_type="Bearer",
                 refresh_token="refresh123",
                 api_key=None,
-                cookies={"auth_token": "cookie_auth123"},
+                _cookie_jar=SimpleCookie("auth_token=cookie_auth123;"),
             ),
         ),
         (
@@ -72,10 +72,9 @@ from alpha.utils.request_headers import Headers
                 auth_token_type="Bearer",
                 refresh_token="cookie_refresh123",
                 api_key=None,
-                cookies={
-                    "auth_token": "cookie_auth123",
-                    "refresh_token": "cookie_refresh123",
-                },
+                _cookie_jar=SimpleCookie(
+                    "auth_token=cookie_auth123; refresh_token=cookie_refresh123;"
+                ),
             ),
         ),
         (
@@ -85,7 +84,7 @@ from alpha.utils.request_headers import Headers
                 auth_token_type=None,
                 refresh_token=None,
                 api_key=None,
-                cookies=None,
+                _cookie_jar=None,
             ),
         ),
     ],
@@ -115,7 +114,7 @@ def test_has_auth_token():
     assert headers.has_auth_token is True
     assert headers.auth_token_type == "Bearer"
     assert headers.auth_token == "abc.def.ghi"
-    assert headers.cookies is None
+    assert headers.cookies == {}
 
     headers = Headers.from_headers({"Cookie": "auth_token=abc.def.ghi;"})
     assert headers.has_auth_token is True

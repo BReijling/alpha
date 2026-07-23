@@ -37,7 +37,7 @@ class Headers:
     auth_token_type: str | None = None
     refresh_token: str | None = None
     api_key: str | None = None
-    cookies: Mapping[str, str] | None = None
+    _cookie_jar: SimpleCookie | None = None
 
     @classmethod
     def from_headers(
@@ -89,9 +89,9 @@ class Headers:
         api_key = headers.get("X-API-Key")
         cookies_header = headers.get("Cookie")
 
-        cookies = None
+        cookie_jar: SimpleCookie | None = None
         if cookies_header is not None:
-            cookie_jar: SimpleCookie = SimpleCookie(cookies_header)
+            cookie_jar = SimpleCookie(cookies_header)
 
             if not auth_token and auth_token_cookie_name in cookie_jar:
                 auth_token = cookie_jar[auth_token_cookie_name].value
@@ -101,14 +101,12 @@ class Headers:
             if not api_key and api_key_cookie_name in cookie_jar:
                 api_key = cookie_jar[api_key_cookie_name].value
 
-            cookies = cls._cookie_jar_to_dict(cookie_jar)
-
         return cls(
             auth_token=auth_token,
             auth_token_type=auth_token_type,
             refresh_token=refresh_token,
             api_key=api_key,
-            cookies=cookies,
+            _cookie_jar=cookie_jar,
         )
 
     @property
@@ -127,13 +125,26 @@ class Headers:
     def has_api_key(self) -> bool:
         return True if self.api_key else False
 
+    @property
+    def cookies(self) -> dict[str, str]:
+        """Return a dictionary of cookies extracted from the request headers.
+
+        Returns
+        -------
+        dict[str, str]
+            A dictionary mapping cookie names to their values. If no cookies
+            are present, an empty dictionary is returned.
+        """
+        if self._cookie_jar is None:
+            return {}
+        return self._cookie_jar_to_dict(self._cookie_jar)
+
     def __repr__(self) -> str:
         return (
             f"Headers(auth_token={'***' if self.auth_token else None}, "
             f"auth_token_type={self.auth_token_type}, "
             f"refresh_token={'***' if self.refresh_token else None}, "
-            f"api_key={'***' if self.api_key else None}, "
-            f"cookies={self.cookies})"
+            f"api_key={'***' if self.api_key else None})"
         )
 
     @staticmethod

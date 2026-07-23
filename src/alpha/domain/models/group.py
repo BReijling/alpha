@@ -36,7 +36,7 @@ class Group(LifeCycleBase, BaseDomainModel):
     id: UUID | int | str | None = None
     name: str | None = None
     description: str | None = None
-    permissions: list[str] = field(default_factory=list[str])
+    permissions: list[str] = field(default_factory=list)  # type: ignore
     is_active: bool = True
 
     def to_dict(self) -> dict[str, Any]:
