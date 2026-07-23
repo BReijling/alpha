@@ -78,14 +78,22 @@ class SqlAlchemyUnitOfWork:
 
         return self
 
-    def __exit__(self, *args: Any) -> None:
-        """Finalize the Unit of Work context."""
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        """Finalize the Unit of Work context.
+
+        Roll back only when leaving the context because of an exception.
+        Unconditional rollbacks after successful commits can expire ORM state
+        and make returned entities appear empty once detached.
+        """
         if not self._session:
             raise exceptions.DatabaseSessionError(
                 "No active database session is defined"
             )
+
+        if exc_type is not None:
+            self._session.rollback()
+
         self._session.close()
-        self.rollback()
         self._session = None  # type: ignore
 
     def commit(self) -> None:
