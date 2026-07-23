@@ -82,8 +82,8 @@ class SqlAlchemyUnitOfWork:
         """Finalize the Unit of Work context.
 
         Roll back only when leaving the context because of an exception.
-        Unconditional rollbacks after successful commits can expire ORM state
-        and make returned entities appear empty once detached.
+        Rolling back after a successful commit can expire ORM state and may
+        trigger DetachedInstanceError once the session is closed/detached.
         """
         if not self._session:
             raise exceptions.DatabaseSessionError(
