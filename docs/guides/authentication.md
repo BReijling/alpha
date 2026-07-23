@@ -60,9 +60,9 @@ identity = ldap_provider.authenticate(credentials)
 
 When building a small application or when you want to have full control over the authentication process, password-based authentication can be a suitable choice. In this section, we will cover how to implement password-based authentication securely.
 
-The [DatabaseProvider][alpha.providers.database_provider.DatabaseProvider] provider uses a simple username and password authentication mechanism. The users are stored in a local database, and passwords are securely hashed using a strong hashing algorithm (argon2). The provider will handle authentication, and password management. 
+The [`DatabaseProvider`][alpha.providers.database_provider.DatabaseProvider] provider uses a simple username and password authentication mechanism. The users are stored in a local database, and passwords are securely hashed using a strong hashing algorithm (argon2). The provider will handle authentication, and password management. 
 
-It makes use of a Unit-of-Work pattern to interact with the database, allowing for better separation of concerns and easier testing. When a user attempts to authenticate, the provider will retrieve the user record from the database, verify the provided password against the stored hash, and return an Identity object if authentication is successful. It is important to implement proper security measures when using password-based authentication, such as enforcing strong password policies, implementing account lockout after multiple failed attempts, and using secure communication channels (e.g., HTTPS) to protect user credentials during transmission.
+It makes use of a Unit-of-Work pattern to interact with the database, allowing for better separation of concerns and easier testing. When a user attempts to authenticate, the provider will retrieve the user record from the database, verify the provided password against the stored hash, and return an [`Identity`][alpha.providers.models.identity.Identity] object if authentication is successful. It is important to implement proper security measures when using password-based authentication, such as enforcing strong password policies, implementing account lockout after multiple failed attempts, and using secure communication channels (e.g., HTTPS) to protect user credentials during transmission.
 
 ### Example Database Provider Configuration
 

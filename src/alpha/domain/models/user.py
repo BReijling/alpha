@@ -1,6 +1,6 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Self, Sequence, cast
+from typing import Any, Self, cast
 from uuid import UUID
 
 from alpha.domain.models.base_model import BaseDomainModel, DomainModel
@@ -67,8 +67,8 @@ class User(LifeCycleBase, BaseDomainModel):
     email: str | None = None
     phone: str | None = None
     display_name: str | None = None
-    permissions: Sequence[str] | None = None
-    groups: Sequence[str | Group] | None = None
+    permissions: list[str] = field(default_factory=list)  # type: ignore
+    groups: list[str | Group] = field(default_factory=list)  # type: ignore
     is_active: bool = True
     admin: bool = False
 

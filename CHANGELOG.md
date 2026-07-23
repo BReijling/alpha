@@ -5,11 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.7.4] - 2026-07-23
 
 ### Added
 
 - `ApiRepository` interface now includes a `request` method which allows for making custom HTTP requests to the API. This method takes parameters for the HTTP method, endpoint, request body, headers, cookies, and query parameters. This addition provides more flexibility in interacting with the API beyond the standard CRUD operations defined in the `ApiRepository` interface.
+- `Headers` class now includes a `cookies` property which returns a dictionary of cookies extracted from the request headers. This allows for easier access to cookies in the API controller template.
+
+### Fixed
+
+- When using `x-alpha-service-additional-parameters` vendor extension of the `identity` parameter in combination with the `x-alpha-request-factory` parameter an error occurred because the Identity object is not of the OpenAPIModel type. This has been fixed by bypassing the object because it is already a valid object and does not need to be converted to a dataclass type. The Identity object is now passed as-is to the service method when using the `x-alpha-service-additional-parameters` vendor extension.
+- The User type in the UserLifecycleMixin has been fixed to correctly reference the User domain model.
+- The `permissions` and `groups` attributes of the User and Group domain model have been changed from `Sequence` to `list` types. Using Sequence caused issues when using a sqlalchemy ORM.
 
 ## [0.7.3] - 2026-07-21
 

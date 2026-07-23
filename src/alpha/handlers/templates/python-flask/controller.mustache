@@ -198,6 +198,7 @@ def {{operationId}}(
     auth_token = headers.auth_token if headers.has_auth_token else None
     refresh_token = headers.refresh_token
     api_key = headers.api_key
+    cookies = headers.cookies
 
     {{#vendorExtensions.x-alpha-factory}}
     factory = {{vendorExtensions.x-alpha-factory}}

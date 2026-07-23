@@ -552,7 +552,6 @@ paths:
         - Test
       x-alpha-service-name: test_service
       x-alpha-service-method: upload_document
-
   /users:
     get:
       description: Get users
@@ -592,6 +591,8 @@ paths:
       tags: [User]
       x-alpha-service-name: user_management_service
       x-alpha-service-method: add_user
+      x-alpha-service-additional-parameters:
+        - identity
       x-alpha-request-factory: true
       x-alpha-verify-permissions:
         - MANAGE_USERS

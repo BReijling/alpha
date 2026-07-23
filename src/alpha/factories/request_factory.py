@@ -25,6 +25,8 @@ from alpha.interfaces.factories import (
 )
 from alpha.interfaces.openapi_model import OpenAPIModel
 from alpha.interfaces.pydantic_instance import PydanticInstance
+from alpha.providers.models.identity import Identity
+from alpha.utils.request_headers import Headers
 
 
 class RequestFactory:
@@ -184,6 +186,8 @@ class RequestFactory:
         DataclassInstance
         | AttrsInstance
         | PydanticInstance
+        | Identity
+        | Headers
         | None
         | OpenAPIModel
     ):
@@ -202,6 +206,9 @@ class RequestFactory:
         -------
         DataclassInstance | AttrsInstance | PydanticInstance | None
             Dataclass, attrs, or pydantic instance
+        Identity | Headers
+            If the value is an instance of Identity or Headers, it will be
+            returned as is.
         OpenAPIModel
             If the `use_model_class_factory` parameter is set to False, the
             value will be returned as an OpenAPIModel instance.
@@ -211,6 +218,9 @@ class RequestFactory:
         TypeError
             The value is not an instance of the OpenAPI (Base)Model
         """
+        if isinstance(value, (Identity, Headers)):
+            return value
+
         if not isinstance(value, OpenAPIModel):
             raise TypeError(f"Unable to map {type(value)} on dataclass model")
 

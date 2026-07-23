@@ -120,6 +120,7 @@ Alpha supports multiple `x-alpha-*` extensions to customize endpoint behavior.
 | `x-alpha-verify-groups` | operation | Group based access constraint |
 | `x-alpha-verify-permissions` | operation | Permission based access constraint |
 | `x-alpha-filelist` | body parameter | Build list of uploaded files |
+| `x-codegen-request-body-name` | body parameter | Specify the name of the request body model |
 | `x-alpha-response-factory` | response | Convert service output to response model |
 | `x-alpha-raw-response` | response | Return service result as-is |
 | `x-alpha-cookie-support` | response | Enable cookie-aware response object |
@@ -176,8 +177,16 @@ paths:
 
 ### `x-alpha-service-additional-parameters`
 
-Passes extra runtime values to the service method. Typical values are
-`identity`, `auth_token`, `refresh_token`, or `api_key`.
+Passes extra runtime values to the service method. The additional parameters are passed as keyword arguments to the service method, and the values are extracted from the request context.
+
+Available values include:
+ - `identity` ([`Identity`][alpha.providers.models.identity.Identity]): The Identity object of the authenticated user, if available.
+ - `payload` (dict[str, Any]): The raw payload of the authenticated user, if available.
+ - `headers` ([`Headers`][alpha.utils.request_headers.Headers]): The Headers object which contains authentication headers and cookies, if available.
+ - `auth_token` (str): The value of the `Authorization` header, if available.
+ - `refresh_token` (str): The value of the `Refresh-Token` header, if available.
+ - `api_key` (str): The value of the `X-API-Key` header, if available.
+ - `cookies` (dict[str, str]): All request cookies, if available.
 
 ```yaml
 paths:
@@ -303,6 +312,21 @@ paths:
                     format: binary
       x-alpha-service-name: document_service
       x-alpha-service-method: upload
+```
+
+### `x-codegen-request-body-name`
+
+Specifies the name of the request body model class generated from the OpenAPI spec. This is useful when you want to control the naming of the request body model, especially when the default naming might not be suitable or conflicts with existing classes.
+
+```yaml
+  /users:
+    post:
+      requestBody:
+        x-codegen-request-body-name: CustomUser
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
 ```
 
 ### `x-alpha-response-factory`
