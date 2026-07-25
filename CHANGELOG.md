@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- The `__exit__` method of the `SqlAlchemyUnitOfWork` now correctly rolls back the transaction if an exception occurred during the unit of work. This ensures that any changes made to the database during the unit of work are not persisted if an error occurs, maintaining data integrity.
+
 ## [0.7.4] - 2026-07-23
 
 ### Added
