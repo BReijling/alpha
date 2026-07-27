@@ -45,6 +45,7 @@ class LDAPProvider(JWTProviderMixin):
         populate_groups: bool = True,
         populate_permissions: bool = False,
         populate_claims: bool = True,
+        flatten_claims: bool = True,
         auto_connect: bool = True,
         change_password_supported: bool = False,
         additional_connector_params: dict[str, Any] | None = None,
@@ -71,6 +72,9 @@ class LDAPProvider(JWTProviderMixin):
             Whether to populate permissions in the Identity, by default False
         populate_claims
             Whether to populate claims in the Identity, by default True
+        flatten_claims
+            Whether to flatten single-value claims in the Identity, by default
+            True
         auto_connect
             Whether to automatically connect using the connector, by default
             True
@@ -89,6 +93,7 @@ class LDAPProvider(JWTProviderMixin):
         self._populate_groups = populate_groups
         self._populate_permissions = populate_permissions
         self._populate_claims = populate_claims
+        self._flatten_claims = flatten_claims
         self._auto_connect = auto_connect
         self._change_password_supported = change_password_supported
         self._additional_connector_params = additional_connector_params or {
@@ -297,6 +302,7 @@ class LDAPProvider(JWTProviderMixin):
             populate_claims=self._populate_claims,
             populate_groups=self._populate_groups,
             populate_permissions=self._populate_permissions,
+            flatten_claims=self._flatten_claims,
         )
         return identity
 
@@ -324,6 +330,7 @@ class ADProvider(LDAPProvider):
         populate_groups: bool = True,
         populate_permissions: bool = False,
         populate_claims: bool = True,
+        flatten_claims: bool = True,
         auto_connect: bool = True,
         change_password_supported: bool = False,
     ) -> None:
@@ -356,6 +363,9 @@ class ADProvider(LDAPProvider):
         populate_claims
             Whether to populate claims on the :class:`Identity`, by default
             True.
+        flatten_claims
+            Whether to flatten single-value claims in the Identity, by default
+            True
         auto_connect
             Whether to automatically open the LDAP connection on first use, by
             default True.
@@ -373,6 +383,7 @@ class ADProvider(LDAPProvider):
             populate_groups=populate_groups,
             populate_permissions=populate_permissions,
             populate_claims=populate_claims,
+            flatten_claims=flatten_claims,
             auto_connect=auto_connect,
             change_password_supported=change_password_supported,
         )

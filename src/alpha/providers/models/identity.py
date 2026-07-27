@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Mapping, Any, Self, Sequence, TYPE_CHECKING
+from typing import Mapping, Any, Self, Sequence, TYPE_CHECKING, cast
 from datetime import datetime, timezone
 
 from alpha.domain.models.group import Group
@@ -160,6 +160,7 @@ class Identity:
         populate_groups: bool = True,
         populate_permissions: bool = False,
         populate_claims: bool = True,
+        flatten_claims: bool = False,
     ) -> Identity:
         """Instantiate an Identity from an LDAP entry dictionary.
 
@@ -178,6 +179,9 @@ class Identity:
         populate_claims
             Whether to populate the claims dictionary from the LDAP entry, by
             default True
+        flatten_claims
+            Whether to replace claim lists containing a single value with that
+            value, by default False
 
         Returns
         -------
@@ -187,6 +191,12 @@ class Identity:
         username = cls._get_key(entry, mappings["username"])
         if not username:
             username = cls._get_key(entry, mappings["subject"])
+
+        claims = (
+            cls._remove_password_from_claims(entry) if populate_claims else {}
+        )
+        if populate_claims and flatten_claims:
+            claims = cls.flatten_single_value_claims(claims)
 
         return cls(
             subject=cls._get_key(entry, mappings["subject"], ""),
@@ -204,11 +214,7 @@ class Identity:
                 if populate_permissions
                 else []
             ),
-            claims=(
-                cls._remove_password_from_claims(entry)
-                if populate_claims
-                else {}
-            ),
+            claims=claims,
             issued_at=datetime.now(tz=timezone.utc),
         )
 
@@ -429,6 +435,37 @@ class Identity:
             k: v for k, v in claims.items() if "password" not in k.lower()
         }
         return filtered_claims
+
+    @staticmethod
+    def flatten_single_value_claims(
+        claims: Mapping[str, Any],
+    ) -> Mapping[str, Any]:
+        """Replace single-value claim lists with their contained value.
+
+        Password-related claims (keys containing "password", case-insensitive)
+        are removed before flattening.
+
+        Parameters
+        ----------
+        claims
+            Original claims dictionary.
+
+        Returns
+        -------
+        Mapping[str, Any]
+            A new claims dictionary with password-related keys removed and
+            single-value lists replaced by their contained value.
+        """
+        claims = Identity._remove_password_from_claims(claims)
+
+        return {
+            key: (
+                value[0]
+                if isinstance(value, list) and len(cast(list[Any], value)) == 1
+                else value
+            )
+            for key, value in claims.items()
+        }
 
     @staticmethod
     def _extract_groups(
