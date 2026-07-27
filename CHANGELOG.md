@@ -10,8 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - The `Identity` class now has a `flatten_single_value_claims` method which can be used to flatten single-value lists in the claims dictionary to their contained value. This allows for more flexibility in how the claims are represented in the Identity object, depending on the needs of the application.
-- The `Identity.from_ldap_dict` now had an additional `flatten_claims` parameter which can be used to control whether single-value lists in the claims dictionary should be flattened to their contained value. This allows for more flexibility in how the claims are represented in the Identity object, depending on the needs of the application.
-- The `LDAPProvider`, `ADProvider`, `OIDCProvider` and `KeyCloakProvider` classes now have an additional `flatten_claims` parameter which can be used to control whether single-value lists in the claims dictionary should be flattened to their contained value. This allows for more flexibility in how the claims are represented in the Identity object, depending on the needs of the application.
+- The `Identity.from_ldap_dict` method now has an additional `flatten_claims` parameter which can be used to control whether single-value lists in the claims dictionary should be flattened to their contained value. This allows for more flexibility in how the claims are represented in the Identity object, depending on the needs of the application.
+- The `LDAPProvider`, `ADProvider`, `OIDCProvider`, and `KeyCloakProvider` classes now have an additional `flatten_claims` parameter which can be used to control whether single-value lists in the claims dictionary should be flattened to their contained value. This allows for more flexibility in how the claims are represented in the Identity object, depending on the needs of the application.
 
 ### Fixed
 
