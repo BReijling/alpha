@@ -192,6 +192,12 @@ class Identity:
         if not username:
             username = cls._get_key(entry, mappings["subject"])
 
+        claims = (
+            cls._remove_password_from_claims(entry) if populate_claims else {}
+        )
+        if populate_claims and flatten_claims:
+            claims = cls.flatten_single_value_claims(claims)
+
         return cls(
             subject=cls._get_key(entry, mappings["subject"], ""),
             username=username,
@@ -208,13 +214,7 @@ class Identity:
                 if populate_permissions
                 else []
             ),
-            claims=(
-                cls.flatten_single_value_claims(entry)
-                if flatten_claims
-                else entry
-                if populate_claims
-                else {}
-            ),
+            claims=claims,
             issued_at=datetime.now(tz=timezone.utc),
         )
 
@@ -442,8 +442,8 @@ class Identity:
     ) -> Mapping[str, Any]:
         """Replace single-value claim lists with their contained value.
 
-        Password-related claims (keys containing "password", case-insensitive) are
-        removed before flattening.
+        Password-related claims (keys containing "password", case-insensitive)
+        are removed before flattening.
 
         Parameters
         ----------
