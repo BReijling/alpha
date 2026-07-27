@@ -57,6 +57,7 @@ class OIDCProvider(JWTProviderMixin):
         populate_groups: bool = True,
         populate_permissions: bool = False,
         populate_claims: bool = False,
+        flatten_claims: bool = True,
         change_password_supported: bool = False,
     ) -> None:
         """Initialize OIDCProvider.
@@ -90,6 +91,7 @@ class OIDCProvider(JWTProviderMixin):
         self._populate_groups = populate_groups
         self._populate_permissions = populate_permissions
         self._populate_claims = populate_claims
+        self._flatten_claims = flatten_claims
         self._change_password_supported = change_password_supported
 
     def authenticate(self, credentials: PasswordCredentials) -> Identity:
@@ -237,6 +239,9 @@ class OIDCProvider(JWTProviderMixin):
 
         audience = self._extract_audience(claims)
 
+        if self._populate_claims and self._flatten_claims:
+            claims = Identity.flatten_single_value_claims(claims)
+
         identity = Identity(
             subject=str(subject),
             username=username,
@@ -244,7 +249,7 @@ class OIDCProvider(JWTProviderMixin):
             display_name=self._get_claim(claims, "display_name"),
             groups=groups,
             permissions=permissions,
-            claims=dict(claims) if self._populate_claims else {},
+            claims=claims if self._populate_claims else {},
             issued_at=issued_at,
             audience=audience,
             role=self._get_claim(claims, "role"),
@@ -403,6 +408,7 @@ class KeyCloakProvider(OIDCProvider):
         populate_groups: bool = True,
         populate_permissions: bool = False,
         populate_claims: bool = False,
+        flatten_claims: bool = True,
         change_password_supported: bool = False,
     ) -> None:
         """Initialize KeyCloakProvider.
@@ -427,6 +433,9 @@ class KeyCloakProvider(OIDCProvider):
             Whether to populate permissions on the Identity.
         populate_claims
             Whether to include raw claims on the Identity.
+        flatten_claims
+            Whether to flatten single-value claims when populating raw claims
+            on the Identity.
         change_password_supported
             Whether this provider supports changing passwords.
         """
@@ -437,5 +446,6 @@ class KeyCloakProvider(OIDCProvider):
             populate_groups=populate_groups,
             populate_permissions=populate_permissions,
             populate_claims=populate_claims,
+            flatten_claims=flatten_claims,
             change_password_supported=change_password_supported,
         )

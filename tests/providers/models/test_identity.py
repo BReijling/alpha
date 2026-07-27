@@ -54,6 +54,26 @@ def test_identity_from_ldap_dict(ldap_dict):
     assert identity.pretend_identity is None
 
 
+def test_identity_from_ldap_dict_flattens_single_value_claims():
+    identity = Identity.from_ldap_dict(
+        {
+            "uid": ["ldap_user"],
+            "single_value": ["value"],
+            "multiple_values": ["first", "second"],
+            "empty_values": [],
+            "password_hash": ["sensitive"],
+        },
+        flatten_claims=True,
+    )
+
+    assert identity.claims == {
+        "uid": "ldap_user",
+        "single_value": "value",
+        "multiple_values": ["first", "second"],
+        "empty_values": [],
+    }
+
+
 def test_identity_from_ad_dict(ad_dict):
     identity = Identity.from_ldap_dict(ad_dict, mappings=DEFAULT_AD_MAPPINGS)
 
