@@ -74,6 +74,24 @@ def test_identity_from_ldap_dict_flattens_single_value_claims():
     }
 
 
+def test_identity_from_ldap_dict_does_not_populate_claims_when_disabled():
+    identity = Identity.from_ldap_dict(
+        {"uid": ["ldap_user"], "password_hash": ["sensitive"]},
+        populate_claims=False,
+        flatten_claims=True,
+    )
+
+    assert identity.claims == {}
+
+
+def test_identity_from_ldap_dict_removes_password_claims_when_not_flattening():
+    identity = Identity.from_ldap_dict(
+        {"uid": ["ldap_user"], "password_hash": ["sensitive"]},
+        flatten_claims=False,
+    )
+
+    assert "password_hash" not in identity.claims
+
 def test_identity_from_ad_dict(ad_dict):
     identity = Identity.from_ldap_dict(ad_dict, mappings=DEFAULT_AD_MAPPINGS)
 
