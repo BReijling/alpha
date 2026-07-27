@@ -442,6 +442,9 @@ class Identity:
     ) -> Mapping[str, Any]:
         """Replace single-value claim lists with their contained value.
 
+        Password-related claims (keys containing "password", case-insensitive) are
+        removed before flattening.
+
         Parameters
         ----------
         claims
@@ -450,8 +453,8 @@ class Identity:
         Returns
         -------
         Mapping[str, Any]
-            A new claims dictionary with single-value lists replaced by their
-            contained value.
+            A new claims dictionary with password-related keys removed and
+            single-value lists replaced by their contained value.
         """
         claims = Identity._remove_password_from_claims(claims)
 
