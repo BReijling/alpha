@@ -214,3 +214,4 @@ api/
 typings/
 refresh_tokens.json
 .DS_Store
+templates/

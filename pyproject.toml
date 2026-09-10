@@ -1,6 +1,6 @@
 [project]
 name = "alpha-python"
-version = "0.7.5"
+version = "0.7.6"
 description = "Alpha is intended to be the first dependency you need to add to your Python application. It is a Python library which contains standard building blocks that can be used in applications that are used as APIs and/or make use of database interaction."
 readme = "README.md"
 authors = [
@@ -18,7 +18,7 @@ classifiers = [
 ]
 license = "MIT"
 license-files = ['LICENSE']
-requires-python = ">=3.11, <3.15"
+requires-python = ">=3.11"
 dependencies = [
     "attrs>=25.4.0",
     "gunicorn>=23.0.0",

@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.6] - 2026-09-10
+
+### Added
+
+- The `Permission` model has been added to represent permissions within the system. The model can be used to define and manage various permissions that can be assigned to users or groups.
+- The `User` model now has methods to get a string representation of the user, including `__str__` and `__repr__` methods.
+- The `Group` model now has methods to get a string representation of the group, including `__str__` and `__repr__` methods.
+
+### Changed
+
+- The `to_dict` method of the`User` model has been updated to provide better handling of the `permissions` and `groups` attributes.
+- The `to_dict` method of the `Group` model has been updated to provide better handling of the `permissions` attribute.
+- The `Identity` class has been updated to include better handling of the `groups` and `permissions` attributes.
+- The `AuthenticationService` class has been updated to allow the use of a customized identity model. The `identity_model` parameter can now be specified to use a custom identity class instead of the default `Identity` class.
+
+### Fixed
+
+- The `requires-python` metadata in the project configuration has been fixed to correctly specify the minimum required Python version. An upper bound for the Python version has been removed because it restricts compatibility with newer Python versions and caused unnecessary dependency issues.
+
 ## [0.7.5] - 2026-07-27
 
 ### Added

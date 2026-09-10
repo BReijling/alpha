@@ -7,6 +7,7 @@ from alpha.factories.logging_handler_factory import LoggingHandlerFactory
 from alpha.factories.model_class_factory import ModelClassFactory
 from alpha.domain.models.user import User
 from alpha.domain.models.group import Group
+from alpha.domain.models.permission import Permission
 from alpha.domain.models.role import Role
 from alpha.domain.models.base_model import (
     BaseDomainModel,
@@ -123,6 +124,7 @@ __all__ = [
     "LifeCycleBase",
     "User",
     "Group",
+    "Permission",
     "Role",
     "OIDCConnector",
     "KeyCloakOIDCConnector",
