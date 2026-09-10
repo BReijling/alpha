@@ -13,3 +13,4 @@ All documentation is auto-generated from docstrings in the source code.
 | [User](models/user.md) | Domain model which represents a user in the system |
 | [Role](models/role.md) | Enum class which defines user roles with varying levels of permissions |
 | [Group](models/group.md) | Domain model which represents a group of users with specific permissions |
+| [Permission](models/permission.md) | Domain model which represents a system permission |
