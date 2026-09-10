@@ -1,14 +1,10 @@
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Any, cast
+from typing import Any, cast
 from uuid import UUID
 
 from alpha.domain.models.base_model import BaseDomainModel, DomainModel
-
-if TYPE_CHECKING:
-    from alpha.domain.models.life_cycle_base import LifeCycleBase
-else:
-    LifeCycleBase = Any
+from alpha.domain.models.life_cycle_base import LifeCycleBase
 
 
 @dataclass(kw_only=True)

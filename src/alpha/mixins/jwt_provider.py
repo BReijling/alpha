@@ -12,6 +12,7 @@ class JWTProviderMixin:
     """
 
     token_factory: TokenFactory | None = None
+    _identity_model: type[Identity] = Identity
 
     def validate(self, token: Token) -> Identity:
         """Validate a token and return the associated identity
@@ -43,7 +44,7 @@ class JWTProviderMixin:
                 "Token payload does not contain mandatory 'subject' field"
             )
 
-        return Identity.from_dict(payload)
+        return self._identity_model.from_dict(payload)
 
     def issue_token(self, identity: Identity) -> Token:
         """Issue a token for the given identity
@@ -57,6 +58,8 @@ class JWTProviderMixin:
         -------
             Token object
         """
+        identity = self._identity_model.from_dict(identity.to_dict())
+
         if not self.token_factory:
             raise exceptions.MissingDependencyException(
                 "Token factory is not configured"

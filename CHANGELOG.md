@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- The `to_dict` method of the`User` model has been updated to provide better handling of the `permissions` and `groups` attributes.
+- The `to_dict` method of the `User` model has been updated to provide better handling of the `permissions` and `groups` attributes.
 - The `to_dict` method of the `Group` model has been updated to provide better handling of the `permissions` attribute.
 - The `Identity` class has been updated to include better handling of the `groups` and `permissions` attributes.
 - The `AuthenticationService` class has been updated to allow the use of a customized identity model. The `identity_model` parameter can now be specified to use a custom identity class instead of the default `Identity` class.

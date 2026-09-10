@@ -5,13 +5,13 @@ from alpha.mixins.jwt_provider import JWTProviderMixin
 from alpha.providers.models.token import Token
 
 
-def test_jwt_provider_initialize():
+def test_jwt_provider_initialize(fake_identity):
     jwt_provider = JWTProviderMixin()
 
     with pytest.raises(MissingDependencyException):
         jwt_provider.validate("dummy_token")
     with pytest.raises(MissingDependencyException):
-        jwt_provider.issue_token("dummy_identity")
+        jwt_provider.issue_token(fake_identity)
 
 
 def test_jwt_provider_validate(jwt_provider, fake_jwt_factory, jwt_payload):

@@ -48,6 +48,7 @@ class OIDCProvider(JWTProviderMixin):
 
     protocol = "oidc"
     token_factory: TokenFactory | None = None
+    _identity_model: type[Identity] = Identity
 
     def __init__(
         self,
@@ -58,6 +59,7 @@ class OIDCProvider(JWTProviderMixin):
         populate_permissions: bool = False,
         populate_claims: bool = False,
         flatten_claims: bool = True,
+        identity_model: type[Identity] = Identity,
         change_password_supported: bool = False,
     ) -> None:
         """Initialize OIDCProvider.
@@ -80,6 +82,11 @@ class OIDCProvider(JWTProviderMixin):
             Whether to populate permissions on the Identity.
         populate_claims
             Whether to include raw claims on the Identity.
+        flatten_claims
+            Whether to flatten single-value claims in the Identity.
+        identity_model
+            Identity model class to use for representing users, by default
+            Identity
         change_password_supported
             Whether this provider supports changing passwords.
         """
@@ -92,6 +99,7 @@ class OIDCProvider(JWTProviderMixin):
         self._populate_permissions = populate_permissions
         self._populate_claims = populate_claims
         self._flatten_claims = flatten_claims
+        self._identity_model = identity_model
         self._change_password_supported = change_password_supported
 
     def authenticate(self, credentials: PasswordCredentials) -> Identity:
@@ -240,9 +248,9 @@ class OIDCProvider(JWTProviderMixin):
         audience = self._extract_audience(claims)
 
         if self._populate_claims and self._flatten_claims:
-            claims = Identity.flatten_single_value_claims(claims)
+            claims = self._identity_model.flatten_single_value_claims(claims)
 
-        identity = Identity(
+        identity = self._identity_model(
             subject=str(subject),
             username=username,
             email=self._get_claim(claims, "email"),

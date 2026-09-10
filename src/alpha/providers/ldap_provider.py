@@ -33,6 +33,7 @@ class LDAPProvider(JWTProviderMixin):
 
     protocol = "ldap"
     token_factory: TokenFactory | None = None
+    _identity_model: type[Identity] = Identity
 
     def __init__(
         self,
@@ -48,6 +49,7 @@ class LDAPProvider(JWTProviderMixin):
         flatten_claims: bool = True,
         auto_connect: bool = True,
         change_password_supported: bool = False,
+        identity_model: type[Identity] = Identity,
         additional_connector_params: dict[str, Any] | None = None,
     ) -> None:
         """Initialize LDAPProvider.
@@ -80,6 +82,9 @@ class LDAPProvider(JWTProviderMixin):
             True
         change_password_supported
             Whether the provider supports changing passwords, by default False
+        identity_model
+            Identity model class to use for representing users, by default
+            Identity
         additional_connector_params
             Additional parameters to pass to the LDAP connection, by default
             {"receive_timeout": 5}
@@ -96,6 +101,7 @@ class LDAPProvider(JWTProviderMixin):
         self._flatten_claims = flatten_claims
         self._auto_connect = auto_connect
         self._change_password_supported = change_password_supported
+        self._identity_model = identity_model
         self._additional_connector_params = additional_connector_params or {
             "receive_timeout": 5
         }
@@ -296,7 +302,7 @@ class LDAPProvider(JWTProviderMixin):
             Identity object
         """
         entry_dict = cast(dict[str, Any], entry.entry_attributes_as_dict)  # type: ignore
-        identity = Identity.from_ldap_dict(
+        identity = self._identity_model.from_ldap_dict(
             entry=entry_dict,
             mappings=self._identity_mappings,
             populate_claims=self._populate_claims,
