@@ -35,7 +35,7 @@ class Permission(LifeCycleBase, BaseDomainModel):
         -------
             self.name value
         """
-        return self.name
+        return self.name or ""
 
     def __repr__(self) -> str:
         """Return the official string representation of the object.
