@@ -1,6 +1,9 @@
 from typing import Any
 import pytest
 
+from alpha.domain.models.group import Group
+from alpha.domain.models.permission import Permission
+from alpha.domain.models.user import User
 from alpha.providers.models.credentials import PasswordCredentials
 from alpha.providers.models.identity import Identity
 from alpha.providers.models.token import Token
@@ -84,3 +87,44 @@ def identity_no_admin() -> Identity:
 @pytest.fixture
 def token() -> Token:
     return Token("abcdef123456")
+
+
+@pytest.fixture
+def user() -> User:
+    return User(
+        id=1,
+        username="testuser",
+        email="testuser@example.com",
+        display_name="Test User",
+        groups=[],
+        permissions=[],
+        role="USER",
+        admin=False,
+    )
+
+
+@pytest.fixture
+def user_with_string_groups(user: User) -> User:
+    user.groups = ["group1", "group2"]
+    return user
+
+
+@pytest.fixture
+def user_with_model_groups(user: User) -> User:
+    user.groups = [Group(name="group1"), Group(name="group2")]
+    return user
+
+
+@pytest.fixture
+def user_with_string_permissions(user: User) -> User:
+    user.permissions = ["permission1", "permission2"]
+    return user
+
+
+@pytest.fixture
+def user_with_model_permissions(user: User) -> User:
+    user.permissions = [
+        Permission(name="permission1"),
+        Permission(name="permission2"),
+    ]
+    return user

@@ -125,7 +125,7 @@ class Identity:
     username: str | None
     email: str | None
     display_name: str | None
-    groups: Sequence[str | Group]
+    groups: Sequence[str]
     permissions: Sequence[str]
     claims: Mapping[str, Any]
     issued_at: datetime
@@ -274,13 +274,16 @@ class Identity:
             An Identity instance populated with data from the User object.
         """
         subject = str(user.id) if user.id else user.username
+
         return cls(
             subject=subject,  # type: ignore
             username=user.username,
             email=user.email,
             display_name=user.display_name,
-            groups=user.groups or [],
-            permissions=user.permissions or [],
+            groups=[str(group) for group in user.groups or []],
+            permissions=[
+                str(permission) for permission in user.permissions or []
+            ],
             claims={},
             issued_at=datetime.now(tz=timezone.utc),
             role=user.role,  # type: ignore
@@ -324,10 +327,10 @@ class Identity:
             self.display_name = user.display_name
         for permission in user.permissions or []:
             self.permissions = self._append_on_sequence(
-                self.permissions, permission
+                self.permissions, str(permission)
             )
         for group in user.groups or []:
-            self.groups = self._append_on_sequence(self.groups, group)
+            self.groups = self._append_on_sequence(self.groups, str(group))
         self.role = user.role  # type: ignore
         self.admin = user.admin
 
@@ -343,7 +346,7 @@ class Identity:
         for group in groups:
             for permission in group.permissions or []:
                 self.permissions = self._append_on_sequence(
-                    self.permissions, permission
+                    self.permissions, str(permission)
                 )
 
     def to_dict(self) -> dict[str, Any]:

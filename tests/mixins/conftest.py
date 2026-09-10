@@ -32,6 +32,29 @@ class FakeJWTFactory:
         return self._payload
 
 
+class FakeIdentity:
+    def __init__(self, username: str):
+        self.username = username
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "FakeIdentity":
+        return cls(
+            username=data.get("username", ""),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "username": self.username,
+        }
+
+
+@pytest.fixture
+def fake_identity() -> FakeIdentity:
+    return FakeIdentity(
+        username="Test User",
+    )
+
+
 @pytest.fixture
 def test_user_id() -> str:
     return "testuser"

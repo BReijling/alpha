@@ -72,6 +72,32 @@ class User(LifeCycleBase, BaseDomainModel):
     is_active: bool = True
     admin: bool = False
 
+    def __str__(self) -> str:
+        """Return the username of the user.
+
+        Returns
+        -------
+            self.username value
+        """
+        return self.username or ""
+
+    def __repr__(self) -> str:
+        """Return the official string representation of the object.
+
+        Returns
+        -------
+            A string representing the User instance.
+        """
+        return (
+            "User("
+            f"id={self.id}, "
+            f"username={self.username!r}, "
+            f"display_name={self.display_name!r}, "
+            f"permissions={self.permissions!r}, "
+            f"groups={self.groups!r}"
+            ")"
+        )
+
     @classmethod
     def from_identity(cls, identity: Identity) -> Self:
         """Create a User instance from an Identity instance.
@@ -101,6 +127,35 @@ class User(LifeCycleBase, BaseDomainModel):
         dict[str, Any]
             A dictionary representation of the User instance.
         """
+        permissions = cast(
+            list[str | dict[str, Any]],
+            [
+                permission.to_dict()  # type: ignore
+                if hasattr(permission, "to_dict")
+                else permission
+                for permission in self.permissions
+            ],
+        )
+        groups = cast(
+            list[str | dict[str, Any]],
+            [
+                group.to_dict()  # type: ignore
+                if hasattr(group, "to_dict")
+                else group
+                for group in self.groups
+            ],
+        )
+        created_at = (
+            self.created_at.isoformat()
+            if hasattr(self, "created_at") and self.created_at is not None
+            else None
+        )
+        modified_at = (
+            self.modified_at.isoformat()
+            if hasattr(self, "modified_at") and self.modified_at is not None
+            else None
+        )
+
         return {
             "id": self.id,
             "username": self.username,
@@ -109,10 +164,18 @@ class User(LifeCycleBase, BaseDomainModel):
             "email": self.email,
             "phone": self.phone,
             "display_name": self.display_name,
-            "permissions": self.permissions,
-            "groups": self.groups,
+            "permissions": permissions,
+            "groups": groups,
             "is_active": self.is_active,
             "admin": self.admin,
+            "created_by": self.created_by
+            if hasattr(self, "created_by") and self.created_by is not None
+            else None,
+            "created_at": created_at,
+            "modified_by": self.modified_by
+            if hasattr(self, "modified_by") and self.modified_by is not None
+            else None,
+            "modified_at": modified_at,
         }
 
     def update(self, obj: DomainModel) -> DomainModel:
@@ -140,4 +203,5 @@ class User(LifeCycleBase, BaseDomainModel):
         self.modified_at = datetime.now(tz=timezone.utc)
         self.is_active = obj.is_active
         self.admin = obj.admin
+
         return cast(DomainModel, self)

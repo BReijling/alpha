@@ -39,6 +39,20 @@ class Group(LifeCycleBase, BaseDomainModel):
     permissions: list[str] = field(default_factory=list)  # type: ignore
     is_active: bool = True
 
+    def __str__(self) -> str:
+        """Return the name-based representation of the Group instance."""
+        return self.name or ""
+
+    def __repr__(self) -> str:
+        """Return the official string representation of the Group instance."""
+        return (
+            "Group("
+            f"id={self.id!r}, "
+            f"name={self.name!r}, "
+            f"description={self.description!r}"
+            ")"
+        )
+
     def to_dict(self) -> dict[str, Any]:
         """Convert the Group instance to a dictionary.
 
@@ -47,12 +61,38 @@ class Group(LifeCycleBase, BaseDomainModel):
         dict[str, Any]
             A dictionary representation of the Group instance.
         """
+        permissions = cast(
+            list[str | dict[str, Any]],
+            [
+                p.to_dict() if hasattr(p, "to_dict") else p  # type: ignore
+                for p in self.permissions
+            ],
+        )
+        created_at = (
+            self.created_at.isoformat()
+            if hasattr(self, "created_at") and self.created_at is not None
+            else None
+        )
+        modified_at = (
+            self.modified_at.isoformat()
+            if hasattr(self, "modified_at") and self.modified_at is not None
+            else None
+        )
+
         return {
             "id": self.id,
             "name": self.name,
             "description": self.description,
-            "permissions": self.permissions,
+            "permissions": permissions,
             "is_active": self.is_active,
+            "created_by": self.created_by
+            if hasattr(self, "created_by") and self.created_by is not None
+            else None,
+            "created_at": created_at,
+            "modified_by": self.modified_by
+            if hasattr(self, "modified_by") and self.modified_by is not None
+            else None,
+            "modified_at": modified_at,
         }
 
     def update(self, obj: DomainModel) -> DomainModel:

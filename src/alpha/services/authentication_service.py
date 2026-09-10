@@ -74,6 +74,7 @@ class AuthenticationService:
         user_model: type[User] = User,
         group_model: type[Group] = Group,
         token_model: type[Token] = Token,
+        identity_model: type[Identity] = Identity,
         users_repository_name: str = "users",
         groups_repository_name: str = "groups",
         refresh_repository: RefreshRepository | None = None,
@@ -147,6 +148,9 @@ class AuthenticationService:
             Group model class to use for database operations, by default Group
         token_model
             Token model class to use for database operations, by default Token
+        identity_model
+            Identity model class to use for object creation and manipulation,
+            by default Identity
         users_repository_name
             Name of the user repository in the UnitOfWork, by default "users"
         groups_repository_name
@@ -206,6 +210,7 @@ class AuthenticationService:
         self._user_model = user_model
         self._group_model = group_model
         self._token_model = token_model
+        self._identity_model = identity_model
         self._users_repository_name = users_repository_name
         self._groups_repository_name = groups_repository_name
         self._refresh_repository = (
@@ -265,7 +270,7 @@ class AuthenticationService:
             and credentials.username == self._static_user.username
             and credentials.password == self._static_user.password
         ):
-            identity = Identity.from_user(self._static_user)
+            identity = self._identity_model.from_user(self._static_user)
 
         # Use the identity provider to authenticate the user and retrieve their
         # identity
@@ -464,7 +469,7 @@ class AuthenticationService:
                 payload = self._identity_provider.token_factory.get_payload(
                     token=auth_token, options={"verify_exp": False}
                 )
-                identity = Identity.from_dict(payload)
+                identity = self._identity_model.from_dict(payload)
             except Exception:
                 identity = None
 

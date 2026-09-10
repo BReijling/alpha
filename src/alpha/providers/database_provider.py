@@ -18,12 +18,14 @@ class DatabaseProvider(JWTProviderMixin):
 
     protocol = "database"
     token_factory: TokenFactory | None = None
+    _identity_model: type[Identity] = Identity
 
     def __init__(
         self,
         uow: UnitOfWork,
         token_factory: TokenFactory | None = None,
         password_factory: PasswordFactory | None = None,
+        identity_model: type[Identity] = Identity,
         user_name_attribute: str = "username",
         users_repository_name: str = "users",
     ) -> None:
@@ -42,6 +44,9 @@ class DatabaseProvider(JWTProviderMixin):
             Password factory instance to handle password hashing and
             verification, by default None. If None, a default PasswordFactory
             will be used.
+        identity_model
+            Identity model class to use for representing users, by default
+            Identity
         user_name_attribute
             Attribute name to identify the user, by default "username"
         users_repository_name
@@ -52,6 +57,7 @@ class DatabaseProvider(JWTProviderMixin):
         self._password_factory = password_factory or PasswordFactory()
         self._user_name_attribute = user_name_attribute
         self._users_repository_name = users_repository_name
+        self._identity_model = identity_model
 
     def authenticate(self, credentials: PasswordCredentials) -> Identity:
         """Authenticate a user using their credentials.
@@ -73,7 +79,7 @@ class DatabaseProvider(JWTProviderMixin):
                 credentials=credentials, user_repository=users
             )
 
-            return Identity.from_user(user)
+            return self._identity_model.from_user(user)
 
     def get_user(self, subject: str) -> Identity:
         """Retrieve a user by their subject identifier.
@@ -95,7 +101,7 @@ class DatabaseProvider(JWTProviderMixin):
                 username=subject, user_repository=users, attribute_name="id"
             )
 
-            return Identity.from_user(user)
+            return self._identity_model.from_user(user)
 
     def change_password(
         self, credentials: PasswordCredentials, new_password: str

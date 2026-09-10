@@ -92,6 +92,7 @@ def test_identity_from_ldap_dict_removes_password_claims_when_not_flattening():
 
     assert "password_hash" not in identity.claims
 
+
 def test_identity_from_ad_dict(ad_dict):
     identity = Identity.from_ldap_dict(ad_dict, mappings=DEFAULT_AD_MAPPINGS)
 
@@ -129,6 +130,78 @@ def test_identity_from_and_to_dict(identity):
     new_identity = Identity.from_dict(identity_dict)
 
     assert new_identity == identity
+
+
+def test_identity_from_user(user):
+    identity = Identity.from_user(user)
+
+    assert identity.subject == str(user.id)
+    assert identity.username == user.username
+    assert identity.email == user.email
+    assert identity.display_name == user.display_name
+    assert identity.groups == [group.name for group in user.groups]
+    assert identity.permissions == [
+        permission.name for permission in user.permissions
+    ]
+    assert identity.admin == user.admin
+
+
+def test_identity_from_user_with_string_groups(user_with_string_groups):
+    identity = Identity.from_user(user_with_string_groups)
+
+    assert identity.groups == ["group1", "group2"]
+
+
+def test_identity_from_user_with_model_groups(user_with_model_groups):
+    identity = Identity.from_user(user_with_model_groups)
+
+    assert identity.groups == ["group1", "group2"]
+
+
+def test_identity_from_user_with_string_permissions(
+    user_with_string_permissions,
+):
+    identity = Identity.from_user(user_with_string_permissions)
+
+    assert identity.permissions == ["permission1", "permission2"]
+
+
+def test_identity_from_user_with_model_permissions(
+    user_with_model_permissions,
+):
+    identity = Identity.from_user(user_with_model_permissions)
+
+    assert identity.permissions == ["permission1", "permission2"]
+
+
+def test_identity_update_from_user(
+    identity,
+    user_with_string_permissions,
+    user_with_model_permissions,
+    user_with_string_groups,
+    user_with_model_groups,
+):
+    identity.update_from_user(user_with_string_permissions)
+    assert identity.permissions == [
+        "read",
+        "write",
+        "permission1",
+        "permission2",
+    ]
+
+    identity.update_from_user(user_with_model_permissions)
+    assert identity.permissions == [
+        "read",
+        "write",
+        "permission1",
+        "permission2",
+    ]
+
+    identity.update_from_user(user_with_string_groups)
+    assert identity.groups == ["group1", "group2"]
+
+    identity.update_from_user(user_with_model_groups)
+    assert identity.groups == ["group1", "group2"]
 
 
 def test_identity_str_and_repr(identity):
