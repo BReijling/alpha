@@ -25,7 +25,7 @@ class Permission(LifeCycleBase, BaseDomainModel):
     """
 
     id: UUID | int | str | None = None
-    name: str
+    name: str | None = None
     description: str = ""
 
     def __str__(self) -> str:
