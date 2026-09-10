@@ -17,13 +17,12 @@ paths:
       tags:
         - Test
       responses:
-        "200":
+        '200':
           description: OK
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-                example: API is running
+                $ref: '#/components/schemas/ObjectResponse'
       x-alpha-import:
         - from alpha.utils.openapi_test.service import TestService
         - from alpha.utils.openapi_test.response import custom_response_builder
@@ -172,39 +171,39 @@ paths:
                 type: boolean
       x-alpha-service-name: test_service
       x-alpha-service-method: is_float
-  /is_array/{obj}:
-    get:
-      description: |
-        This endpoint is intended to check:
-          - if comma separated values will be parsed correctly into a list
-      operationId: is_array
-      tags:
-        - Test
-      parameters:
-        - name: obj
-          in: path
-          schema:
-            type: array
-            items:
-              type: integer
-            minItems: 2
-            maxItems: 3
-          required: true
-          example:
-            - 1
-            - 1
-            - 1
-      responses:
-        "200":
-          description: Success
-          content:
-            text/plain:
-              schema:
-                type: boolean
-        "400":
-          description: When the min or max amount of items is not respected
-      x-alpha-service-name: test_service
-      x-alpha-service-method: is_list
+  # /is_array/{obj}:
+  #   get:
+  #     description: |
+  #       This endpoint is intended to check:
+  #         - if comma separated values will be parsed correctly into a list
+  #     operationId: is_array
+  #     tags:
+  #       - Test
+  #     parameters:
+  #       - name: obj
+  #         in: path
+  #         schema:
+  #           type: array
+  #           items:
+  #             type: integer
+  #           minItems: 2
+  #           maxItems: 3
+  #         required: true
+  #         example:
+  #           - 1
+  #           - 2
+  #           - 3
+  #     responses:
+  #       "200":
+  #         description: Success
+  #         content:
+  #           text/plain:
+  #             schema:
+  #               type: boolean
+  #       "400":
+  #         description: When the min or max amount of items is not respected
+  #     x-alpha-service-name: test_service
+  #     x-alpha-service-method: is_list
   /check_datetime_tz_utc/{obj}:
     get:
       description: |
@@ -1204,6 +1203,13 @@ components:
           properties:
             data:
               type: string
+    ObjectResponse:
+      allOf:
+        - $ref: '#/components/schemas/Response'
+        - type: object
+          properties:
+            data:
+              type: object
     StringArrayResponse:
       allOf:
         - $ref: '#/components/schemas/Response'

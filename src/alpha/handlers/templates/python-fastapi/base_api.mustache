@@ -1,6 +1,38 @@
 # coding: utf-8
 
 from typing import ClassVar, Dict, List, Tuple  # noqa: F401
+import traceback
+
+{{containerImport}}
+from dependency_injector.wiring import inject, Provide
+from fastapi import Depends, Request
+
+from alpha.factories.request_factory import RequestFactory
+from alpha.factories.response_factory import ResponseFactory
+from alpha.encoder import JSONEncoder
+from alpha.providers.models.identity import Identity
+from alpha.utils.logging_level_checker import logging_level_checker
+from alpha.utils.response_object import create_response_object
+from alpha.utils.request_headers import Headers
+from alpha.utils.verify_identity import verify_identity
+from alpha.utils._http_codes import http_codes_{{#languageCode}}{{languageCode}}{{/languageCode}}{{^languageCode}}en{{/languageCode}} as http_codes
+from alpha.exceptions import (
+    BadRequestException,
+    UnauthorizedException,
+    ForbiddenException,
+    NotFoundException,
+    MethodNotAllowedException,
+    NotAcceptableException,
+    ConflictException,
+    PayloadTooLargeException,
+    UnprocessableContentException,
+    ServerErrorException,
+    InternalServerErrorException,
+    NotImplementedException,
+    BadGatewayException,
+    ServiceUnavailableException,
+    GatewayTimeoutException
+)
 
 {{#imports}}
 {{import}}
@@ -8,23 +40,254 @@ from typing import ClassVar, Dict, List, Tuple  # noqa: F401
 {{#securityImports.0}}from {{packageName}}.security_api import {{#securityImports}}get_token_{{.}}{{^-last}}, {{/-last}}{{/securityImports}}{{/securityImports.0}}
 
 class Base{{classname}}:
-    subclasses: ClassVar[Tuple] = ()
+    # subclasses: ClassVar[Tuple] = ()
 
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        Base{{classname}}.subclasses = Base{{classname}}.subclasses + (cls,)
+    # def __init_subclass__(cls, **kwargs):
+    #     super().__init_subclass__(**kwargs)
+    #     Base{{classname}}.subclasses = Base{{classname}}.subclasses + (cls,)
+
 {{#operations}}
 {{#operation}}
+    {{#authMethods}}{{#-first}}@inject{{/-first}}{{/authMethods}}{{^authMethods}}{{#vendorExtensions.x-alpha-service-name}}@inject{{/vendorExtensions.x-alpha-service-name}}{{/authMethods}}
     async def {{operationId}}(
         self,
+        request: Request,
         {{#allParams}}
         {{>impl_argument_definition}},
         {{/allParams}}
+        {{#vendorExtensions.x-alpha-service-name}}{{vendorExtensions.x-alpha-service-name}}=Depends(Provide[Container.{{vendorExtensions.x-alpha-service-name}}]),{{/vendorExtensions.x-alpha-service-name}}
     ) -> {{returnType}}{{^returnType}}None{{/returnType}}:
-        {{#notes}}"""{{.}}"""
-        ...{{/notes}}{{^notes}}...{{/notes}}
-{{^-last}}
+        {{#notes}}"""{{.}}"""{{/notes}}
+        {{#vendorExtensions.x-alpha-import}}
+        {{.}}
+        {{/vendorExtensions.x-alpha-import}}
 
+        headers = Headers.from_headers(request.headers)
+
+        auth_token = headers.auth_token if headers.has_auth_token else None
+        refresh_token = headers.refresh_token
+        api_key = headers.api_key
+        cookies = headers.cookies
+
+        {{#vendorExtensions.x-alpha-factory}}
+        factory = {{vendorExtensions.x-alpha-factory}}
+        {{#allParams}}
+        {{#isBodyParam}}
+        {{^isArray}}
+        {{paramName}} = factory(**{{paramName}}.to_dict())
+        {{/isArray}}
+        {{#isArray}}
+        {{paramName}} = [factory(**obj.to_dict()) for obj in {{paramName}}]
+        {{/isArray}}
+        {{/isBodyParam}}
+        {{/allParams}}
+        {{/vendorExtensions.x-alpha-factory}}
+
+        response_object_function = {{^vendorExtensions.x-alpha-custom-response-builder}}create_response_object{{/vendorExtensions.x-alpha-custom-response-builder}}{{#vendorExtensions.x-alpha-custom-response-builder}}{{vendorExtensions.x-alpha-custom-response-builder}}{{/vendorExtensions.x-alpha-custom-response-builder}}
+
+        try:
+            # Call method or use variable
+            {{#vendorExtensions.x-alpha-request-factory}}
+                {{#vendorExtensions.x-alpha-service-name}}
+                    {{#vendorExtensions.x-alpha-service-method}}
+            result = await RequestFactory(
+                {{vendorExtensions.x-alpha-service-name}}.{{vendorExtensions.x-alpha-service-method}}
+            ).__call__(
+                {{#allParams}}{{paramName}}={{paramName}},{{/allParams}}
+                {{#vendorExtensions.x-alpha-service-additional-parameters}}{{.}}={{.}},
+                {{/vendorExtensions.x-alpha-service-additional-parameters}}
+            )
+                    {{/vendorExtensions.x-alpha-service-method}}
+                {{/vendorExtensions.x-alpha-service-name}}
+                {{^vendorExtensions.x-alpha-service-name}}
+                    {{#vendorExtensions.x-alpha-custom-function}}
+            result = await {{{vendorExtensions.x-alpha-custom-function}}}
+                    {{/vendorExtensions.x-alpha-custom-function}}
+                {{/vendorExtensions.x-alpha-service-name}}
+            {{/vendorExtensions.x-alpha-request-factory}}
+
+            {{^vendorExtensions.x-alpha-request-factory}}
+                {{^vendorExtensions.x-alpha-service-name}}
+                    {{^vendorExtensions.x-alpha-custom-function}}
+            raise ServerErrorException('Missing x-alpha-service-name in API specification')
+                    {{/vendorExtensions.x-alpha-custom-function}}
+                    {{^vendorExtensions.x-alpha-service-method}}
+                        {{^vendorExtensions.x-alpha-custom-function}}
+            raise ServerErrorException('Missing x-alpha-service-method in API specification')
+                        {{/vendorExtensions.x-alpha-custom-function}}
+                    {{/vendorExtensions.x-alpha-service-method}}
+                    {{#vendorExtensions.x-alpha-custom-function}}
+            result = await {{{vendorExtensions.x-alpha-custom-function}}}
+                    {{/vendorExtensions.x-alpha-custom-function}}
+                {{/vendorExtensions.x-alpha-service-name}}
+                {{#vendorExtensions.x-alpha-service-name}}
+                    {{#vendorExtensions.x-alpha-service-method}}
+            result = await {{vendorExtensions.x-alpha-service-name}}.{{vendorExtensions.x-alpha-service-method}}(
+                {{#allParams}}{{paramName}}={{paramName}},{{/allParams}}
+                {{#vendorExtensions.x-alpha-service-additional-parameters}}{{.}}={{.}},{{/vendorExtensions.x-alpha-service-additional-parameters}}
+            )
+                    {{/vendorExtensions.x-alpha-service-method}}
+                {{/vendorExtensions.x-alpha-service-name}}
+            {{/vendorExtensions.x-alpha-request-factory}}
+
+        {{#responses}}
+        {{#is2xx}}
+            {{#vendorExtensions.x-alpha-raw-response}}
+            return result
+            {{/vendorExtensions.x-alpha-raw-response}}
+            {{^vendorExtensions.x-alpha-raw-response}}
+            {{#vendorExtensions.x-alpha-debug-response}}
+
+            if logging_level_checker("debug"):
+                logging.debug(f"returning response: {json.dumps(result, cls=JSONEncoder)}")
+
+            {{/vendorExtensions.x-alpha-debug-response}}
+            {{#returnType}}
+            {{#vendorExtensions.x-alpha-response-factory}}
+            result = await ResponseFactory().process(
+                response=result,
+                cls={{vendorExtensions.x-alpha-response-factory}}
+            )
+            {{/vendorExtensions.x-alpha-response-factory}}
+            return response_object_function(
+                http_codes=http_codes,
+                status_code={{code}},
+                status_message='{{message}}',
+                data=result,
+                accept_header={{#vendorExtensions.x-content-type}}'{{vendorExtensions.x-content-type}}'{{/vendorExtensions.x-content-type}}{{^vendorExtensions.x-content-type}}request.headers.get("Accept", None){{/vendorExtensions.x-content-type}},
+                supported_accept_headers=[{{#produces}}'{{mediaType}}',{{/produces}}{{^produces}}{{#vendorExtensions.x-preferred-produce}}'{{mediaType}}',{{/vendorExtensions.x-preferred-produce}}{{/produces}}],
+                {{#vendorExtensions.x-alpha-cookie-support}}response_format='flask'{{/vendorExtensions.x-alpha-cookie-support}}
+            )
+            {{/returnType}}
+            {{^returnType}}
+            return response_object_function(
+                http_codes=http_codes,
+                status_code=204,
+                status_message='{{message}}',
+                {{#vendorExtensions.x-alpha-cookie-support}}data=result, response_format='flask'{{/vendorExtensions.x-alpha-cookie-support}}
+            )
+            {{/returnType}}
+            {{/vendorExtensions.x-alpha-raw-response}}
+        {{/is2xx}}
+        {{#is4xx}}
+            {{#vendorExtensions.x-alpha-exception}}
+        except {{vendorExtensions.x-alpha-exception}} as exc:
+            return response_object_function(
+                http_codes=http_codes,
+                status_code={{code}},
+                status_message=f'{exc}',
+                accept_header={{#vendorExtensions.x-content-type}}'{{vendorExtensions.x-content-type}}'{{/vendorExtensions.x-content-type}}{{^vendorExtensions.x-content-type}}connexion.request.headers.get("Accept", None){{/vendorExtensions.x-content-type}},
+                supported_accept_headers=[{{#produces}}'{{mediaType}}',{{/produces}}{{^produces}}{{#vendorExtensions.x-preferred-produce}}'{{mediaType}}',{{/vendorExtensions.x-preferred-produce}}{{/produces}}],
+            )
+            {{/vendorExtensions.x-alpha-exception}}
+        {{/is4xx}}
+        {{#is5xx}}
+            {{#vendorExtensions.x-alpha-exception}}
+        except {{vendorExtensions.x-alpha-exception}} as exc:
+            return response_object_function(
+                http_codes=http_codes,
+                status_code={{code}},
+                status_message=f'{exc}'
+                accept_header={{#vendorExtensions.x-content-type}}'{{vendorExtensions.x-content-type}}'{{/vendorExtensions.x-content-type}}{{^vendorExtensions.x-content-type}}connexion.request.headers.get("Accept", None){{/vendorExtensions.x-content-type}},
+                supported_accept_headers=[{{#produces}}'{{mediaType}}',{{/produces}}{{^produces}}{{#vendorExtensions.x-preferred-produce}}'{{mediaType}}',{{/vendorExtensions.x-preferred-produce}}{{/produces}}],
+            )
+            {{/vendorExtensions.x-alpha-exception}}
+        {{/is5xx}}
+        {{/responses}}
+        except BadRequestException as exc:
+            return response_object_function(
+                http_codes=http_codes,
+                status_code=400,
+                status_message=f'{exc}'
+            )
+        except UnauthorizedException as exc:
+            return response_object_function(
+                http_codes=http_codes,
+                status_code=401,
+                status_message=f'{exc}'
+            )
+        except ForbiddenException as exc:
+            return response_object_function(
+                http_codes=http_codes,
+                status_code=403,
+                status_message=f'{exc}'
+            )
+        except NotFoundException as exc:
+            return response_object_function(
+                http_codes=http_codes,
+                status_code=404,
+                status_message=f'{exc}'
+            )
+        except MethodNotAllowedException as exc:
+            return response_object_function(
+                http_codes=http_codes,
+                status_code=405,
+                status_message=f'{exc}'
+            )
+        except NotAcceptableException as exc:
+            return response_object_function(
+                http_codes=http_codes,
+                status_code=406,
+                status_message=f'{exc}'
+            )
+        except ConflictException as exc:
+            return response_object_function(
+                http_codes=http_codes,
+                status_code=409,
+                status_message=f'{exc}'
+            )
+        except PayloadTooLargeException as exc:
+            return response_object_function(
+                http_codes=http_codes,
+                status_code=413,
+                status_message=f'{exc}'
+            )
+        except UnprocessableContentException as exc:
+            return response_object_function(
+                http_codes=http_codes,
+                status_code=422,
+                status_message=f'{exc}'
+            )
+        except NotImplementedException as exc:
+            return response_object_function(
+                http_codes=http_codes,
+                status_code=501,
+                status_message=f'{exc}'
+            )
+        except BadGatewayException as exc:
+            return response_object_function(
+                http_codes=http_codes,
+                status_code=502,
+                status_message=f'{exc}'
+            )
+        except ServiceUnavailableException as exc:
+            return response_object_function(
+                http_codes=http_codes,
+                status_code=503,
+                status_message=f'{exc}'
+            )
+        except GatewayTimeoutException as exc:
+            return response_object_function(
+                http_codes=http_codes,
+                status_code=504,
+                status_message=f'{exc}'
+            )
+        except ServerErrorException as exc:
+            return response_object_function(
+                http_codes=http_codes,
+                status_code=500,
+                status_message=f'{exc}'
+            )
+        except Exception as exc:
+            traceback.print_exc()
+            return response_object_function(
+                http_codes=http_codes,
+                status_code=500,
+                status_message=f'{exc}'
+            )
+
+
+{{^-last}}
 
 {{/-last}}
 {{/operation}}
