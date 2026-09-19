@@ -67,7 +67,7 @@ CORS(
     app.app,
     origins=origins,
     supports_credentials=supports_credentials or False,
-    resources=container.config.cors.resources() or {},
+    resources=container.config.cors.resources() or r"/*",
     methods=container.config.cors.methods() or ["GET", "HEAD", "POST", "OPTIONS", "PUT", "PATCH", "DELETE"],
     allow_headers=container.config.cors.allow_headers() or "*",
     expose_headers=container.config.cors.expose_headers(),
