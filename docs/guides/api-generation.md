@@ -559,3 +559,29 @@ Custom response headers defined in the container configuration are added to all 
 - `X-Frame-Options: DENY`
 
 When a request is made to the Swagger UI (`/ui`), the generator skips adding any response headers that have "Content-Security-Policy" in their name to avoid breaking the UI.
+
+### Example configuration for CORS and Response Headers
+
+```yaml
+# config.yaml
+cors:
+  # Check https://flask-cors.readthedocs.io/en/latest/api.html#flask_cors.CORS to understand the available options for CORS configuration.
+  origins: ["https://app.example.com"]
+  supports_credentials: true
+  allow_headers: "*"
+  expose_headers: []
+  max_age: 600
+  vary_header: true
+  send_wildcard: false
+  methods: ["GET", "HEAD", "POST", "OPTIONS", "PUT", "PATCH", "DELETE"]
+response:
+  headers:
+    Access-Control-Allow-Methods: "GET, POST, PUT, PATCH, DELETE"
+    Access-Control-Allow-Headers: "Content-Type, Authorization, X-XSRF-TOKEN"
+    Cache-Control: "no-store"
+    Content-Security-Policy: "default-src 'self'"
+    Strict-Transport-Security: "max-age=31536000; includeSubDomains"
+    X-Content-Type-Options: "nosniff"
+    X-Frame-Options: "DENY"
+    X-Custom-Header: "MyValue"
+```

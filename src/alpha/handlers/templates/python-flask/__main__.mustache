@@ -36,9 +36,6 @@ if os.getenv('FLASK_ENV') != 'production':
 
 app = connexion.App(__name__, specification_dir='./openapi/')
 app.app.json_encoder = JSONEncoder
-app.add_api('openapi.yaml',
-            arguments={'title': '{{appName}}'},
-            pythonic_params=True)
 
 compress = Compress()
 compress.init_app(app.app)
@@ -57,18 +54,36 @@ LoggingConfigurator(
 )
 {{/disableLoggingConfigurator}}
 {{#featureCORS}}
-cors_origins = container.config.cors.origins()
-if cors_origins is None:
+origins = container.config.cors.origins()
+supports_credentials = container.config.cors.supports_credentials()
+
+if origins is None:
     logging.info(
         "CORS origins not configured, defaulting to allow all origins"
     )
-    cors_origins = ["*"]
-logging.info(f"Enabling CORS for origins: {cors_origins}")
-CORS(app.app, origins=cors_origins)
+    origins = ["*"]
+logging.info(f"Enabling CORS for origins: {origins}")
+CORS(
+    app.app,
+    origins=origins,
+    supports_credentials=supports_credentials or False,
+    resources=container.config.cors.resources() or r"/*",
+    methods=container.config.cors.methods() or ["GET", "HEAD", "POST", "OPTIONS", "PUT", "PATCH", "DELETE"],
+    allow_headers=container.config.cors.allow_headers() or "*",
+    expose_headers=container.config.cors.expose_headers(),
+    max_age=container.config.cors.max_age(),
+    vary_header=container.config.cors.vary_header() or True,
+    send_wildcard=container.config.cors.send_wildcard() or False,
+)
 {{/featureCORS}}
-
-app.container = container
 {{/initContainerFunction}}
+
+app.add_api(
+    'openapi.yaml',
+    arguments={'title': '{{appName}}'},
+    pythonic_params=True
+)
+{{#initContainerFunction}}app.container = container{{/initContainerFunction}}
 
 
 @app.app.after_request
@@ -93,6 +108,12 @@ def add_headers(response: Response):
         ):
             continue
         response.headers[header] = value
+    {{#featureCORS}}
+    request_origin = request.headers.get("Origin", None)
+    if supports_credentials and request_origin:
+        response.headers["Access-Control-Allow-Origin"] = request_origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+    {{/featureCORS}}
     return response
 
 logging.info(f'Started {{servicePackage}} API on \'{socket.gethostname()}\'')
