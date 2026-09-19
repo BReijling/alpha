@@ -1003,16 +1003,20 @@ components:
           type: string
           example: abc123
         username:
-          type: string          
+          type: string
+          nullable: true
           example: Gebruiker1
         role:
-          type: string          
+          type: string
+          nullable: true
         email:
           type: string
-          format: email          
+          format: email
+          nullable: true
           example: name@example.org
         display_name:
-          type: string          
+          type: string
+          nullable: true
           example: John Doe
         groups:
           type: array
@@ -1028,16 +1032,19 @@ components:
           type: string
           format: date-time
         expires_at:
-          type: string          
+          type: string
+          nullable: true
           format: date-time
         audience:
-          type: array          
+          type: array
+          nullable: true
           items:
             type: string
         admin:
           type: boolean
         pretend_identity:
-          type: object          
+          type: object
+          nullable: true
     Credentials:
       type: object
       properties:
@@ -1086,18 +1093,22 @@ components:
               type: string
               example: admin
             email:
-              type: string              
+              type: string
+              nullable: true
               format: email
               example: user1@test.nl
             display_name:
-              type: string              
+              type: string
+              nullable: true
               example: User One
             permissions:
-              type: array              
+              type: array
+              nullable: true
               items:
                 type: string
             groups:
-              type: array              
+              type: array
+              nullable: true
               items:
                 type: string
             admin:
@@ -1117,10 +1128,12 @@ components:
               type: string
               example: Group1
             description:
-              type: string              
+              type: string
+              nullable: true
               example: This is a group for testing purposes.
             permissions:
-              type: array              
+              type: array
+              nullable: true
               items:
                 type: string
     Feature:
@@ -1135,10 +1148,12 @@ components:
           example: Job title
         min:
           type: integer
-          example: 1          
+          example: 1
+          nullable: true
         max:
           type: integer
-          example: 40          
+          example: 40
+          nullable: true
         dtype:
           type: string
           example: string
@@ -1147,21 +1162,27 @@ components:
           example: generic_features
         required:
           type: boolean
-          example: true          
+          example: true
+          nullable: true
         readonly:
           type: boolean
-          example: false          
+          example: false
+          nullable: true
         value:
           type: boolean
-          example: null          
+          example: null
+          nullable: true
         multiple:
           type: boolean
-          example: true          
+          example: true
+          nullable: true
         options:
           type: array
           items:
-            type: object          
+            type: object
+          nullable: true
           example: [option1, option2, option3]
+
     Files:
       type: object
       properties:
@@ -1220,7 +1241,8 @@ components:
         name:
           type: string
         pet_type:
-          type: string          
+          type: string
+          nullable: true
           enum:
             - DOG
             - CAT
@@ -1233,9 +1255,11 @@ components:
           type: integer
           readOnly: true
         weight:
-          type: number          
+          type: number
+          nullable: true
         good_boy:
-          type: boolean          
+          type: boolean
+          nullable: true
       required:
         - name
         - date_of_birth
