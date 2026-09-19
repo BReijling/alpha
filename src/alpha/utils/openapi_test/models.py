@@ -1,7 +1,10 @@
-from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
-from typing import Any, Literal, Self, Sequence
+from datetime import datetime, timedelta, timezone, date
+from typing import Any, Literal, Self, Sequence, Optional, Type, TypeVar
 from uuid import UUID
+from dataclasses import dataclass, field
+from attrs import define
+from pydantic import BaseModel
+from enum import Enum, auto
 
 from alpha.domain.models.base_model import BaseDomainModel
 from alpha.providers.models.identity import Identity
@@ -119,3 +122,66 @@ class TestToken(BaseDomainModel):
             obj["expires_at"] = self.expires_at.isoformat()
 
         return obj
+
+
+P = TypeVar("P", bound="Pet")
+
+
+class PetType(Enum):
+    NONE = 0
+    DOG = auto()
+    CAT = auto()
+    RABBIT = auto()
+
+
+@dataclass
+class Pet:
+    name: str
+    pet_type: PetType
+    date_of_birth: date
+    weight: Optional[float] = None
+    good_boy: Optional[bool] = None
+    id: int = field(default=1)
+
+    @property
+    def age(self) -> int:
+        delta = date(2022, 2, 2) - self.date_of_birth
+        return delta.days // 365
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "id": 1,
+            "name": self.name,
+            "pet_type": self.pet_type.name,
+            "age": self.age,
+            "weight": self.weight,
+            "good_boy": self.good_boy,
+        }
+
+    @classmethod
+    def factory(cls: Type[P], **kwargs) -> P:
+        return cls(
+            name=kwargs["name"],
+            pet_type=PetType[kwargs["pet_type"]],
+            date_of_birth=kwargs["date_of_birth"],
+            good_boy=kwargs["good_boy"],
+        )
+
+
+@define
+class AttrsPet:
+    name: str
+    pet_type: PetType
+    date_of_birth: date
+    weight: Optional[float] = None
+    good_boy: Optional[bool] = None
+    id: int = 1
+
+
+class PydanticPet(BaseModel):
+    name: str
+    pet_type: PetType
+    date_of_birth: date
+    weight: Optional[float] = None
+    good_boy: Optional[bool] = None
+    id: int = 1

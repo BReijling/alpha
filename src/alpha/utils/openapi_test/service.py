@@ -1,9 +1,6 @@
 from copy import deepcopy
 import datetime
-from dataclasses import dataclass, field
-from enum import Enum, auto
-from typing import Any, Optional, Type, TypeVar
-
+from typing import Any
 import dateutil
 from werkzeug.datastructures import FileStorage
 
@@ -23,51 +20,9 @@ from alpha.exceptions import (
     UnauthorizedException,
     UnprocessableContentException,
 )
+from alpha.utils.openapi_test.models import AttrsPet, Pet, PetType, PydanticPet
 
 from . import exceptions
-
-P = TypeVar("P", bound="Pet")
-
-
-class PetType(Enum):
-    NONE = 0
-    DOG = auto()
-    CAT = auto()
-    RABBIT = auto()
-
-
-@dataclass
-class Pet:
-    name: str
-    pet_type: PetType
-    date_of_birth: datetime.date
-    weight: Optional[float] = None
-    good_boy: Optional[bool] = None
-    id: int = field(default=1)
-
-    @property
-    def age(self) -> int:
-        delta = datetime.date(2022, 2, 2) - self.date_of_birth
-        return delta.days // 365
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "id": 1,
-            "name": self.name,
-            "pet_type": self.pet_type.name,
-            "age": self.age,
-            "weight": self.weight,
-            "good_boy": self.good_boy,
-        }
-
-    @classmethod
-    def factory(cls: Type[P], **kwargs) -> P:
-        return cls(
-            name=kwargs["name"],
-            pet_type=PetType[kwargs["pet_type"]],
-            date_of_birth=kwargs["date_of_birth"],
-            good_boy=kwargs["good_boy"],
-        )
 
 
 class TestService:
@@ -103,15 +58,44 @@ class TestService:
             "The object is not an instance of Pet"
         )
 
+    def check_attrs_class(self, pet: AttrsPet) -> AttrsPet:
+        if isinstance(pet, AttrsPet):
+            return pet
+        raise exceptions.InvalidInstance(
+            "The object is not an instance of AttrsPet; received type: "
+            f"{type(pet)}"
+        )
+
+    def check_pydantic_class(self, pet: PydanticPet) -> PydanticPet:
+        if isinstance(pet, PydanticPet):
+            return pet
+        raise exceptions.InvalidInstance(
+            "The object is not an instance of PydanticPet; received type: "
+            f"{type(pet)}"
+        )
+
     def check_dataclass_return_list(self, pet: Pet) -> list[Pet]:
         if isinstance(pet, Pet):
             pet2 = deepcopy(pet)
             pet2.id = 2
             pet2.name = "Dug"
             return [pet, pet2]
-        # raise exceptions.InvalidInstance(
-        #     "The object is not an instance of Pet"
-        # )
+
+    def check_attrs_class_return_list(self, pet: AttrsPet) -> list[AttrsPet]:
+        if isinstance(pet, AttrsPet):
+            pet2 = deepcopy(pet)
+            pet2.id = 2
+            pet2.name = "Dug"
+            return [pet, pet2]
+
+    def check_pydantic_class_return_list(
+        self, pet: PydanticPet
+    ) -> list[PydanticPet]:
+        if isinstance(pet, PydanticPet):
+            pet2 = deepcopy(pet)
+            pet2.id = 2
+            pet2.name = "Dug"
+            return [pet, pet2]
 
     def handle4xx(self, pet: Pet) -> Any:
         if pet.weight and pet.weight < 0:
