@@ -396,6 +396,58 @@ paths:
       x-alpha-service-name: test_service
       x-alpha-service-method: check_dataclass
       x-alpha-request-factory: true
+  /attrs_class/request_response_factory:
+    post:
+      description: |
+        This endpoint is intended to check/validate:
+          - if the request-factory is able to map the object to a AttrsPet instance
+          - if the response-factory is able to map the AttrsPet instance to a OpenApi model
+      operationId: attrs_class_request_response_factory
+      tags:
+        - Test
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Pet"
+        required: true
+      responses:
+        "201":
+          description: Success
+          x-alpha-response-factory: api_models.MiniPet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MiniPet"
+      x-alpha-service-name: test_service
+      x-alpha-service-method: check_attrs_class
+      x-alpha-request-factory: true
+  /pydantic_class/request_response_factory:
+    post:
+      description: |
+        This endpoint is intended to check/validate:
+          - if the request-factory is able to map the object to a PydanticPet instance
+          - if the response-factory is able to map the PydanticPet instance to a OpenApi model
+      operationId: pydantic_class_request_response_factory
+      tags:
+        - Test
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Pet"
+        required: true
+      responses:
+        "201":
+          description: Success
+          x-alpha-response-factory: api_models.MiniPet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MiniPet"
+      x-alpha-service-name: test_service
+      x-alpha-service-method: check_pydantic_class
+      x-alpha-request-factory: true
   /dataclass/response_factory_list:
     post:
       description: |

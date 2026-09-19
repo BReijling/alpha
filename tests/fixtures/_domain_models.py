@@ -30,6 +30,7 @@ class Address(BaseDomainModel):
     street: str
     house_number: int
     city: str
+    country: str = field(init=False)
 
 
 @dataclass

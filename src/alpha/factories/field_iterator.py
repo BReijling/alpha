@@ -131,6 +131,8 @@ class Field:
 
         Parameters
         ----------
+        key
+            Name of the pydantic field
         obj
             pydantic Field
 
@@ -140,6 +142,7 @@ class Field:
             Field object
         """
         init = getattr(obj, "init", True)
+        init = init if init is not None else True
         type = getattr(obj, "annotation", None)
         default = getattr(obj, "default", MISSING)
 

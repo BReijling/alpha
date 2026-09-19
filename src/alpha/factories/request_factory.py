@@ -160,7 +160,9 @@ class RequestFactory:
                 for item in value
             ]
 
-        if isinstance(cls, DataclassInstance):
+        if isinstance(
+            cls, DataclassInstance | AttrsInstance | PydanticInstance
+        ):
             return self._to_dataclass(value=value, cls=cls)
 
         if isinstance(cls, type(Enum)):

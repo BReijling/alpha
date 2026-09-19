@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- When using the `x-alpha-request-factory` parameter in combination with a service method which used an attrs or pydantic data class in its signature, the request factory did not correctly process the request. The API model was not properly converted to the expected data class instance. This has been fixed to ensure proper handling of attrs and pydantic data classes when using the request factory. Additional integration tests have been added to verify the correct behavior of the request factory an response factory in combination with attrs and pydantic data classes.
+
 ## [0.7.7] - 2026-09-10
 
 ### Fixed

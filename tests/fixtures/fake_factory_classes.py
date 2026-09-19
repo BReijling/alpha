@@ -22,6 +22,8 @@ class FakeClassFactory:
         field: Field[Any],
         factory_classes: FactoryClassesInstance,
     ) -> Any:
+        if field.type is int:
+            return 42
         return self.name
 
 
@@ -29,7 +31,9 @@ class FakeTypeFactory:
     def __init__(self, name: str = "FakeTypeFactory") -> None:
         self.name = name
 
-    def process(self, key: str, value: Any, cls: Any, **kwargs: dict[str, Any]) -> Any:
+    def process(
+        self, key: str, value: Any, cls: Any, **kwargs: dict[str, Any]
+    ) -> Any:
         return self.name
 
 
