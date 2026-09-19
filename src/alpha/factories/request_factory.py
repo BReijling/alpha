@@ -183,7 +183,9 @@ class RequestFactory:
         return value
 
     def _to_dataclass(
-        self, value: OpenAPIModel | Any, cls: DataclassInstance
+        self,
+        value: OpenAPIModel | Any,
+        cls: DataclassInstance | AttrsInstance | PydanticInstance,
     ) -> (
         DataclassInstance
         | AttrsInstance
