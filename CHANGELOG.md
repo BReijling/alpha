@@ -5,11 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.7.8] - 2026-09-19
 
 ### Added
 
-- Add support for additional CORS configuration. This allows for more fine-grained control over which origins, methods, and headers are allowed when making cross-origin requests to the API. This improves compatibility and security for cross-origin requests. CORS configuration can take place through the container configuration.
+- Add support for additional CORS configuration. This allows for more fine-grained control over which origins, methods, and headers are allowed when making cross-origin requests to the API. This improves compatibility and security for cross-origin requests. CORS configuration can take place through the container configuration. With this enhancement it is now possible to use the correct response headers when handling credentials in cross-origin requests, which is required when connecting with the axios library when using the `withCredentials` option.
 
 ### Fixed
 
