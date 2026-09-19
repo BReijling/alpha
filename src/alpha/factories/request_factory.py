@@ -161,7 +161,7 @@ class RequestFactory:
             ]
 
         if isinstance(
-            cls, DataclassInstance | AttrsInstance | PydanticInstance
+            cls, (DataclassInstance | AttrsInstance | PydanticInstance)
         ):
             return self._to_dataclass(value=value, cls=cls)
 

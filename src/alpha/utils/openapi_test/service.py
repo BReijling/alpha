@@ -80,9 +80,22 @@ class TestService:
             pet2.id = 2
             pet2.name = "Dug"
             return [pet, pet2]
-        # raise exceptions.InvalidInstance(
-        #     "The object is not an instance of Pet"
-        # )
+
+    def check_attrs_class_return_list(self, pet: AttrsPet) -> list[AttrsPet]:
+        if isinstance(pet, AttrsPet):
+            pet2 = deepcopy(pet)
+            pet2.id = 2
+            pet2.name = "Dug"
+            return [pet, pet2]
+
+    def check_pydantic_class_return_list(
+        self, pet: PydanticPet
+    ) -> list[PydanticPet]:
+        if isinstance(pet, PydanticPet):
+            pet2 = deepcopy(pet)
+            pet2.id = 2
+            pet2.name = "Dug"
+            return [pet, pet2]
 
     def handle4xx(self, pet: Pet) -> Any:
         if pet.weight and pet.weight < 0:

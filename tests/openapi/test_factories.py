@@ -34,15 +34,15 @@ def test_dataclass_default_factory(post, pet_dict):
 
 
 @pytest.mark.parametrize(
-    "endpoint",
+    "class_type",
     [
-        "/dataclass/request_response_factory",
-        "/attrs_class/request_response_factory",
-        "/pydantic_class/request_response_factory",
+        "dataclass",
+        "attrs_class",
+        "pydantic_class",
     ],
 )
-def test_dataclass_request_response_factories(post, pet_dict, endpoint):
-    response = post(endpoint, pet_dict)
+def test_request_response_factories(post, pet_dict, class_type):
+    response = post(f"/{class_type}/request_response_factory", pet_dict)
 
     assert response.status_code == 201
 
@@ -56,8 +56,16 @@ def test_dataclass_request_response_factories(post, pet_dict, endpoint):
         assert response.json["data"]["pet_type"]
 
 
-def test_dataclass_response_factory_return_list(post, pet_dict):
-    response = post("/dataclass/response_factory_list", pet_dict)
+@pytest.mark.parametrize(
+    "class_type",
+    [
+        "dataclass",
+        "attrs_class",
+        "pydantic_class",
+    ],
+)
+def test_response_factory_return_list(post, pet_dict, class_type):
+    response = post(f"/{class_type}/response_factory_list", pet_dict)
 
     assert response.status_code == 201
 

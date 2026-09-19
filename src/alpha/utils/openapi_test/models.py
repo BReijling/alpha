@@ -1,11 +1,10 @@
 from datetime import datetime, timedelta, timezone, date
-from typing import Any, Literal, Self, Sequence
+from typing import Any, Literal, Self, Sequence, Optional, Type, TypeVar
 from uuid import UUID
 from dataclasses import dataclass, field
 from attrs import define
 from pydantic import BaseModel
 from enum import Enum, auto
-from typing import Optional, Type, TypeVar
 
 from alpha.domain.models.base_model import BaseDomainModel
 from alpha.providers.models.identity import Identity
