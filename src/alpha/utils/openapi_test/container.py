@@ -175,6 +175,7 @@ def init_container():
             },
             "cors": {
                 "origins": ["*"],
+                "supports_credentials": True,
             },
             "jwt": {
                 "secret": "supersecretkey0123456789",
