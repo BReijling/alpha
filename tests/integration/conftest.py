@@ -122,7 +122,7 @@ def psql_database() -> SqlAlchemyDatabase:
         username=os.getenv("TEST_PSQL_USERNAME", "postgres"),
         password=os.getenv("TEST_PSQL_PASSWORD", "postgres"),
         db_name=os.getenv("TEST_PSQL_DATABASE", "postgres"),
-        db_type="postgresql",
+        db_type="postgresql+psycopg2",
         create_tables=True,
         mapper=FakeMapper,
     )
@@ -156,7 +156,7 @@ def app_database() -> SqlAlchemyDatabase:
         username=os.getenv("TEST_PSQL_USERNAME", "postgres"),
         password=os.getenv("TEST_PSQL_PASSWORD", "postgres"),
         db_name=os.getenv("TEST_PSQL_DATABASE", "postgres"),
-        db_type="postgresql",
+        db_type="postgresql+psycopg2",
         create_tables=True,
         mapper=AppMapper,
     )

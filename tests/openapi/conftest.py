@@ -176,7 +176,7 @@ def psql_database() -> Generator[SqlAlchemyDatabase, None, None]:
         username=os.getenv("TEST_PSQL_USERNAME", "postgres"),
         password=os.getenv("TEST_PSQL_PASSWORD", "postgres"),
         db_name=os.getenv("TEST_PSQL_DATABASE", "postgres"),
-        db_type="postgresql",
+        db_type="postgresql+psycopg2",
         create_schema=False,
         create_tables=False,
         mapper=TestMapper,

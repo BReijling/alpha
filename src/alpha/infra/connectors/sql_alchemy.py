@@ -32,7 +32,7 @@ class SqlAlchemyDatabase:
     db_name
         Database name, by default ""
     db_type
-        Database type, by default "postgresql"
+        Database type and driver, by default "postgresql+psycopg2"
     conn_str
         Connection string. Can be used instead of host, port, username,
         password, and db_name, by default None
@@ -55,7 +55,7 @@ class SqlAlchemyDatabase:
         username: str = "",
         password: str = "",
         db_name: str = "",
-        db_type: str = "postgresql",
+        db_type: str = "postgresql+psycopg2",
         conn_str: str | None = None,
         schema_name: str = "public",
         create_schema: bool = True,
