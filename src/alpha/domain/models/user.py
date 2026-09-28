@@ -205,3 +205,16 @@ class User(LifeCycleBase, BaseDomainModel):
         self.admin = obj.admin
 
         return cast(DomainModel, self)
+
+    def update_from_identity(self, identity: Identity) -> Self:
+        """Update the User instance with data from an Identity instance. Only
+        the email and display name are updated.
+
+        Parameters
+        ----------
+        identity
+            Identity object to update from.
+        """
+        self.email = identity.email
+        self.display_name = identity.display_name
+        return self

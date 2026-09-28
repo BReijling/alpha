@@ -62,6 +62,9 @@ class TestUser(LifeCycleBase, BaseDomainModel):
             display_name=identity.display_name,
         )
 
+    def update_from_identity(self, identity: Identity) -> None:
+        return None
+
 
 @dataclass
 class TestToken(BaseDomainModel):

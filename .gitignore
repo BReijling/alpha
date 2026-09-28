@@ -154,7 +154,7 @@ venv.bak/
 .ropeproject
 
 # mkdocs documentation
-/site
+site/
 
 # mypy
 .mypy_cache/
@@ -214,4 +214,5 @@ api/
 typings/
 refresh_tokens.json
 .DS_Store
+.vscode/
 templates/
