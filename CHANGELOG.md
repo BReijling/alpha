@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.9] - 2026-09-28
+
+### Changed
+
+- The `display_name` and `email` attributes of an `Identity` model takes precedence over the attributes of the same name in a `User` model. Therefore, when `Identity.display_name` or `Identity.email` is set, it will override `User.display_name` or `User.email`. An `Identity` instance is derived from a provider, which is considered the source of truth for identity-related information.
+
 ## [0.7.8] - 2026-09-19
 
 ### Added
