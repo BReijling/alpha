@@ -29,6 +29,15 @@ def test_user_from_identity(sample_user, identity):
     assert user_from_identity.permissions == []
 
 
+def test_user_update_from_identity(sample_user, identity):
+    assert sample_user.email != identity.email
+    assert sample_user.display_name != identity.display_name
+
+    sample_user.update_from_identity(identity)
+    assert sample_user.email == identity.email
+    assert sample_user.display_name == identity.display_name
+
+
 def test_user_to_dict(sample_user):
     user_dict = sample_user.to_dict()
     assert user_dict["id"] is None

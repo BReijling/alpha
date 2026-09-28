@@ -147,7 +147,9 @@ def init_container():
                 "username": os.getenv("TEST_PSQL_USERNAME", "postgres"),
                 "password": os.getenv("TEST_PSQL_PASSWORD", "postgres"),
                 "db_name": os.getenv("TEST_PSQL_DB_NAME", "postgres"),
-                "db_type": os.getenv("TEST_PSQL_DB_TYPE", "postgresql"),
+                "db_type": os.getenv(
+                    "TEST_PSQL_DB_TYPE", "postgresql+psycopg2"
+                ),
             },
             "authentication": {
                 "use_cookies": True,

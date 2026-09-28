@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import Enum
 from typing import Mapping, Any, Self, Sequence, TYPE_CHECKING, cast
 from datetime import datetime, timezone
 
@@ -321,18 +322,24 @@ class Identity:
             User object to update from.
         """
         self.username = user.username
-        if not self.email:
-            self.email = user.email
-        if not self.display_name:
-            self.display_name = user.display_name
+        self.role = (
+            user.role.name if isinstance(user.role, Enum) else user.role
+        )
+        self.admin = user.admin
         for permission in user.permissions or []:
             self.permissions = self._append_on_sequence(
                 self.permissions, str(permission)
             )
         for group in user.groups or []:
             self.groups = self._append_on_sequence(self.groups, str(group))
-        self.role = user.role  # type: ignore
-        self.admin = user.admin
+
+        # Update email and display name only if they are not already set. This
+        # ensures that existing values which are provided by an identity
+        # provider are not overwritten.
+        if not self.email:
+            self.email = user.email
+        if not self.display_name:
+            self.display_name = user.display_name
 
     def update_from_groups(self, groups: list[Group]) -> None:
         """Update the Identity permissions with data from a list of Group

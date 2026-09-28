@@ -21,6 +21,9 @@ def test_authentication_service_with_database_provider(
         uow.groups.add(group3)
         uow.commit()
 
+    assert fred_object.username == user_fred.username
+    assert fred_object.email == user_fred.email
+    assert fred_object.display_name == user_fred.display_name
     assert fred_object.groups == ["group2", "group3"]
     assert fred_object.permissions == []
     assert fred_object.admin is True
@@ -44,6 +47,7 @@ def test_authentication_service_with_database_provider(
     )
     assert identity.username == user_fred.username
     assert identity.email == user_fred.email
+    assert identity.display_name == user_fred.display_name
     assert identity.groups == ["group2", "group3"]
     assert identity.permissions == ["read", "write"]
     assert identity.has_admin_privileges is True
@@ -61,6 +65,7 @@ def test_authentication_service_with_database_provider(
     )
     assert identity.username == static_user.username
     assert identity.email == static_user.email
+    assert identity.display_name == static_user.display_name
     assert identity.groups == static_user.groups
     assert identity.permissions == ["read", "write"]
     assert identity.has_admin_privileges is False

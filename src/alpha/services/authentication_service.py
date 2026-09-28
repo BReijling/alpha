@@ -622,12 +622,13 @@ class AuthenticationService:
             )
             if user:
                 identity.update_from_user(user)
+                user.update_from_identity(identity)
 
             else:
                 # Create new user from identity if not found in database
                 user = self._user_model.from_identity(identity)
                 users.add(user)
-                self.uow.commit()
+            self.uow.commit()
 
         return identity
 
