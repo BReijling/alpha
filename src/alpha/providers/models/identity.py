@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import Enum
 from typing import Mapping, Any, Self, Sequence, TYPE_CHECKING, cast
 from datetime import datetime, timezone
 
@@ -321,7 +322,9 @@ class Identity:
             User object to update from.
         """
         self.username = user.username
-        self.role = str(user.role)
+        self.role = (
+            user.role.name if isinstance(user.role, Enum) else user.role
+        )
         self.admin = user.admin
         for permission in user.permissions or []:
             self.permissions = self._append_on_sequence(
