@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.10] - 2026-10-10
+
+### Fixed
+
+- Corrected the handling of Swagger UI requests to properly identify requests to the `/ui` endpoint, ensuring that response headers are correctly applied. This fixed an issue where a white screen would appear when accessing the Swagger UI when using a non root path for the API.
+
 ## [0.7.9] - 2026-09-28
 
 ### Changed
