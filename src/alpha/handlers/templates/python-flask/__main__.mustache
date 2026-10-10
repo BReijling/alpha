@@ -89,9 +89,7 @@ app.add_api(
 @app.app.after_request
 def add_headers(response: Response):
     response_headers = container.config.response.headers()
-    is_swagger_ui_request = request.path == "/ui" or request.path.startswith(
-        "/ui/"
-    )
+    is_swagger_ui_request = "ui" in request.path.strip("/").split("/")
 
     if response_headers is None:
         response_headers = {
