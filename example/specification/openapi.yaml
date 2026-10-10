@@ -8,7 +8,8 @@ paths:
   /:
     get:
       operationId: health_check
-      x-alpha-custom-function: 'dict(status="ok")'
+      x-alpha-service-name: support_service
+      x-alpha-service-method: health_check
       responses:
         '200':
           description: OK
