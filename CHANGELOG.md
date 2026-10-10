@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Corrected the handling of Swagger UI requests to properly identify requests to the `/ui` endpoint, ensuring that response headers are correctly applied. This fixed an issue where a white screen would appear when accessing the Swagger UI when using a non root path for the API.
+- Corrected the handling of Swagger UI requests to properly identify requests to the `/ui` endpoint, ensuring that response headers are correctly applied. This fixed an issue where a white screen would appear when accessing the Swagger UI when using a non-root path for the API.
 
 ## [0.7.9] - 2026-09-28
 
