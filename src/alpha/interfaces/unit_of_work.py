@@ -9,18 +9,22 @@ from typing import (
     runtime_checkable,
 )
 
-from sqlalchemy.orm.session import Session
+UOW = TypeVar("UOW", bound="UnitOfWork", covariant=True)
+"""A covariant TypeVar bound to UnitOfWork.
 
-UOW = TypeVar("UOW", bound="UnitOfWork")
+This is used to represent the `Self` type for subclasses of `UnitOfWork`,
+allowing static type checkers to correctly infer the specific subclass
+instance within a `with` statement context.
+"""
 
 
 @runtime_checkable
-class UnitOfWork(Protocol):
-    """Unit of Work protocol defining the interface for a unit of work 
+class UnitOfWork(Protocol[UOW]):
+    """Unit of Work protocol defining the interface for a unit of work
     implementation.
     """
 
-    def __enter__(self: UOW) -> UOW:
+    def __enter__(self) -> UOW:
         """Enter the runtime context related to this object.
 
         Returns
@@ -31,8 +35,7 @@ class UnitOfWork(Protocol):
         ...
 
     def __exit__(self, *args: Any) -> None:
-        """Exit the runtime context related to this object.
-        """
+        """Exit the runtime context related to this object."""
         ...
 
     def commit(self) -> None:
@@ -49,22 +52,10 @@ class UnitOfWork(Protocol):
 
     def refresh(self, obj: object) -> None:
         """Refresh the state of the given object from the database.
-        
+
         Parameters
         ----------
         obj
             The object to refresh.
         """
         ...
-
-    @property
-    def session(self) -> Session:
-        """Get the current session.
-
-        Returns
-        -------
-        Session
-            The current SQLAlchemy session.
-        """
-        ...
-        

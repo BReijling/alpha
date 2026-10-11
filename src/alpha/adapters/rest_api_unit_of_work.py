@@ -7,7 +7,6 @@ import requests
 from alpha.interfaces.http_client import HTTPClient
 from alpha.repositories.models.repository_model import RepositoryModel
 
-
 UOW = TypeVar("UOW", bound="RestApiUnitOfWork")
 
 
@@ -88,6 +87,11 @@ class RestApiUnitOfWork:
         """Finalize the Unit of Work context."""
         if self._session:
             self._session.close()
+
+        for repo in self._repositories:
+            self.__delattr__(
+                repo.name,
+            )
 
     def commit(self) -> None:
         raise NotImplementedError("RestApiUnitOfWork does not support commit")
