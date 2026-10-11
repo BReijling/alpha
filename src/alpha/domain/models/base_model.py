@@ -43,10 +43,15 @@ class BaseDomainModel:
             ]
         elif hasattr(self, "__pydantic_fields__"):
             attributes = getattr(self, "__pydantic_fields__").keys()
-        elif hasattr(self, "__slots__"):
-            attributes = list(getattr(self, "__slots__"))
         else:
-            attributes = list(getattr(self, "__dict__").keys())
+            attributes = list(getattr(self, "__dict__", {}).keys())
+            for cls in type(self).__mro__:
+                slots = cls.__dict__.get("__slots__", ())
+                if isinstance(slots, str):
+                    slots = (slots,)
+                attributes.extend(
+                    slot for slot in slots if hasattr(self, slot)
+                )
 
         for attr in attributes:
             if not attr.startswith("_"):
