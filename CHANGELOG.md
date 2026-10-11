@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.11] - 2026-10-11
+
+### Fixed
+
+- Removed the dataclass decorator from the BaseDomainModel class. It should be a neutral class so it can be used as a base for various types of models without imposing dataclass behavior. This was done to ensure compatibility with native, attrs, and pydantic data classes as well as other potential model types.
+
 ## [0.7.10] - 2026-10-10
 
 ### Fixed

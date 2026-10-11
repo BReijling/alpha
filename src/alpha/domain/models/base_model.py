@@ -1,5 +1,7 @@
-from dataclasses import dataclass
+"""Base domain model class and type variables for domain models."""
+
 from typing import Any, TypeVar
+
 
 DomainModel = TypeVar("DomainModel", bound="BaseDomainModel")
 DomainModelCovariant = TypeVar(
@@ -10,7 +12,6 @@ DomainModelContravariant = TypeVar(
 )
 
 
-@dataclass
 class BaseDomainModel:
     """Base class for all domain models which can be inherited by all domain
     models in the application.
@@ -31,7 +32,28 @@ class BaseDomainModel:
             A dictionary representation of the domain model instance.
         """
         obj: dict[str, Any] = {}
-        for attr in self.__dataclass_fields__.keys():
+
+        attributes: list[str] = []
+
+        if hasattr(self, "__dataclass_fields__"):
+            attributes = getattr(self, "__dataclass_fields__").keys()
+        elif hasattr(self, "__attrs_attrs__"):
+            attributes = [
+                field.name for field in getattr(self, "__attrs_attrs__")
+            ]
+        elif hasattr(self, "__pydantic_fields__"):
+            attributes = getattr(self, "__pydantic_fields__").keys()
+        else:
+            attributes = list(getattr(self, "__dict__", {}).keys())
+            for cls in type(self).__mro__:
+                slots = cls.__dict__.get("__slots__", ())
+                if isinstance(slots, str):
+                    slots = (slots,)
+                attributes.extend(
+                    slot for slot in slots if hasattr(self, slot)
+                )
+
+        for attr in attributes:
             if not attr.startswith("_"):
                 obj[attr] = getattr(self, attr)
             if attr == "_id":
