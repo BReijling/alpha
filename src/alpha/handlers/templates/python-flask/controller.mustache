@@ -231,11 +231,12 @@ def {{operationId}}(
         # Get auth token payload and verify identity
         payload = token_factory.get_payload(auth_token)
         identity = Identity.from_dict(payload)
-        verify_identity(identity,
-            roles=roles,
-            groups=groups,
-            permissions=permissions,
-        )
+        if not identity.has_admin_privileges:
+            verify_identity(identity,
+                roles=roles,
+                groups=groups,
+                permissions=permissions,
+            )
         {{/isBasicBearer}}
         {{#isApiKey}}
         # This needs to be replaced by code to authenticate with an API key

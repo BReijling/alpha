@@ -117,6 +117,7 @@ class User(LifeCycleBase, BaseDomainModel):
             username=identity.username,
             email=identity.email,
             display_name=identity.display_name,
+            admin=identity.admin,
         )
 
     def to_dict(self) -> dict[str, Any]:

@@ -60,6 +60,7 @@ class TestUser(LifeCycleBase, BaseDomainModel):
             username=identity.username,
             email=identity.email,
             display_name=identity.display_name,
+            admin=identity.admin,
         )
 
     def update_from_identity(self, identity: Identity) -> None:

@@ -215,4 +215,4 @@ typings/
 refresh_tokens.json
 .DS_Store
 .vscode/
-templates/
+./templates/
