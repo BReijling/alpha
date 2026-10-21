@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- The `PasswordCredentialsUpdate` model has been introduced to handle updates to password credentials, including the new password.
+- The `AuthenticationService` class now includes an `update_password` method that accepts a `PasswordCredentialsUpdate` instance to update a user's password.
+
+### Changed
+
+- The `AuthenticationService` class now uses the `static_users` parameter instead of the deprecated `static_user` parameter. The `static_users` parameter accepts a list of static user instances, allowing multiple static users to be configured. The `static_user` parameter will be removed in a future release.
+
 ## [0.7.12] - 2026-10-14
 
 ### Fixed

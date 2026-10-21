@@ -11,7 +11,10 @@ from alpha.interfaces.sql_repository import SqlRepository
 from alpha.interfaces.unit_of_work import UnitOfWork
 from alpha.providers.models.identity import Identity
 from alpha.providers.models.token import Token
-from alpha.providers.models.credentials import PasswordCredentials
+from alpha.providers.models.credentials import (
+    PasswordCredentials,
+    PasswordCredentialsUpdate,
+)
 from alpha.interfaces.providers import IdentityProvider
 from alpha.repositories.refresh.memory_repository import (
     MemoryRefreshRepository,
@@ -80,6 +83,7 @@ class AuthenticationService:
         refresh_repository: RefreshRepository | None = None,
         refresh_identity_on_refresh: bool = False,
         static_user: User | None = None,
+        static_users: list[User] | None = None,
     ) -> None:
         """Initialize the AuthenticationService with the provided
         configuration.
@@ -181,6 +185,13 @@ class AuthenticationService:
             If provided, this user will be authenticated if the credentials
             match, bypassing the identity provider. This can be used for
             development/testing or as a fallback user and should not be used in
+            production environments. This parameter is deprecated in favor of
+            static_users and will be removed in a future release.
+        static_users
+            List of static users to use for authentication, by default None.
+            If provided, these users will be authenticated if the credentials
+            match, bypassing the identity provider. This can be used for
+            development/testing or as fallback users and should not be used in
             production environments.
 
         Raises
@@ -221,7 +232,9 @@ class AuthenticationService:
             )
         )
         self._refresh_identity_on_refresh = refresh_identity_on_refresh
-        self._static_user = static_user
+        self._static_users = static_users or []
+        if static_user is not None:
+            self._static_users.append(static_user)
 
         if self._use_refresh_tokens and not self._use_cookies:
             raise ValueError(
@@ -263,14 +276,23 @@ class AuthenticationService:
         """
         # Check if static user is configured and matches the provided
         # credentials
-        if (
-            self._static_user
-            and self._static_user.username is not None
-            and self._static_user.password is not None
-            and credentials.username == self._static_user.username
-            and credentials.password == self._static_user.password
+        if self._static_users and any(
+            user.username is not None
+            and user.password is not None
+            and credentials.username == user.username
+            and credentials.password == user.password
+            for user in self._static_users
         ):
-            identity = self._identity_model.from_user(self._static_user)
+            identity = self._identity_model.from_user(
+                next(
+                    user
+                    for user in self._static_users
+                    if user.username is not None
+                    and user.password is not None
+                    and credentials.username == user.username
+                    and credentials.password == user.password
+                )
+            )
 
         # Use the identity provider to authenticate the user and retrieve their
         # identity
@@ -501,6 +523,22 @@ class AuthenticationService:
         """
         if self._identity_provider.authenticate(credentials):
             self._identity_provider.change_password(credentials, new_password)
+
+    def update_password(
+        self,
+        update_credentials: PasswordCredentialsUpdate,
+    ) -> None:
+        """Update the password for a user.
+
+        Parameters
+        ----------
+        update_credentials
+            Update containing the new password for the user.
+        """
+        if self._identity_provider.authenticate(update_credentials):
+            self._identity_provider.change_password(
+                update_credentials, update_credentials.new_password
+            )
 
     def revoke_tokens(self, identity: Identity, subject: str) -> None:
         """Revoke all refresh tokens for a given subject.

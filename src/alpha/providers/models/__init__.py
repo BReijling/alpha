@@ -4,7 +4,10 @@ from alpha.providers.models.identity import (
     DEFAULT_AD_MAPPINGS,
     AD_SEARCH_ATTRIBUTES,
 )
-from alpha.providers.models.credentials import PasswordCredentials
+from alpha.providers.models.credentials import (
+    PasswordCredentials,
+    PasswordCredentialsUpdate,
+)
 from alpha.providers.models.token import Token
 
 __all__ = [
@@ -13,5 +16,6 @@ __all__ = [
     "DEFAULT_AD_MAPPINGS",
     "AD_SEARCH_ATTRIBUTES",
     "PasswordCredentials",
+    "PasswordCredentialsUpdate",
     "Token",
 ]

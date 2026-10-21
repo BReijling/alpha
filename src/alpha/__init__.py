@@ -1,4 +1,5 @@
 from importlib.metadata import version
+from typing import Any
 
 from alpha.adapters.rest_api_unit_of_work import RestApiUnitOfWork
 from alpha.adapters.sqla_unit_of_work import SqlAlchemyUnitOfWork
@@ -55,7 +56,10 @@ from alpha.providers.models.identity import (
     DEFAULT_AD_MAPPINGS,
     AD_SEARCH_ATTRIBUTES,
 )
-from alpha.providers.models.credentials import PasswordCredentials
+from alpha.providers.models.credentials import (
+    PasswordCredentials,
+    PasswordCredentialsUpdate,
+)
 from alpha.providers.models.token import Token
 from alpha.providers.oidc_provider import (
     OIDCProvider,
@@ -165,6 +169,7 @@ __all__ = [
     "DEFAULT_AD_MAPPINGS",
     "AD_SEARCH_ATTRIBUTES",
     "PasswordCredentials",
+    "PasswordCredentialsUpdate",
     "Token",
     "OIDCProvider",
     "KeyCloakProvider",
@@ -213,7 +218,7 @@ def _ensure_ast_str_compat() -> None:
         return
 
     class _StrCompat(ast.Constant):
-        def __new__(cls, s: str = "", **kwargs):  # noqa: N804
+        def __new__(cls, s: str = "", **kwargs: Any):  # type: ignore # noqa: N804
             return ast.Constant(value=s, **kwargs)
 
     setattr(ast, "Str", _StrCompat)
