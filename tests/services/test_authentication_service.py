@@ -1,6 +1,7 @@
 import pytest
 
 from alpha import exceptions
+from alpha.providers.models.credentials import PasswordCredentialsUpdate
 from alpha.providers.models.identity import Identity
 from alpha.services.authentication_service import AuthenticationService
 from alpha.services.models.cookie import Cookie
@@ -17,7 +18,7 @@ def test_authentication_service_init(authentication_service, fake_static_user):
         authentication_service._users_repository_name
         == "authentication_service"
     )
-    assert authentication_service._static_user == fake_static_user
+    assert authentication_service._static_users == [fake_static_user]
 
     with pytest.raises(ValueError):
         AuthenticationService(
@@ -164,6 +165,21 @@ def test_authentication_service_change_password(
     # Since we're using a fake provider, we can't verify the password change
     # directly. In a real test, you would check that the password was updated
     # in the identity provider or database.
+    assert (
+        authentication_service._identity_provider._new_password == new_password
+    )
+
+
+def test_authentication_service_update_password(
+    authentication_service, fake_user_credentials
+):
+    new_password = "new_fake_password"
+    update_credentials = PasswordCredentialsUpdate(
+        username=fake_user_credentials.username,
+        password=fake_user_credentials.password,
+        new_password=new_password,
+    )
+    authentication_service.update_password(update_credentials)
     assert (
         authentication_service._identity_provider._new_password == new_password
     )
