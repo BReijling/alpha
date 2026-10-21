@@ -232,7 +232,7 @@ class AuthenticationService:
             )
         )
         self._refresh_identity_on_refresh = refresh_identity_on_refresh
-        self._static_users = static_users or []
+        self._static_users = list(static_users or [])
         if static_user is not None:
             self._static_users.append(static_user)
 
