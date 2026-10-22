@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, timezone, date
-from typing import Any, Literal, Self, Sequence, Optional, Type, TypeVar
+from typing import Any, Literal, Self, Optional, Type, TypeVar
 from uuid import UUID
 from dataclasses import dataclass, field
 from attrs import define

@@ -494,10 +494,10 @@ class SqlAlchemyRepository(Generic[DomainModel]):
         DomainModel
             The updated domain model instance.
         """
-        obj = obj.update(new)
+        obj = obj.update(new)  # type: ignore
         self.session.flush()
         self.session.refresh(obj)
-        return obj
+        return obj  # type: ignore
 
     def view(
         self,
