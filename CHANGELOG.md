@@ -25,6 +25,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `DatabaseProvider` now updates the `laast_login` attribute of `User` objects whenever they successfully authenticate.
 - The `UserLifecycleManagement` now includes the management of `Permission` objects.
 - The `UserLifecycleManagement` now has been upgraded to provide enhanced lifecycle management for `User` objects, including handling associated permissions and group memberships.
+- The `PasswordCredentialsUpdate` model has been introduced to handle updates to password credentials, including the new password.
+- The `AuthenticationService` class now includes an `update_password` method that accepts a `PasswordCredentialsUpdate` instance to update a user's password.
+- The `AuthenticationService` class now uses the `static_users` parameter instead of the deprecated `static_user` parameter. The `static_users` parameter accepts a list of static user instances, allowing multiple static users to be configured. The `static_user` parameter will be removed in a future release.
 
 ## [0.7.12] - 2026-10-14
 

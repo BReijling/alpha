@@ -94,7 +94,7 @@ def authentication_service(
         identity_provider=fake_identity_provider,
         uow=fake_uow,
         users_repository_name="authentication_service",
-        static_user=fake_static_user,
+        static_users=[fake_static_user],
     )
 
 
@@ -106,7 +106,7 @@ def authentication_service_merge_groups(
         identity_provider=fake_identity_provider,
         uow=fake_uow,
         users_repository_name="authentication_service",
-        static_user=fake_static_user,
+        static_users=[fake_static_user],
         merge_with_database_users=True,
         merge_with_database_groups=True,
     )
@@ -120,7 +120,7 @@ def authentication_service_use_cookies(
         identity_provider=fake_identity_provider,
         uow=fake_uow,
         users_repository_name="authentication_service",
-        static_user=fake_static_user,
+        static_users=[fake_static_user],
         use_cookies=True,
     )
 
@@ -189,7 +189,7 @@ def authentication_service_use_refresh_tokens(
         identity_provider=fake_identity_provider,
         uow=fake_uow,
         users_repository_name="authentication_service",
-        static_user=fake_static_user,
+        static_users=[fake_static_user],
         use_cookies=True,
         use_refresh_tokens=True,
         refresh_repository=file_refresh_repository,
