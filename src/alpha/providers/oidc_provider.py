@@ -13,6 +13,7 @@ from alpha.providers.models.credentials import PasswordCredentials
 from alpha.providers.models.identity import Identity
 from alpha.providers.models.token import Token
 
+
 DEFAULT_OIDC_MAPPINGS: dict[str, str | Sequence[str]] = {
     "subject": "sub",
     "username": "preferred_username",

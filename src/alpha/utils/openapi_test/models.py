@@ -7,6 +7,11 @@ from pydantic import BaseModel
 from enum import Enum, auto
 
 from alpha.domain.models.base_model import BaseDomainModel
+from alpha.domain.models.permission import Permission
+from alpha.exceptions import AlreadyExistsException, NotFoundException
+from alpha.mixins.models.from_dict import FromDictMixin
+from alpha.mixins.models.patchable import PatchableMixin
+from alpha.mixins.models.updatable import UpdatableMixin
 from alpha.providers.models.identity import Identity
 from alpha.utils.secret_generator import generate_secret
 
@@ -20,16 +25,25 @@ class LifeCycleBase:
 
 
 @dataclass(kw_only=True)
-class TestGroup(LifeCycleBase, BaseDomainModel):
+class TestGroup(LifeCycleBase, BaseDomainModel, UpdatableMixin, FromDictMixin):
     id: UUID | int | str | None = None
     name: str | None = None
     description: str | None = None
-    permissions: Sequence[str] | None = None
+    permissions: list[str] | None = None
     is_active: bool = True
+
+    @property
+    def __update_fields__(self) -> list[str]:
+        return [
+            "name",
+            "description",
+            "permissions",
+            "is_active",
+        ]
 
 
 @dataclass(kw_only=True)
-class TestUser(LifeCycleBase, BaseDomainModel):
+class TestUser(LifeCycleBase, BaseDomainModel, UpdatableMixin, FromDictMixin):
     id: UUID | int | str | None = None
     username: str | None = None
     password: str | None = None
@@ -37,10 +51,20 @@ class TestUser(LifeCycleBase, BaseDomainModel):
     email: str | None = None
     phone: str | None = None
     display_name: str | None = None
-    permissions: Sequence[str] | None = None
-    groups: Sequence[str | TestGroup] | None = None
+    permissions: list[str] | None = None
+    groups: list[TestGroup] = field(default_factory=list[TestGroup])
     is_active: bool = True
     admin: bool = False
+
+    @property
+    def __update_fields__(self) -> list[str]:
+        return [
+            "username",
+            "display_name",
+            "permissions",
+            "groups",
+            "admin",
+        ]
 
     @classmethod
     def from_identity(cls, identity: Identity) -> Self:
@@ -189,3 +213,166 @@ class PydanticPet(BaseModel):
     weight: Optional[float] = None
     good_boy: Optional[bool] = None
     id: int = 1
+
+
+# Models for alternative test entities
+@dataclass(kw_only=True)
+class AltTestGroup(
+    LifeCycleBase, BaseDomainModel, UpdatableMixin, PatchableMixin
+):
+    id: UUID | None = None
+    name: str | None = None
+    description: str | None = None
+    permissions: list[Permission] = field(default_factory=list[Permission])
+
+    @property
+    def __patch_fields__(self) -> list[str]:
+        return ["name", "description"]
+
+    @property
+    def __update_fields__(self) -> list[str]:
+        return ["name", "description"]
+
+    def add_permission(self, permission: str | Permission) -> None:
+        if permission not in self.permissions:
+            self.permissions.append(permission)
+        else:
+            raise AlreadyExistsException(
+                f"Permission '{permission}' is already added to the user."
+            )
+
+    def remove_permission(self, permission: str | Permission) -> None:
+        if permission in self.permissions:
+            self.permissions.remove(permission)
+        else:
+            raise NotFoundException(
+                f"Permission '{permission}' is not associated with the user."
+            )
+
+    def to_dict(self) -> dict[str, Any]:
+        permissions = [permission.to_dict() for permission in self.permissions]
+        created_at = (
+            self.created_at.isoformat()
+            if hasattr(self, "created_at") and self.created_at is not None
+            else None
+        )
+        modified_at = (
+            self.modified_at.isoformat()
+            if hasattr(self, "modified_at") and self.modified_at is not None
+            else None
+        )
+
+        return {
+            "id": self.id,
+            "name": self.name,
+            "description": self.description,
+            "permissions": permissions,
+            "created_by": self.created_by
+            if hasattr(self, "created_by") and self.created_by is not None
+            else None,
+            "created_at": created_at,
+            "modified_by": self.modified_by
+            if hasattr(self, "modified_by") and self.modified_by is not None
+            else None,
+            "modified_at": modified_at,
+        }
+
+
+@dataclass(kw_only=True)
+class AltTestUser(
+    LifeCycleBase, BaseDomainModel, UpdatableMixin, PatchableMixin
+):
+    id: UUID | None = None
+    username: str
+    password: str | None = None
+    display_name: str | None = None
+    permissions: list[Permission] = field(default_factory=list[Permission])
+    groups: list[AltTestGroup] = field(default_factory=list[AltTestGroup])
+    admin: bool = False
+    last_login: datetime | None = None
+
+    @property
+    def __patch_fields__(self) -> list[str]:
+        return [
+            "username",
+            "display_name",
+            "admin",
+        ]
+
+    @property
+    def __update_fields__(self) -> list[str]:
+        return [
+            "username",
+            "display_name",
+            "admin",
+        ]
+
+    def add_group(self, group: str | AltTestGroup) -> None:
+        if group not in self.groups:
+            self.groups.append(group)
+        else:
+            raise AlreadyExistsException(
+                f"Group '{group}' is already added to the user."
+            )
+
+    def add_permission(self, permission: str | Permission) -> None:
+        if permission not in self.permissions:
+            self.permissions.append(permission)
+        else:
+            raise AlreadyExistsException(
+                f"Permission '{permission}' is already added to the user."
+            )
+
+    def remove_group(self, group: str | AltTestGroup) -> None:
+        if group in self.groups:
+            self.groups.remove(group)
+        else:
+            raise NotFoundException(
+                f"Group '{group}' is not associated with the user."
+            )
+
+    def remove_permission(self, permission: str | Permission) -> None:
+        if permission in self.permissions:
+            self.permissions.remove(permission)
+        else:
+            raise NotFoundException(
+                f"Permission '{permission}' is not associated with the user."
+            )
+
+    def to_dict(self) -> dict[str, Any]:
+        permissions = [permission.to_dict() for permission in self.permissions]
+        groups = [group.to_dict() for group in self.groups]
+        created_at = (
+            self.created_at.isoformat()
+            if hasattr(self, "created_at") and self.created_at is not None
+            else None
+        )
+        modified_at = (
+            self.modified_at.isoformat()
+            if hasattr(self, "modified_at") and self.modified_at is not None
+            else None
+        )
+        last_login = (
+            self.last_login.isoformat()
+            if hasattr(self, "last_login") and self.last_login is not None
+            else None
+        )
+
+        return {
+            "id": self.id,
+            "username": self.username,
+            "password": self.password,
+            "display_name": self.display_name,
+            "permissions": permissions,
+            "groups": groups,
+            "admin": self.admin,
+            "created_by": self.created_by
+            if hasattr(self, "created_by") and self.created_by is not None
+            else None,
+            "created_at": created_at,
+            "modified_by": self.modified_by
+            if hasattr(self, "modified_by") and self.modified_by is not None
+            else None,
+            "modified_at": modified_at,
+            "last_login": last_login,
+        }

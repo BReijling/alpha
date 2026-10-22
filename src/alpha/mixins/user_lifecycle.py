@@ -1,12 +1,15 @@
 """Contains the UserLifecycleMixin class"""
 
-from typing import TYPE_CHECKING, Any
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Any, cast
 from uuid import UUID
 
-from alpha.exceptions import BadRequestException, NotFoundException
+from alpha.exceptions import BadRequestException, ForbiddenException
 from alpha.factories.password_factory import PasswordFactory
-from alpha.interfaces.sql_repository import SqlRepository
+from alpha.infra.models.json_patch import JsonPatch
+from alpha.infra.models.search_filter import Operator, SearchFilter
 from alpha.interfaces.unit_of_work import UnitOfWork
+from alpha.mixins.user_group_helper import UserGroupHelperMixin, PATCH_TYPE
 from alpha.providers.models.identity import Identity
 
 if TYPE_CHECKING:
@@ -15,18 +18,18 @@ else:
     User = Any
 
 
-class UserLifecycleMixin:
+class UserLifecycleMixin(UserGroupHelperMixin):
     """Mixin class providing methods for managing the lifecycle of User
     objects.
     """
 
     uow: UnitOfWork
-    _users_repository_name: str
-    _user_model: type[User]
-    _password_support: bool
+    _users_repository_name: str = "users"
+    _user_model: type[User] = User
+    _password_support: bool = True
     _password_factory: PasswordFactory
-    _user_username_attribute: str
-    _user_password_attribute: str
+    _user_username_attribute: str = "username"
+    _user_password_attribute: str = "password"
 
     def add_user(self, user: User, identity: Identity | None = None) -> User:
         """Adds a new user object to the repository
@@ -45,7 +48,9 @@ class UserLifecycleMixin:
         User
             Created user object
         """
-        user = self._user_model(**user.to_dict())
+        user.groups = []
+        user.permissions = []
+        user = self._user_model.from_dict(user.to_dict())
 
         if not hasattr(user, self._user_username_attribute) or not getattr(
             user, self._user_username_attribute
@@ -72,10 +77,8 @@ class UserLifecycleMixin:
             user.created_by = identity.username
 
         with self.uow:
-            users: SqlRepository[User] = getattr(
-                self.uow, self._users_repository_name
-            )
-            user = users.add(user, raise_if_exists=True)
+            repository = self._get_users_repository()
+            user = repository.add(user, raise_if_exists=True)
             self.uow.commit()
             return user
 
@@ -98,31 +101,36 @@ class UserLifecycleMixin:
             When the object is not found in the repository
         """
         with self.uow:
-            users: SqlRepository[User] = getattr(
-                self.uow, self._users_repository_name
-            )
-            user = users.get_by_id(user_id)
-
-            if not user:
-                raise NotFoundException(
-                    f"User with id '{user_id}' is not found"
-                )
+            user = self._get_user_by_id(user_id)
 
             return user
 
-    def get_users(self) -> list[User]:
-        """Gets all user objects from the repository
+    def get_users(
+        self, user_ids: list[str | int | UUID] | None = None
+    ) -> list[User]:
+        """Gets all user objects from the repository, optionally filtered by user IDs
+
+        Parameters
+        ----------
+        user_ids
+            An optional list of user ids to filter on
+
 
         Returns
         -------
         list[User]
             A collection of all the user objects
         """
-        with self.uow:
-            users: SqlRepository[User] = getattr(
-                self.uow, self._users_repository_name
+        filters: list[SearchFilter] = []
+
+        if user_ids:
+            filters.append(
+                SearchFilter(field="id", op=Operator.IN, value=user_ids)
             )
-            result = users.select()
+
+        with self.uow:
+            repository = self._get_users_repository()
+            result = repository.select(filters=filters)
 
             return result
 
@@ -134,14 +142,61 @@ class UserLifecycleMixin:
         user_id
             The id of the user object
         """
-        user = self.get_user(user_id=user_id)
         with self.uow:
-            users: SqlRepository[User] = getattr(
-                self.uow, self._users_repository_name
-            )
+            repository = self._get_users_repository()
+            user = self._get_user_by_id(user_id)
 
-            users.remove(user)
+            repository.remove(user)
             self.uow.commit()
+
+    def patch_user(
+        self,
+        user_id: str,
+        json_patch: JsonPatch,
+        identity: Identity | None = None,
+    ) -> User:
+        """Patch an existing user object in the repository
+
+        Parameters
+        ----------
+        user_id
+            The id of the user object
+        json_patch
+            The JSON patch to apply to the user object
+        identity
+            The identity of the user making the changes, by default None. If
+            provided, the `modified_by` attribute of the user will be updated
+            with the username from the identity.
+
+        Returns
+        -------
+        User
+            The patched user object
+        """
+        with self.uow:
+            user = self._get_user_by_id(user_id)
+            for patch in cast(list[PATCH_TYPE], json_patch):
+                path = str(patch["path"]).strip("/")
+
+                if path == "groups" and "groups" not in user.__patch_fields__:
+                    self._patch_groups(obj=user, patch=patch)
+                elif (
+                    path == "permissions"
+                    and "permissions" not in user.__patch_fields__
+                ):
+                    self._patch_permissions(obj=user, patch=patch)
+                elif "id" in path:
+                    raise ForbiddenException(
+                        "The id parameter cannot be patched"
+                    )
+                else:
+                    user.patch(patch)
+
+            if identity:
+                user.modified_by = identity.username
+            user.modified_at = datetime.now(tz=UTC)
+            self.uow.commit()
+            return user
 
     def update_user(
         self,
@@ -167,22 +222,14 @@ class UserLifecycleMixin:
         User
             Updated user object
         """
-        user = self._user_model(**user.to_dict())
+        user = self._user_model.from_dict(user.to_dict())
 
         with self.uow:
-            users: SqlRepository[User] = getattr(
-                self.uow, self._users_repository_name
-            )
-            original_user = users.get_by_id(user_id)
-
-            if not original_user:
-                raise NotFoundException(
-                    f"User with id '{user_id}' is not found"
-                )
+            original_user = self._get_user_by_id(user_id)
 
             updated_user = original_user.update(user)
             if identity:
                 updated_user.modified_by = identity.username
             self.uow.commit()
 
-        return updated_user
+            return updated_user

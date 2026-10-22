@@ -1,14 +1,24 @@
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from typing import Any, cast
 from uuid import UUID
 
-from alpha.domain.models.base_model import BaseDomainModel, DomainModel
+from alpha.domain.models.base_model import BaseDomainModel
 from alpha.domain.models.life_cycle_base import LifeCycleBase
+from alpha.domain.models.permission import Permission
+from alpha.exceptions import AlreadyExistsException, NotFoundException
+from alpha.mixins.models.from_dict import FromDictMixin
+from alpha.mixins.models.patchable import PatchableMixin
+from alpha.mixins.models.updatable import UpdatableMixin
 
 
 @dataclass(kw_only=True)
-class Group(LifeCycleBase, BaseDomainModel):
+class Group(
+    LifeCycleBase,
+    BaseDomainModel,
+    UpdatableMixin,
+    PatchableMixin,
+    FromDictMixin,
+):
     """Group domain model which represents a group of users with specific
     permissions. The Group model includes attributes for group identification,
     description, permissions, and lifecycle attributes for tracking creation
@@ -31,13 +41,29 @@ class Group(LifeCycleBase, BaseDomainModel):
         A boolean flag indicating whether the group is active. Inactive groups
         may not be able to be assigned to users or may not grant permissions to
         users assigned to the group.
+    created_by
+        The identifier of the user who created the group.
+    created_at
+        The timestamp when the group was created.
+    modified_by
+        The identifier of the user who last modified the group.
+    modified_at
+        The timestamp when the group was last modified.
     """
 
     id: UUID | int | str | None = None
     name: str | None = None
     description: str | None = None
-    permissions: list[str] = field(default_factory=list)  # type: ignore
+    permissions: list[str | Permission] = field(default_factory=list)  # type: ignore
     is_active: bool = True
+
+    @property
+    def __patch_fields__(self) -> list[str]:
+        return ["name", "description", "permissions", "is_active"]
+
+    @property
+    def __update_fields__(self) -> list[str]:
+        return ["name", "description", "permissions", "is_active"]
 
     def __str__(self) -> str:
         """Return the name-based representation of the Group instance."""
@@ -52,6 +78,36 @@ class Group(LifeCycleBase, BaseDomainModel):
             f"description={self.description!r}"
             ")"
         )
+
+    def add_permission(self, permission: str | Permission) -> None:
+        """Add a permission to the user's permissions list.
+
+        Parameters
+        ----------
+        permission
+            The permission to add.
+        """
+        if permission not in self.permissions:
+            self.permissions.append(permission)
+        else:
+            raise AlreadyExistsException(
+                f"Permission '{permission}' is already added to the user."
+            )
+
+    def remove_permission(self, permission: str | Permission) -> None:
+        """Remove a permission from the user's permissions list.
+
+        Parameters
+        ----------
+        permission
+            The permission to remove.
+        """
+        if permission in self.permissions:
+            self.permissions.remove(permission)
+        else:
+            raise NotFoundException(
+                f"Permission '{permission}' is not associated with the user."
+            )
 
     def to_dict(self) -> dict[str, Any]:
         """Convert the Group instance to a dictionary.
@@ -94,32 +150,3 @@ class Group(LifeCycleBase, BaseDomainModel):
             else None,
             "modified_at": modified_at,
         }
-
-    def update(self, obj: DomainModel) -> DomainModel:
-        """Update the Group instance with data from another Group instance.
-
-        Parameters
-        ----------
-        obj
-            Group object to update from.
-
-        Returns
-        -------
-        DomainModel
-            The updated instance of the Group.
-
-        Raises
-        ------
-        TypeError
-            If the provided object is not a Group instance.
-        """
-        if not isinstance(obj, Group):
-            raise TypeError("Group.update expects a Group instance.")
-
-        self.name = obj.name
-        self.description = obj.description
-        self.permissions = obj.permissions
-        self.modified_at = datetime.now(tz=timezone.utc)
-        self.is_active = obj.is_active
-
-        return cast(DomainModel, self)

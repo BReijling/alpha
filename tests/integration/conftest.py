@@ -6,6 +6,7 @@ import pytest
 
 from alpha.adapters.sqla_unit_of_work import SqlAlchemyUnitOfWork
 from alpha.domain.models.group import Group
+from alpha.domain.models.permission import Permission
 from alpha.domain.models.user import User
 from alpha.factories.jwt_factory import JWTFactory
 from alpha.factories.password_factory import PasswordFactory
@@ -15,6 +16,7 @@ from alpha.infra.connectors.oidc_connector import KeyCloakOIDCConnector
 from alpha.infra.databases.sql_alchemy import SqlAlchemyDatabase
 from alpha.infra.models.json_patch import JsonPatch
 from alpha.interfaces.sql_repository import SqlRepository
+from alpha.interfaces.unit_of_work import UnitOfWork
 from alpha.providers.database_provider import DatabaseProvider
 from alpha.providers.ldap_provider import LDAPProvider
 from alpha.providers.models.token import Token
@@ -25,6 +27,7 @@ from alpha.repositories.refresh.database_repository import (
 from alpha.repositories.sql_alchemy_repository import SqlAlchemyRepository
 from alpha.repositories.models.repository_model import RepositoryModel
 from alpha.services.authentication_service import AuthenticationService
+from alpha.services.user_lifecycle_management import UserLifecycleManagement
 from tests.fixtures._domain_models import Gender, TrackPoint
 from tests.fixtures.api_generate_models.json_patch import (
     JsonPatch as ApiJsonPatch,
@@ -48,7 +51,14 @@ from tests.integration.fixtures.api_generate_models.nested_object import (
     NestedObject,
 )
 
-from tests.integration._classes import AppMapper, FakeMapper, Pet, PetType
+from tests.integration._classes import (
+    AltTestGroup,
+    AltTestUser,
+    AppMapper,
+    FakeMapper,
+    Pet,
+    PetType,
+)
 from tests.integration._filters import (
     contains_filter,
     endswith_filter,
@@ -185,6 +195,24 @@ def uow_auth(app_database) -> SqlAlchemyUnitOfWork:
                 name="refresh_tokens",
                 repository=SqlAlchemyRepository[Token],
                 default_model=Token,
+                interface=SqlRepository,
+            ),
+            RepositoryModel(
+                name="alt_test_users",
+                repository=SqlAlchemyRepository[AltTestUser],
+                default_model=AltTestUser,
+                interface=SqlRepository,
+            ),
+            RepositoryModel(
+                name="alt_test_groups",
+                repository=SqlAlchemyRepository[AltTestGroup],
+                default_model=AltTestGroup,
+                interface=SqlRepository,
+            ),
+            RepositoryModel(
+                name="alt_permissions",
+                repository=SqlAlchemyRepository[Permission],
+                default_model=Permission,
                 interface=SqlRepository,
             ),
         ],
@@ -588,4 +616,105 @@ def authentication_service_with_ldap_provider(
 def auth_token(identity, jwt_factory) -> str:
     return jwt_factory.create(
         subject=identity.subject, payload=identity.to_dict()
+    )
+
+
+@pytest.fixture
+def user_lifecycle_management_service(
+    uow_auth: UnitOfWork,
+) -> UserLifecycleManagement:
+    user_management_service = UserLifecycleManagement(
+        uow=uow_auth,
+        users_repository_name="alt_test_users",
+        groups_repository_name="alt_test_groups",
+        permissions_repository_name="alt_permissions",
+        user_model=AltTestUser,
+        group_model=AltTestGroup,
+        permission_model=Permission,
+        password_support=True,
+    )
+    return user_management_service
+
+
+@pytest.fixture
+def alt_test_user():
+    return AltTestUser(
+        username="user123",
+        password="password123",
+        display_name="User 123",
+    )
+
+
+@pytest.fixture
+def updated_alt_test_user():
+    return AltTestUser(
+        username="updated_user123", display_name="Updated User 123"
+    )
+
+
+@pytest.fixture
+def alt_test_user_patch():
+    return JsonPatch(
+        [
+            {
+                "op": "replace",
+                "path": "/display_name",
+                "value": "Patched User 123",
+            },
+            {
+                "op": "replace",
+                "path": "/username",
+                "value": "patched_user123",
+            },
+        ]
+    )
+
+
+@pytest.fixture
+def alt_test_group():
+    return AltTestGroup(
+        name="test_group",
+        description="A test group",
+    )
+
+
+@pytest.fixture
+def updated_alt_test_group():
+    return AltTestGroup(
+        name="updated_test_group",
+        description="An updated test group",
+    )
+
+
+@pytest.fixture
+def alt_test_group_patch():
+    return JsonPatch(
+        [
+            {
+                "op": "replace",
+                "path": "/name",
+                "value": "patched_test_group",
+            },
+            {
+                "op": "replace",
+                "path": "/description",
+                "value": "An patched test group",
+            },
+        ]
+    )
+
+
+@pytest.fixture
+def alt_test_permission():
+    return Permission(
+        name="test_permission",
+        description="A test permission",
+    )
+
+
+@pytest.fixture
+def updated_alt_test_permission():
+    return Permission(
+        name="updated_test_permission",
+        description="An updated test permission",
     )

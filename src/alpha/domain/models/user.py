@@ -1,18 +1,28 @@
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any, Self, cast
 from uuid import UUID
 
-from alpha.domain.models.base_model import BaseDomainModel, DomainModel
+from alpha.domain.models.base_model import BaseDomainModel
 from alpha.domain.models.group import Group
+from alpha.domain.models.permission import Permission
 from alpha.domain.models.life_cycle_base import LifeCycleBase
-
 from alpha.domain.models.role import Role
+from alpha.exceptions import NotFoundException, AlreadyExistsException
+from alpha.mixins.models.from_dict import FromDictMixin
+from alpha.mixins.models.patchable import PatchableMixin
+from alpha.mixins.models.updatable import UpdatableMixin
 from alpha.providers.models.identity import Identity
 
 
 @dataclass(kw_only=True)
-class User(LifeCycleBase, BaseDomainModel):
+class User(
+    LifeCycleBase,
+    BaseDomainModel,
+    UpdatableMixin,
+    PatchableMixin,
+    FromDictMixin,
+):
     """User domain model which represents a user in the system. The User model
     includes attributes for user identification, authentication, and
     authorization, as well as lifecycle attributes for tracking creation and
@@ -58,6 +68,10 @@ class User(LifeCycleBase, BaseDomainModel):
         privileges. This can be used to grant additional permissions or access
         to certain features of the application that are reserved for
         administrators.
+    last_login
+        The timestamp of the user's last login. This can be used to track user
+        activity and for security purposes. It should be a datetime object or
+        None if the user has never logged in.
     """
 
     id: UUID | int | str | None = None
@@ -67,10 +81,37 @@ class User(LifeCycleBase, BaseDomainModel):
     email: str | None = None
     phone: str | None = None
     display_name: str | None = None
-    permissions: list[str] = field(default_factory=list)  # type: ignore
+    permissions: list[str | Permission] = field(default_factory=list)  # type: ignore
     groups: list[str | Group] = field(default_factory=list)  # type: ignore
     is_active: bool = True
     admin: bool = False
+    last_login: datetime | None = None
+
+    @property
+    def __patch_fields__(self) -> list[str]:
+        return [
+            "username",
+            "email",
+            "phone",
+            "display_name",
+            "permissions",
+            "groups",
+            "is_active",
+            "admin",
+        ]
+
+    @property
+    def __update_fields__(self) -> list[str]:
+        return [
+            "username",
+            "email",
+            "phone",
+            "display_name",
+            "permissions",
+            "groups",
+            "is_active",
+            "admin",
+        ]
 
     def __str__(self) -> str:
         """Return the username of the user.
@@ -120,6 +161,66 @@ class User(LifeCycleBase, BaseDomainModel):
             admin=identity.admin,
         )
 
+    def add_group(self, group: str | Group) -> None:
+        """Add a group to the user's groups list.
+
+        Parameters
+        ----------
+        group
+            The group to add.
+        """
+        if group not in self.groups:
+            self.groups.append(group)
+        else:
+            raise AlreadyExistsException(
+                f"Group '{group}' is already added to the user."
+            )
+
+    def add_permission(self, permission: str | Permission) -> None:
+        """Add a permission to the user's permissions list.
+
+        Parameters
+        ----------
+        permission
+            The permission to add.
+        """
+        if permission not in self.permissions:
+            self.permissions.append(permission)
+        else:
+            raise AlreadyExistsException(
+                f"Permission '{permission}' is already added to the user."
+            )
+
+    def remove_group(self, group: str | Group) -> None:
+        """Remove a group from the user's groups list.
+
+        Parameters
+        ----------
+        group
+            The group to remove.
+        """
+        if group in self.groups:
+            self.groups.remove(group)
+        else:
+            raise NotFoundException(
+                f"Group '{group}' is not associated with the user."
+            )
+
+    def remove_permission(self, permission: str | Permission) -> None:
+        """Remove a permission from the user's permissions list.
+
+        Parameters
+        ----------
+        permission
+            The permission to remove.
+        """
+        if permission in self.permissions:
+            self.permissions.remove(permission)
+        else:
+            raise NotFoundException(
+                f"Permission '{permission}' is not associated with the user."
+            )
+
     def to_dict(self) -> dict[str, Any]:
         """Convert the User instance to a dictionary.
 
@@ -156,6 +257,11 @@ class User(LifeCycleBase, BaseDomainModel):
             if hasattr(self, "modified_at") and self.modified_at is not None
             else None
         )
+        last_login = (
+            self.last_login.isoformat()
+            if hasattr(self, "last_login") and self.last_login is not None
+            else None
+        )
 
         return {
             "id": self.id,
@@ -177,35 +283,8 @@ class User(LifeCycleBase, BaseDomainModel):
             if hasattr(self, "modified_by") and self.modified_by is not None
             else None,
             "modified_at": modified_at,
+            "last_login": last_login,
         }
-
-    def update(self, obj: DomainModel) -> DomainModel:
-        """Update the User instance with data from another User instance.
-
-        Parameters
-        ----------
-        obj
-            User object to update from.
-
-        Returns
-        -------
-        DomainModel
-            The updated instance of the User.
-        """
-        if not isinstance(obj, User):
-            raise TypeError("User.update expects a User instance.")
-
-        self.username = obj.username
-        self.email = obj.email
-        self.phone = obj.phone
-        self.display_name = obj.display_name
-        self.permissions = obj.permissions
-        self.groups = obj.groups
-        self.modified_at = datetime.now(tz=timezone.utc)
-        self.is_active = obj.is_active
-        self.admin = obj.admin
-
-        return cast(DomainModel, self)
 
     def update_from_identity(self, identity: Identity) -> Self:
         """Update the User instance with data from an Identity instance. Only

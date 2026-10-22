@@ -8,9 +8,7 @@ from alpha.providers.database_provider import DatabaseProvider
 from alpha.repositories.refresh.database_repository import (
     DatabaseRefreshRepository,
 )
-from .models import TestGroup
-from .models import TestUser
-from .models import TestToken
+from .models import TestGroup, TestToken, TestUser
 from alpha.factories.jwt_factory import JWTFactory
 from alpha.infra.databases.sql_alchemy import SqlAlchemyDatabase
 from alpha.interfaces.sql_repository import SqlRepository

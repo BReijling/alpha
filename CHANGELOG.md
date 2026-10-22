@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Introduced the `PermissionLifecycleMixin` class to manage the lifecycle of `Permission` objects, including adding, retrieving, updating, and removing permissions.
+- The `Group` and `User` models now have `add_permission` and `remove_permission` methods to manage their associated permissions.
+- The `User` model now has `add_group` and `remove_group` methods to manage their associated groups.
+- The `FromDictMixin` has been introduced to allow models to be instantiated from dictionaries.
+- The `ToDictMixin` has been introduced to allow models to be converted to dictionaries.
+- The `UpdatableMixin` has been introduced to allow models to be updated with new attribute values.
+- The `PatchableMixin` has been introduced to allow models to be partially updated with new attribute values.
+
+### Changed
+
+- The `BaseDomainModel` class has been updated to serve as a neutral base class for various types of models, without imposing dataclass behavior. The `to_dict` method has been moved to a separate mixin class, allowing it to be reused across different model types.
+- The `Group`, `User` and `Permission` models now use the `UpdatableMixin`, `PatchableMixin`, and `FromDictMixin` to provide update, patch, and from-dict functionality for their attributes.
+- Upgraded the `GroupLifecycleMixin` and `UserLifecycleMixin` to provide enhanced lifecycle management for `Group` and `User` objects, including adding, retrieving, updating, patching, and removing groups and users. This includes improved handling of associated permissions and group memberships for these models when applicable.
+- The `DatabaseProvider` now updates the `laast_login` attribute of `User` objects whenever they successfully authenticate.
+- The `UserLifecycleManagement` now includes the management of `Permission` objects.
+- The `UserLifecycleManagement` now has been upgraded to provide enhanced lifecycle management for `User` objects, including handling associated permissions and group memberships.
+
 ## [0.7.12] - 2026-10-14
 
 ### Fixed
