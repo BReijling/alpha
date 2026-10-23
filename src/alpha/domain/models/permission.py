@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Sequence
+from typing import Any, Self, Sequence
 from uuid import UUID
 
 from alpha.domain.models.base_model import BaseDomainModel
@@ -7,6 +7,7 @@ from alpha.domain.models.life_cycle_base import LifeCycleBase
 from alpha.mixins.models.from_dict import FromDictMixin
 from alpha.mixins.models.patchable import PatchableMixin
 from alpha.mixins.models.updatable import UpdatableMixin
+from alpha.utils.parse_to_datetime import to_datetime
 
 
 @dataclass(kw_only=True)
@@ -43,6 +44,32 @@ class Permission(
     @property
     def __patch_fields__(self) -> Sequence[str]:
         return ("name", "description")
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> Self:
+        """Create a Permission instance from a dictionary.
+
+        Parameters
+        ----------
+        data
+            Dictionary containing permission data.
+
+        Returns
+        -------
+        Self
+            A new Permission instance created from the dictionary.
+        """
+        obj = super().from_dict(data)
+        if "created_at" in data:
+            obj.created_at = to_datetime(
+                data.get("created_at"), fail_silently=False
+            )
+        if "modified_at" in data:
+            obj.modified_at = to_datetime(
+                data.get("modified_at"), fail_silently=False
+            )
+
+        return obj
 
     def __str__(self) -> str:
         """Return the name of the permission.

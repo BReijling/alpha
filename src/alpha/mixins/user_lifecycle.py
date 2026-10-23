@@ -53,6 +53,7 @@ class UserLifecycleMixin(UserGroupHelperMixin):
             Created user object
         """
         user = self._user_model.from_dict(user.to_dict())
+        update_fields = user.__update_fields__
 
         if not hasattr(user, self._user_username_attribute) or not getattr(
             user, self._user_username_attribute
@@ -80,6 +81,27 @@ class UserLifecycleMixin(UserGroupHelperMixin):
 
         with self.uow:
             repository = self._get_users_repository()
+
+            if "permissions" not in update_fields:
+                permissions = [
+                    self._get_permission_by_id_or_name(str(permission.name))
+                    for permission in cast(list[Permission], user.permissions)
+                ]
+                # The default User model expects list[str] for permissions.
+                # When using the extended model with Permission objects, the
+                # typing is incorrect. We can ignore the typing issue here.
+                user.permissions = permissions  # type: ignore
+
+            if "groups" not in update_fields:
+                groups = [
+                    self._get_group_by_id_or_name(str(group.name))
+                    for group in cast(list[Group], user.groups)
+                ]
+                # The default User model expects list[str] for groups.
+                # When using the extended model with Group objects, the
+                # typing is incorrect. We can ignore the typing issue here.
+                user.groups = groups  # type: ignore
+
             user = repository.add(user, raise_if_exists=True)
             self.uow.commit()
             return user
