@@ -32,8 +32,8 @@ __all__ = [
     "PasswordCredentials",
     "PasswordCredentialsUpdate",
     "Token",
-    # "OIDCProvider",
-    # "KeyCloakProvider",
+    "OIDCProvider",
+    "KeyCloakProvider",
 ]
 
 # Conditionally add LDAP-related exports if available
@@ -53,13 +53,11 @@ def __getattr__(name: str) -> Any:
             KeyCloakProvider,
         )
 
-        imported_classes: dict[str, Any] = {
-            "OIDCProvider": OIDCProvider,
-            "KeyCloakProvider": KeyCloakProvider,
-        }
+        globals().update(
+            OIDCProvider=OIDCProvider,
+            KeyCloakProvider=KeyCloakProvider,
+        )
 
-        __all__.extend(list(imported_classes.keys()))
-
-        return imported_classes[name]
+        return globals()[name]
 
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
