@@ -76,7 +76,11 @@ class PatchableMixin:
             the keys "op", "path", and "value".
         """
         op = patch.get("op")
-        path = str(patch.get("path")).strip("/")
+        path = str(patch.get("path")).strip("/").replace("/", ".")
+        if op in ("add", "replace") and "value" not in patch:
+            raise ValueError(
+                f"Patch operation '{op}' for field '{path}' requires a value."
+            )
         value = patch.get("value")
 
         if path not in self.__patch_fields__:

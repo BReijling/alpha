@@ -161,15 +161,15 @@ class User(
         obj = super().from_dict(data)
         if "created_at" in data:
             obj.created_at = to_datetime(
-                data["created_at"], fail_silently=False
+                data.get("created_at"), fail_silently=False
             )
         if "modified_at" in data:
             obj.modified_at = to_datetime(
-                data["modified_at"], fail_silently=False
+                data.get("modified_at"), fail_silently=False
             )
         if "last_login" in data:
             obj.last_login = to_datetime(
-                data["last_login"], fail_silently=False
+                data.get("last_login"), fail_silently=False
             )
 
         return obj
@@ -374,14 +374,22 @@ class UserWithGroupObjects(User):
             email=data.get("email"),
             phone=data.get("phone"),
             display_name=data.get("display_name"),
+            role=data.get("role"),
+            permissions=data.get("permissions", []),
             groups=[Group.from_dict(g) for g in data.get("groups", [])],
             is_active=data.get("is_active", True),
             admin=data.get("admin", False),
             created_by=data.get("created_by"),
-            created_at=to_datetime(data["created_at"], fail_silently=False),
+            created_at=to_datetime(
+                data.get("created_at"), fail_silently=False
+            ),
             modified_by=data.get("modified_by"),
-            modified_at=to_datetime(data["modified_at"], fail_silently=False),
-            last_login=to_datetime(data["last_login"], fail_silently=False),
+            modified_at=to_datetime(
+                data.get("modified_at"), fail_silently=False
+            ),
+            last_login=to_datetime(
+                data.get("last_login"), fail_silently=False
+            ),
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -456,6 +464,7 @@ class UserWithObjects(User):
             email=data.get("email"),
             phone=data.get("phone"),
             display_name=data.get("display_name"),
+            role=data.get("role"),
             groups=[
                 GroupWithObjects.from_dict(g) for g in data.get("groups", [])
             ],
@@ -465,10 +474,16 @@ class UserWithObjects(User):
             is_active=data.get("is_active", True),
             admin=data.get("admin", False),
             created_by=data.get("created_by"),
-            created_at=to_datetime(data["created_at"], fail_silently=False),
+            created_at=to_datetime(
+                data.get("created_at"), fail_silently=False
+            ),
             modified_by=data.get("modified_by"),
-            modified_at=to_datetime(data["modified_at"], fail_silently=False),
-            last_login=to_datetime(data["last_login"], fail_silently=False),
+            modified_at=to_datetime(
+                data.get("modified_at"), fail_silently=False
+            ),
+            last_login=to_datetime(
+                data.get("last_login"), fail_silently=False
+            ),
         )
 
     def to_dict(self) -> dict[str, Any]:

@@ -85,11 +85,11 @@ class Group(
         obj = super().from_dict(data)
         if "created_at" in data:
             obj.created_at = to_datetime(
-                data["created_at"], fail_silently=False
+                data.get("created_at"), fail_silently=False
             )
         if "modified_at" in data:
             obj.modified_at = to_datetime(
-                data["modified_at"], fail_silently=False
+                data.get("modified_at"), fail_silently=False
             )
 
         return obj
@@ -222,9 +222,13 @@ class GroupWithObjects(Group):
             ],
             is_active=data.get("is_active", True),
             created_by=data.get("created_by"),
-            created_at=data.get("created_at"),
+            created_at=to_datetime(
+                data.get("created_at"), fail_silently=False
+            ),
             modified_by=data.get("modified_by"),
-            modified_at=data.get("modified_at"),
+            modified_at=to_datetime(
+                data.get("modified_at"), fail_silently=False
+            ),
         )
 
     def to_dict(self) -> dict[str, Any]:
