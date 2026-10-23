@@ -4,10 +4,10 @@ from datetime import datetime, UTC
 from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
-from alpha.infra.models.json_patch import JsonPatch
+from alpha.infra.models.json_patch import JsonPatch, PatchDict
 from alpha.infra.models.search_filter import Operator, SearchFilter
 from alpha.interfaces.unit_of_work import UnitOfWork
-from alpha.mixins.user_group_helper import PATCH_TYPE, UserGroupHelperMixin
+from alpha.mixins.user_group_helper import UserGroupHelperMixin
 from alpha.providers.models.identity import Identity
 
 if TYPE_CHECKING:
@@ -46,7 +46,6 @@ class GroupLifecycleMixin(UserGroupHelperMixin):
         Group
             Created group object
         """
-        group.permissions = []
         group = self._group_model.from_dict(group.to_dict())
 
         if identity:
@@ -150,7 +149,7 @@ class GroupLifecycleMixin(UserGroupHelperMixin):
         """
         with self.uow:
             group = self._get_group_by_id(group_id)
-            for patch in cast(list[PATCH_TYPE], json_patch):
+            for patch in cast(list[PatchDict], json_patch):
                 path = str(patch["path"]).strip("/")
 
                 if (
@@ -204,7 +203,7 @@ class GroupLifecycleMixin(UserGroupHelperMixin):
                     perm = self._get_permission_by_id_or_name(
                         str(permission.name)
                     )
-                    updated_group.add_permission(perm)
+                    updated_group.add_permission(perm)  # type: ignore
 
             if identity:
                 updated_group.modified_by = identity.username

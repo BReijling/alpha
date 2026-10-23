@@ -5,9 +5,9 @@ from typing import Any
 import pytest
 
 from alpha.adapters.sqla_unit_of_work import SqlAlchemyUnitOfWork
-from alpha.domain.models.group import Group
+from alpha.domain.models.group import Group, GroupWithObjects
 from alpha.domain.models.permission import Permission
-from alpha.domain.models.user import User
+from alpha.domain.models.user import User, UserWithObjects
 from alpha.factories.jwt_factory import JWTFactory
 from alpha.factories.password_factory import PasswordFactory
 from alpha.factories.request_factory import RequestFactory
@@ -52,8 +52,6 @@ from tests.integration.fixtures.api_generate_models.nested_object import (
 )
 
 from tests.integration._classes import (
-    AltTestGroup,
-    AltTestUser,
     AppMapper,
     FakeMapper,
     Pet,
@@ -199,14 +197,14 @@ def uow_auth(app_database) -> SqlAlchemyUnitOfWork:
             ),
             RepositoryModel(
                 name="alt_test_users",
-                repository=SqlAlchemyRepository[AltTestUser],
-                default_model=AltTestUser,
+                repository=SqlAlchemyRepository[UserWithObjects],
+                default_model=UserWithObjects,
                 interface=SqlRepository,
             ),
             RepositoryModel(
                 name="alt_test_groups",
-                repository=SqlAlchemyRepository[AltTestGroup],
-                default_model=AltTestGroup,
+                repository=SqlAlchemyRepository[GroupWithObjects],
+                default_model=GroupWithObjects,
                 interface=SqlRepository,
             ),
             RepositoryModel(
@@ -628,8 +626,8 @@ def user_lifecycle_management_service(
         users_repository_name="alt_test_users",
         groups_repository_name="alt_test_groups",
         permissions_repository_name="alt_permissions",
-        user_model=AltTestUser,
-        group_model=AltTestGroup,
+        user_model=UserWithObjects,
+        group_model=GroupWithObjects,
         permission_model=Permission,
         password_support=True,
     )
@@ -638,7 +636,7 @@ def user_lifecycle_management_service(
 
 @pytest.fixture
 def alt_test_user():
-    return AltTestUser(
+    return UserWithObjects(
         username="user123",
         password="password123",
         display_name="User 123",
@@ -647,7 +645,7 @@ def alt_test_user():
 
 @pytest.fixture
 def updated_alt_test_user():
-    return AltTestUser(
+    return UserWithObjects(
         username="updated_user123", display_name="Updated User 123"
     )
 
@@ -672,7 +670,7 @@ def alt_test_user_patch():
 
 @pytest.fixture
 def alt_test_group():
-    return AltTestGroup(
+    return GroupWithObjects(
         name="test_group",
         description="A test group",
     )
@@ -680,7 +678,7 @@ def alt_test_group():
 
 @pytest.fixture
 def updated_alt_test_group():
-    return AltTestGroup(
+    return GroupWithObjects(
         name="updated_test_group",
         description="An updated test group",
     )

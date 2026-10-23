@@ -1,5 +1,9 @@
-from alpha.domain.models.user import User
-from alpha.domain.models.group import Group
+from alpha.domain.models.user import (
+    User,
+    UserWithGroupObjects,
+    UserWithObjects,
+)
+from alpha.domain.models.group import Group, GroupWithObjects
 from alpha.domain.models.permission import Permission
 from alpha.domain.models.role import Role
 from alpha.domain.models.base_model import (
@@ -18,6 +22,9 @@ __all__ = [
     "LifeCycleBase",
     "User",
     "Group",
+    "GroupWithObjects",
     "Permission",
     "Role",
+    "UserWithGroupObjects",
+    "UserWithObjects",
 ]

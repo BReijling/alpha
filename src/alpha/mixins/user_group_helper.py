@@ -1,10 +1,11 @@
-from typing import TYPE_CHECKING, Literal, cast
+from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
 from alpha.exceptions import (
     BadRequestException,
     NotFoundException,
 )
+from alpha.infra.models.json_patch import PatchDict
 from alpha.interfaces.sql_repository import SqlRepository
 from alpha.interfaces.unit_of_work import UnitOfWork
 
@@ -17,8 +18,6 @@ else:
     Permission = object
     User = object
 
-PATCH_TYPE = dict[Literal["op", "path", "value"], str]
-
 
 class UserGroupHelperMixin:
     uow: UnitOfWork
@@ -29,7 +28,7 @@ class UserGroupHelperMixin:
     _group_model: type[Group] = Group
     _permission_model: type[Permission] = Permission
 
-    def _patch_groups(self, obj: User, patch: PATCH_TYPE) -> None:
+    def _patch_groups(self, obj: User, patch: PatchDict) -> None:
         """Patch the groups attribute of a User instance.
 
         This method should be called within the context of a unit of work to
@@ -59,9 +58,9 @@ class UserGroupHelperMixin:
         group = self._get_group_by_id_or_name(value)
 
         if op == "add":
-            obj.add_group(group)
+            obj.add_group(group)  # type: ignore
         elif op == "remove":
-            obj.remove_group(group)
+            obj.remove_group(group)  # type: ignore
         else:
             raise BadRequestException(
                 f"Using an unsupported operation value: '{op}'. Only 'add' "
@@ -71,7 +70,7 @@ class UserGroupHelperMixin:
     def _patch_permissions(
         self,
         obj: User | Group,
-        patch: PATCH_TYPE,
+        patch: PatchDict,
     ) -> None:
         """Patch the permissions attribute of a Group or User instance.
 
@@ -99,9 +98,9 @@ class UserGroupHelperMixin:
         permission = self._get_permission_by_id_or_name(value)
 
         if op == "add":
-            obj.add_permission(permission)
+            obj.add_permission(permission)  # type: ignore
         elif op == "remove":
-            obj.remove_permission(permission)
+            obj.remove_permission(permission)  # type: ignore
         else:
             raise BadRequestException(
                 f"Using an unsupported operation value: '{op}'. Only 'add' "
@@ -337,7 +336,7 @@ class UserGroupHelperMixin:
         """
         return {"op": op, "path": path, "value": value}
 
-    def _verify_patch(self, patch: PATCH_TYPE) -> tuple[str, str, str]:
+    def _verify_patch(self, patch: PatchDict) -> tuple[str, str, str]:
         """Verify the parameters of the patch object.
 
         All parameters are required and the operation parameter should be

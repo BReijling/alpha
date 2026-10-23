@@ -82,6 +82,7 @@ class DatabaseProvider(JWTProviderMixin):
 
             if hasattr(user, "last_login"):
                 user.last_login = datetime.now(tz=UTC)
+                self.uow.commit()
 
             return self._identity_model.from_user(user)
 

@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Any, cast
+from typing import Any, Self, cast, Sequence
 from uuid import UUID
 
 from alpha.domain.models.base_model import BaseDomainModel
@@ -9,6 +9,7 @@ from alpha.exceptions import AlreadyExistsException, NotFoundException
 from alpha.mixins.models.from_dict import FromDictMixin
 from alpha.mixins.models.patchable import PatchableMixin
 from alpha.mixins.models.updatable import UpdatableMixin
+from alpha.utils.parse_to_datetime import to_datetime
 
 
 @dataclass(kw_only=True)
@@ -36,7 +37,9 @@ class Group(
     permissions
         A list of specific permissions assigned to the group, which can be used
         for group-based access control. Each permission can represent a
-        specific action or resource that the group has access to.
+        specific action or resource that the group has access to. By default
+        this attribute is typed as a list of strings. It can be modified to
+        include other types if needed, such as `Permission` objects.
     is_active
         A boolean flag indicating whether the group is active. Inactive groups
         may not be able to be assigned to users or may not grant permissions to
@@ -54,16 +57,42 @@ class Group(
     id: UUID | int | str | None = None
     name: str | None = None
     description: str | None = None
-    permissions: list[str | Permission] = field(default_factory=list)  # type: ignore
+    permissions: list[str] = field(default_factory=list[str])
     is_active: bool = True
 
     @property
-    def __patch_fields__(self) -> list[str]:
-        return ["name", "description", "permissions", "is_active"]
+    def __patch_fields__(self) -> Sequence[str]:
+        return ("name", "description", "permissions", "is_active")
 
     @property
-    def __update_fields__(self) -> list[str]:
-        return ["name", "description", "permissions", "is_active"]
+    def __update_fields__(self) -> Sequence[str]:
+        return ("name", "description", "permissions", "is_active")
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> Self:
+        """Create a Group instance from a dictionary.
+
+        Parameters
+        ----------
+        data
+            Dictionary containing group data.
+
+        Returns
+        -------
+        Self
+            A new Group instance created from the dictionary.
+        """
+        obj = super().from_dict(data)
+        if "created_at" in data:
+            obj.created_at = to_datetime(
+                data["created_at"], fail_silently=False
+            )
+        if "modified_at" in data:
+            obj.modified_at = to_datetime(
+                data["modified_at"], fail_silently=False
+            )
+
+        return obj
 
     def __str__(self) -> str:
         """Return the name-based representation of the Group instance."""
@@ -79,8 +108,8 @@ class Group(
             ")"
         )
 
-    def add_permission(self, permission: str | Permission) -> None:
-        """Add a permission to the user's permissions list.
+    def add_permission(self, permission: str) -> None:
+        """Add a permission to the group's permissions list.
 
         Parameters
         ----------
@@ -91,11 +120,11 @@ class Group(
             self.permissions.append(permission)
         else:
             raise AlreadyExistsException(
-                f"Permission '{permission}' is already added to the user."
+                f"Permission '{permission}' is already added to the group."
             )
 
-    def remove_permission(self, permission: str | Permission) -> None:
-        """Remove a permission from the user's permissions list.
+    def remove_permission(self, permission: str) -> None:
+        """Remove a permission from the group's permissions list.
 
         Parameters
         ----------
@@ -106,7 +135,7 @@ class Group(
             self.permissions.remove(permission)
         else:
             raise NotFoundException(
-                f"Permission '{permission}' is not associated with the user."
+                f"Permission '{permission}' is not associated with the group."
             )
 
     def to_dict(self) -> dict[str, Any]:
@@ -150,3 +179,58 @@ class Group(
             else None,
             "modified_at": modified_at,
         }
+
+
+@dataclass(kw_only=True)
+class GroupWithObjects(Group):
+    """Group class with related objects included, such as permissions."""
+
+    permissions: list[Permission] = field(default_factory=list[Permission])  # type: ignore
+
+    @property
+    def __patch_fields__(self) -> Sequence[str]:
+        return ("name", "description", "is_active")
+
+    @property
+    def __update_fields__(self) -> Sequence[str]:
+        return ("name", "description", "is_active")
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> Self:
+        """Create a Group instance from a dictionary.
+
+        Parameters
+        ----------
+        data
+            Dictionary containing group data.
+
+        Returns
+        -------
+        Self
+            A new Group instance created from the dictionary.
+        """
+        return cls(
+            id=data.get("id"),
+            name=data.get("name"),
+            description=data.get("description"),
+            permissions=[
+                Permission.from_dict(p) for p in data.get("permissions", [])
+            ],
+            is_active=data.get("is_active", True),
+            created_by=data.get("created_by"),
+            created_at=data.get("created_at"),
+            modified_by=data.get("modified_by"),
+            modified_at=data.get("modified_at"),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert the Group instance to a dictionary.
+
+        Returns
+        -------
+        dict[str, Any]
+            A dictionary representation of the Group instance.
+        """
+        data = super().to_dict()
+        data["permissions"] = [p.to_dict() for p in self.permissions]
+        return data

@@ -1,10 +1,10 @@
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Self, cast
+from typing import Any, Self, Sequence
 from uuid import UUID
 
 from alpha.domain.models.base_model import BaseDomainModel
-from alpha.domain.models.group import Group
+from alpha.domain.models.group import Group, GroupWithObjects
 from alpha.domain.models.permission import Permission
 from alpha.domain.models.life_cycle_base import LifeCycleBase
 from alpha.domain.models.role import Role
@@ -13,6 +13,7 @@ from alpha.mixins.models.from_dict import FromDictMixin
 from alpha.mixins.models.patchable import PatchableMixin
 from alpha.mixins.models.updatable import UpdatableMixin
 from alpha.providers.models.identity import Identity
+from alpha.utils.parse_to_datetime import to_datetime
 
 
 @dataclass(kw_only=True)
@@ -54,11 +55,15 @@ class User(
         A list of specific permissions assigned to the user, which can be used
         for fine-grained access control. This can be used in conjunction with
         the role to provide additional permissions or override role-based
-        permissions.
+        permissions. By default this attribute is typed as a list of strings.
+        It can be modified to include other types if needed, such as
+        `Permission` objects.
     groups
         A list of groups that the user belongs to, which can be used for group-
         based access control. Each group can have its own set of permissions
-        that apply to its members.
+        that apply to its members. By default this attribute is typed as a list
+        of strings. It can be modified to include other types if needed, such
+        as `Group` objects.
     is_active
         A boolean flag indicating whether the user account is active. Inactive
         users may not be able to log in or access certain features of the
@@ -81,15 +86,15 @@ class User(
     email: str | None = None
     phone: str | None = None
     display_name: str | None = None
-    permissions: list[str | Permission] = field(default_factory=list)  # type: ignore
-    groups: list[str | Group] = field(default_factory=list)  # type: ignore
+    permissions: list[str] = field(default_factory=list[str])
+    groups: list[str] = field(default_factory=list[str])
     is_active: bool = True
     admin: bool = False
     last_login: datetime | None = None
 
     @property
-    def __patch_fields__(self) -> list[str]:
-        return [
+    def __patch_fields__(self) -> Sequence[str]:
+        return (
             "username",
             "email",
             "phone",
@@ -98,11 +103,11 @@ class User(
             "groups",
             "is_active",
             "admin",
-        ]
+        )
 
     @property
-    def __update_fields__(self) -> list[str]:
-        return [
+    def __update_fields__(self) -> Sequence[str]:
+        return (
             "username",
             "email",
             "phone",
@@ -111,7 +116,7 @@ class User(
             "groups",
             "is_active",
             "admin",
-        ]
+        )
 
     def __str__(self) -> str:
         """Return the username of the user.
@@ -140,6 +145,36 @@ class User(
         )
 
     @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> Self:
+        """Create a User instance from a dictionary.
+
+        Parameters
+        ----------
+        data
+            Dictionary containing user data.
+
+        Returns
+        -------
+        Self
+            A new User instance created from the dictionary.
+        """
+        obj = super().from_dict(data)
+        if "created_at" in data:
+            obj.created_at = to_datetime(
+                data["created_at"], fail_silently=False
+            )
+        if "modified_at" in data:
+            obj.modified_at = to_datetime(
+                data["modified_at"], fail_silently=False
+            )
+        if "last_login" in data:
+            obj.last_login = to_datetime(
+                data["last_login"], fail_silently=False
+            )
+
+        return obj
+
+    @classmethod
     def from_identity(cls, identity: Identity) -> Self:
         """Create a User instance from an Identity instance.
 
@@ -161,7 +196,7 @@ class User(
             admin=identity.admin,
         )
 
-    def add_group(self, group: str | Group) -> None:
+    def add_group(self, group: str) -> None:
         """Add a group to the user's groups list.
 
         Parameters
@@ -176,7 +211,7 @@ class User(
                 f"Group '{group}' is already added to the user."
             )
 
-    def add_permission(self, permission: str | Permission) -> None:
+    def add_permission(self, permission: str) -> None:
         """Add a permission to the user's permissions list.
 
         Parameters
@@ -191,7 +226,7 @@ class User(
                 f"Permission '{permission}' is already added to the user."
             )
 
-    def remove_group(self, group: str | Group) -> None:
+    def remove_group(self, group: str) -> None:
         """Remove a group from the user's groups list.
 
         Parameters
@@ -206,7 +241,7 @@ class User(
                 f"Group '{group}' is not associated with the user."
             )
 
-    def remove_permission(self, permission: str | Permission) -> None:
+    def remove_permission(self, permission: str) -> None:
         """Remove a permission from the user's permissions list.
 
         Parameters
@@ -229,24 +264,6 @@ class User(
         dict[str, Any]
             A dictionary representation of the User instance.
         """
-        permissions = cast(
-            list[str | dict[str, Any]],
-            [
-                permission.to_dict()  # type: ignore
-                if hasattr(permission, "to_dict")
-                else permission
-                for permission in self.permissions
-            ],
-        )
-        groups = cast(
-            list[str | dict[str, Any]],
-            [
-                group.to_dict()  # type: ignore
-                if hasattr(group, "to_dict")
-                else group
-                for group in self.groups
-            ],
-        )
         created_at = (
             self.created_at.isoformat()
             if hasattr(self, "created_at") and self.created_at is not None
@@ -271,8 +288,8 @@ class User(
             "email": self.email,
             "phone": self.phone,
             "display_name": self.display_name,
-            "permissions": permissions,
-            "groups": groups,
+            "permissions": self.permissions,
+            "groups": self.groups,
             "is_active": self.is_active,
             "admin": self.admin,
             "created_by": self.created_by
@@ -298,3 +315,160 @@ class User(
         self.email = identity.email
         self.display_name = identity.display_name
         return self
+
+
+@dataclass(kw_only=True)
+class UserWithGroupObjects(User):
+    """User class with related objects included, such as groups."""
+
+    groups: list[Group] = field(  # type: ignore
+        default_factory=list[Group]
+    )
+
+    @property
+    def __patch_fields__(self) -> Sequence[str]:
+        return (
+            "username",
+            "email",
+            "phone",
+            "display_name",
+            "permissions",
+            "is_active",
+            "admin",
+        )
+
+    @property
+    def __update_fields__(self) -> Sequence[str]:
+        return (
+            "username",
+            "email",
+            "phone",
+            "display_name",
+            "permissions",
+            "is_active",
+            "admin",
+        )
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> Self:
+        """Create a User instance from a dictionary.
+
+        Parameters
+        ----------
+        data
+            Dictionary containing user data.
+
+        Returns
+        -------
+        Self
+            A new User instance created from the dictionary.
+        """
+        return cls(
+            id=data.get("id"),
+            username=data.get("username"),
+            password=data.get("password"),
+            email=data.get("email"),
+            phone=data.get("phone"),
+            display_name=data.get("display_name"),
+            groups=[Group.from_dict(g) for g in data.get("groups", [])],
+            is_active=data.get("is_active", True),
+            admin=data.get("admin", False),
+            created_by=data.get("created_by"),
+            created_at=to_datetime(data["created_at"], fail_silently=False),
+            modified_by=data.get("modified_by"),
+            modified_at=to_datetime(data["modified_at"], fail_silently=False),
+            last_login=to_datetime(data["last_login"], fail_silently=False),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert the User instance to a dictionary.
+
+        Returns
+        -------
+        dict[str, Any]
+            A dictionary representation of the User instance.
+        """
+        data = super().to_dict()
+        data["groups"] = [g.to_dict() for g in self.groups]
+        return data
+
+
+@dataclass(kw_only=True)
+class UserWithObjects(User):
+    """User class with related objects included, such as permissions and groups."""
+
+    permissions: list[Permission] = field(default_factory=list[Permission])  # type: ignore
+    groups: list[GroupWithObjects] = field(  # type: ignore
+        default_factory=list[GroupWithObjects]
+    )
+
+    @property
+    def __patch_fields__(self) -> Sequence[str]:
+        return (
+            "username",
+            "email",
+            "phone",
+            "display_name",
+            "is_active",
+            "admin",
+        )
+
+    @property
+    def __update_fields__(self) -> Sequence[str]:
+        return (
+            "username",
+            "email",
+            "phone",
+            "display_name",
+            "is_active",
+            "admin",
+        )
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> Self:
+        """Create a User instance from a dictionary.
+
+        Parameters
+        ----------
+        data
+            Dictionary containing user data.
+
+        Returns
+        -------
+        Self
+            A new User instance created from the dictionary.
+        """
+        return cls(
+            id=data.get("id"),
+            username=data.get("username"),
+            password=data.get("password"),
+            email=data.get("email"),
+            phone=data.get("phone"),
+            display_name=data.get("display_name"),
+            groups=[
+                GroupWithObjects.from_dict(g) for g in data.get("groups", [])
+            ],
+            permissions=[
+                Permission.from_dict(p) for p in data.get("permissions", [])
+            ],
+            is_active=data.get("is_active", True),
+            admin=data.get("admin", False),
+            created_by=data.get("created_by"),
+            created_at=to_datetime(data["created_at"], fail_silently=False),
+            modified_by=data.get("modified_by"),
+            modified_at=to_datetime(data["modified_at"], fail_silently=False),
+            last_login=to_datetime(data["last_login"], fail_silently=False),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert the User instance to a dictionary.
+
+        Returns
+        -------
+        dict[str, Any]
+            A dictionary representation of the User instance.
+        """
+        data = super().to_dict()
+        data["permissions"] = [p.to_dict() for p in self.permissions]
+        data["groups"] = [g.to_dict() for g in self.groups]
+        return data

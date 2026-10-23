@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Sequence
 from uuid import UUID
 
 from alpha.domain.models.base_model import BaseDomainModel
@@ -37,12 +37,12 @@ class Permission(
     description: str = ""
 
     @property
-    def __update_fields__(self) -> list[str]:
-        return ["name", "description"]
+    def __update_fields__(self) -> Sequence[str]:
+        return ("name", "description")
 
     @property
-    def __patch_fields__(self) -> list[str]:
-        return ["name", "description"]
+    def __patch_fields__(self) -> Sequence[str]:
+        return ("name", "description")
 
     def __str__(self) -> str:
         """Return the name of the permission.

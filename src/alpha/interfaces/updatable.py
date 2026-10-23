@@ -1,12 +1,20 @@
-from typing import Protocol
+from typing import Protocol, Sequence
 
-from alpha.domain.models.base_model import DomainModel
+from alpha.domain.models.base_model import (
+    DomainModelCovariant,
+    BaseDomainModel,
+)
 
 
-class Updatable(Protocol):
+class Updatable(Protocol[DomainModelCovariant]):
     """Updatable interface for updating domain models."""
 
-    def update(self, obj: DomainModel) -> DomainModel:
+    @property
+    def __update_fields__(self) -> Sequence[str]:
+        """List of fields that can be updated."""
+        ...
+
+    def update(self, obj: BaseDomainModel) -> DomainModelCovariant:
         """Update a domain model object.
 
         Parameters

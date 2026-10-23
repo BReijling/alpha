@@ -1,20 +1,25 @@
-import datetime
+from datetime import datetime, date
 from contextlib import suppress
+from typing import Any, Literal
 
 import jsonpatch  # type: ignore[import-untyped]
 
 
+PatchOp = Literal["replace", "add", "remove"]
+PatchDict = dict[Literal["op", "path", "value"], Any]
+
+
 class JsonPatch(jsonpatch.JsonPatch):
-    """A JSON Patch that automatically converts ISO format date strings to
-    datetime objects.
+    """A JSON Patch that automatically converts ISO format date and datetime
+    strings to date and datetime objects.
 
     This class extends the standard JsonPatch to include functionality for
-    converting date strings in the patch operations to datetime objects. This
-    is useful for ensuring that any date values in the patch are properly
-    handled as datetime objects.
+    converting date and datetime strings in the patch operations to date or
+    datetime objects. This is useful for ensuring that any date values in the
+    patch are properly handled as datetime objects.
     """
 
-    def __init__(self, patch: list[dict[str, str]], *args, **kwargs):
+    def __init__(self, patch: list[PatchDict], *args: Any, **kwargs: Any):
         """Initialize the JsonPatch. This method calls the parent class's
         initializer and then updates the date values in the patch operations.
 
@@ -32,14 +37,20 @@ class JsonPatch(jsonpatch.JsonPatch):
             Additional keyword arguments to be passed to the parent class's
             initializer.
         """
+        self.patch: list[PatchDict] = patch
         super().__init__(patch=patch, *args, **kwargs)
-        self.update_dates()
+        self.parse_dates()
 
-    def update_dates(self) -> None:
+    def parse_dates(self) -> None:
         """Convert ISO format date strings to datetime objects in the patch"""
-        for update in self:
-            if isinstance(update["value"], str):
+        for patch in self.patch:
+            value = patch.get("value", None)
+            if not isinstance(value, str):
+                continue
+            if value:
+                # Try to parse the value as a date first, then as a datetime
                 with suppress(ValueError):
-                    update["value"] = datetime.datetime.fromisoformat(
-                        update["value"]
-                    )
+                    patch["value"] = date.fromisoformat(value)
+                    continue
+                with suppress(ValueError):
+                    patch["value"] = datetime.fromisoformat(value)

@@ -1,5 +1,5 @@
 from datetime import UTC, datetime
-from typing import Self
+from typing import Self, Sequence
 
 from alpha.domain.models.base_model import BaseDomainModel
 
@@ -17,7 +17,7 @@ class UpdatableMixin:
     """
 
     @property
-    def __update_fields__(self) -> list[str]:
+    def __update_fields__(self) -> Sequence[str]:
         raise NotImplementedError(
             "Subclasses must implement the __update_fields__ property."
         )

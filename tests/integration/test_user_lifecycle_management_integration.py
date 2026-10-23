@@ -1,10 +1,11 @@
 import pytest
 
+from alpha.domain.models.group import GroupWithObjects
 from alpha.domain.models.permission import Permission
+from alpha.domain.models.user import UserWithObjects
 from alpha.exceptions import BadRequestException, NotFoundException
 from alpha.infra.models.json_patch import JsonPatch
 from alpha.services.user_lifecycle_management import UserLifecycleManagement
-from tests.integration._classes import AltTestGroup, AltTestUser
 
 
 def test_user_lifecycle_management_service_user_lifecycle(
@@ -286,7 +287,7 @@ def test_user_lifecycle_management_service_relations(
     # Use update to modify to remove the permission from the user and group.
     updated_group = service.update_group(
         new_group.id,
-        AltTestGroup(
+        GroupWithObjects(
             name=new_group.name,
             description=new_group.description,
             permissions=[],
@@ -296,7 +297,7 @@ def test_user_lifecycle_management_service_relations(
 
     updated_group = service.update_group(
         new_group.id,
-        AltTestGroup(
+        GroupWithObjects(
             name=new_group.name,
             description=new_group.description,
             permissions=[Permission(name=new_permission.name)],
@@ -304,10 +305,22 @@ def test_user_lifecycle_management_service_relations(
     )
     assert updated_group.permissions[0].id == new_permission.id
 
+    updated_user = service.update_user(
+        new_user.id,
+        UserWithObjects(
+            username=new_user.username,
+            display_name=new_user.display_name,
+            groups=[GroupWithObjects(name=new_group.name)],
+            permissions=[Permission(name=new_permission.name)],
+        ),
+    )
+    assert updated_user.permissions[0].id == new_permission.id
+    assert updated_user.groups[0].id == new_group.id
+
     with pytest.raises(NotFoundException):
         service.update_group(
             new_group.id,
-            AltTestGroup(
+            GroupWithObjects(
                 name=new_group.name,
                 description=new_group.description,
                 permissions=[Permission(name="name")],

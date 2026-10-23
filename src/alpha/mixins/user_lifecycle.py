@@ -6,16 +6,20 @@ from uuid import UUID
 
 from alpha.exceptions import BadRequestException, ForbiddenException
 from alpha.factories.password_factory import PasswordFactory
-from alpha.infra.models.json_patch import JsonPatch
+from alpha.infra.models.json_patch import JsonPatch, PatchDict
 from alpha.infra.models.search_filter import Operator, SearchFilter
 from alpha.interfaces.unit_of_work import UnitOfWork
-from alpha.mixins.user_group_helper import UserGroupHelperMixin, PATCH_TYPE
+from alpha.mixins.user_group_helper import UserGroupHelperMixin
 from alpha.providers.models.identity import Identity
 
 if TYPE_CHECKING:
     from alpha.domain.models.user import User
+    from alpha.domain.models.permission import Permission
+    from alpha.domain.models.group import Group
 else:
     User = Any
+    Permission = Any
+    Group = Any
 
 
 class UserLifecycleMixin(UserGroupHelperMixin):
@@ -48,8 +52,6 @@ class UserLifecycleMixin(UserGroupHelperMixin):
         User
             Created user object
         """
-        user.groups = []
-        user.permissions = []
         user = self._user_model.from_dict(user.to_dict())
 
         if not hasattr(user, self._user_username_attribute) or not getattr(
@@ -175,7 +177,7 @@ class UserLifecycleMixin(UserGroupHelperMixin):
         """
         with self.uow:
             user = self._get_user_by_id(user_id)
-            for patch in cast(list[PATCH_TYPE], json_patch):
+            for patch in cast(list[PatchDict], json_patch):
                 path = str(patch["path"]).strip("/")
 
                 if path == "groups" and "groups" not in user.__patch_fields__:
@@ -185,7 +187,7 @@ class UserLifecycleMixin(UserGroupHelperMixin):
                     and "permissions" not in user.__patch_fields__
                 ):
                     self._patch_permissions(obj=user, patch=patch)
-                elif "id" in path:
+                elif path == "id":
                     raise ForbiddenException(
                         "The id parameter cannot be patched"
                     )
@@ -223,11 +225,25 @@ class UserLifecycleMixin(UserGroupHelperMixin):
             Updated user object
         """
         user = self._user_model.from_dict(user.to_dict())
+        update_fields = user.__update_fields__
 
         with self.uow:
             original_user = self._get_user_by_id(user_id)
-
             updated_user = original_user.update(user)
+
+            if "permissions" not in update_fields:
+                updated_user.permissions = []
+                for permission in cast(list[Permission], user.permissions):
+                    _permission = self._get_permission_by_id_or_name(
+                        str(permission.name)
+                    )
+                    updated_user.add_permission(_permission)  # type: ignore
+            if "groups" not in update_fields:
+                updated_user.groups = []
+                for group in cast(list[Group], user.groups):
+                    _group = self._get_group_by_id_or_name(str(group.name))
+                    updated_user.add_group(_group)  # type: ignore
+
             if identity:
                 updated_user.modified_by = identity.username
             self.uow.commit()

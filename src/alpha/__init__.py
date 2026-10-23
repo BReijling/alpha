@@ -6,8 +6,12 @@ from alpha.adapters.sqla_unit_of_work import SqlAlchemyUnitOfWork
 from alpha.factories.jwt_factory import JWTFactory
 from alpha.factories.logging_handler_factory import LoggingHandlerFactory
 from alpha.factories.model_class_factory import ModelClassFactory
-from alpha.domain.models.user import User
-from alpha.domain.models.group import Group
+from alpha.domain.models.user import (
+    User,
+    UserWithGroupObjects,
+    UserWithObjects,
+)
+from alpha.domain.models.group import Group, GroupWithObjects
 from alpha.domain.models.permission import Permission
 from alpha.domain.models.role import Role
 from alpha.domain.models.base_model import (
@@ -131,7 +135,10 @@ __all__ = [
     "DomainModelContravariant",
     "LifeCycleBase",
     "User",
+    "UserWithGroupObjects",
+    "UserWithObjects",
     "Group",
+    "GroupWithObjects",
     "Permission",
     "Role",
     "OIDCConnector",
