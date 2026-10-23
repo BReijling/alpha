@@ -1,14 +1,22 @@
 from dataclasses import dataclass
-from datetime import datetime, timezone
-from typing import Any, cast
+from typing import Any, Sequence
 from uuid import UUID
 
-from alpha.domain.models.base_model import BaseDomainModel, DomainModel
+from alpha.domain.models.base_model import BaseDomainModel
 from alpha.domain.models.life_cycle_base import LifeCycleBase
+from alpha.mixins.models.from_dict import FromDictMixin
+from alpha.mixins.models.patchable import PatchableMixin
+from alpha.mixins.models.updatable import UpdatableMixin
 
 
 @dataclass(kw_only=True)
-class Permission(LifeCycleBase, BaseDomainModel):
+class Permission(
+    LifeCycleBase,
+    BaseDomainModel,
+    UpdatableMixin,
+    PatchableMixin,
+    FromDictMixin,
+):
     """Permission class representing a system permission. This class is used to
     define and manage permissions. User and group permissions are handled
     through this class.
@@ -27,6 +35,14 @@ class Permission(LifeCycleBase, BaseDomainModel):
     id: UUID | int | str | None = None
     name: str | None = None
     description: str = ""
+
+    @property
+    def __update_fields__(self) -> Sequence[str]:
+        return ("name", "description")
+
+    @property
+    def __patch_fields__(self) -> Sequence[str]:
+        return ("name", "description")
 
     def __str__(self) -> str:
         """Return the name of the permission.
@@ -80,31 +96,3 @@ class Permission(LifeCycleBase, BaseDomainModel):
             else None,
             "modified_at": modified_at,
         }
-
-    def update(self, obj: DomainModel) -> DomainModel:
-        """Update the Permission instance with data from another Permission
-        instance.
-
-        Parameters
-        ----------
-        obj
-            Permission object to update from.
-
-        Returns
-        -------
-        DomainModel
-            The updated instance of the Permission.
-
-        Raises
-        ------
-        TypeError
-            If the provided object is not a Permission instance.
-        """
-        if not isinstance(obj, Permission):
-            raise TypeError("Permission.update expects a Permission instance.")
-
-        self.name = obj.name
-        self.description = obj.description
-        self.modified_at = datetime.now(tz=timezone.utc)
-
-        return cast(DomainModel, self)

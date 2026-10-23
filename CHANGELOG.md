@@ -9,12 +9,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- The `PasswordCredentialsUpdate` model has been introduced to handle updates to password credentials, including the new password.
-- The `AuthenticationService` class now includes an `update_password` method that accepts a `PasswordCredentialsUpdate` instance to update a user's password.
+- Introduced the `PermissionLifecycleMixin` class to manage the lifecycle of `Permission` objects, including adding, retrieving, updating, and removing permissions.
+- The `Group` and `User` models now have `add_permission` and `remove_permission` methods to manage their associated permissions.
+- The `User` model now has `add_group` and `remove_group` methods to manage their associated groups.
+- The `UserWithGroupObjects` and `UserWithObjects` classes have been introduced to provide enhanced representations of `User` objects with their associated groups and other related objects.
+- The `GroupWithObjects` class has been introduced to provide an enhanced representation of `Group` objects with their associated objects.
+- The `FromDictMixin` has been introduced to allow models to be instantiated from dictionaries.
+- The `ToDictMixin` has been introduced to allow models to be converted to dictionaries.
+- The `UpdatableMixin` has been introduced to allow models to be updated with new attribute values.
+- The `PatchableMixin` has been introduced to allow models to be partially updated with new attribute values.
+- `to_date` and `to_datetime` utility functions have been introduced to safely convert values to `date` and `datetime` objects, respectively.
 
 ### Changed
 
+- The `BaseDomainModel` class has been updated to serve as a neutral base class for various types of models, without imposing dataclass behavior. The `to_dict` method has been moved to a separate mixin class, allowing it to be reused across different model types.
+- The `Group`, `User` and `Permission` models now use the `UpdatableMixin`, `PatchableMixin`, and `FromDictMixin` to provide update, patch, and from-dict functionality for their attributes.
+- Upgraded the `GroupLifecycleMixin` and `UserLifecycleMixin` to provide enhanced lifecycle management for `Group` and `User` objects, including adding, retrieving, updating, patching, and removing groups and users. This includes improved handling of associated permissions and group memberships for these models when applicable.
+- The `DatabaseProvider` now updates the `laast_login` attribute of `User` objects whenever they successfully authenticate.
+- The `UserLifecycleManagement` now includes the management of `Permission` objects.
+- The `UserLifecycleManagement` now has been upgraded to provide enhanced lifecycle management for `User` objects, including handling associated permissions and group memberships.
+- The `PasswordCredentialsUpdate` model has been introduced to handle updates to password credentials, including the new password.
+- The `AuthenticationService` class now includes an `update_password` method that accepts a `PasswordCredentialsUpdate` instance to update a user's password.
 - The `AuthenticationService` class now uses the `static_users` parameter instead of the deprecated `static_user` parameter. The `static_users` parameter accepts a list of static user instances, allowing multiple static users to be configured. The `static_user` parameter will be removed in a future release.
+- The `User` model creation from dictionaries using the newly introduced `FromDictMixin`.
+- The `Group` model creation from dictionaries has also been improved using the newly introduced `FromDictMixin`.
+- The `JsonPatch` model now parses date and datetime values correctly, ensuring that patch operations involving these types are handled appropriately.
 
 ## [0.7.12] - 2026-10-14
 

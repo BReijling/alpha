@@ -1,14 +1,18 @@
 """Contains the UserLifecycleManagement class"""
 
 from alpha.domain.models.group import Group
+from alpha.domain.models.permission import Permission
 from alpha.domain.models.user import User
 from alpha.factories.password_factory import PasswordFactory
 from alpha.interfaces.unit_of_work import UnitOfWork
 from alpha.mixins.group_lifecycle import GroupLifecycleMixin
+from alpha.mixins.permission_lifecycle import PermissionLifecycleMixin
 from alpha.mixins.user_lifecycle import UserLifecycleMixin
 
 
-class UserLifecycleManagement(UserLifecycleMixin, GroupLifecycleMixin):
+class UserLifecycleManagement(
+    UserLifecycleMixin, GroupLifecycleMixin, PermissionLifecycleMixin
+):
     """Management service for User CRUD transactions"""
 
     def __init__(
@@ -16,8 +20,10 @@ class UserLifecycleManagement(UserLifecycleMixin, GroupLifecycleMixin):
         uow: UnitOfWork,
         users_repository_name: str = "users",
         groups_repository_name: str = "groups",
+        permissions_repository_name: str = "permissions",
         user_model: type[User] = User,
         group_model: type[Group] = Group,
+        permission_model: type[Permission] = Permission,
         password_support: bool = False,
         password_factory: PasswordFactory | None = None,
         user_username_attribute: str = "username",
@@ -38,10 +44,14 @@ class UserLifecycleManagement(UserLifecycleMixin, GroupLifecycleMixin):
             Name of the users repository, by default "users"
         groups_repository_name
             Name of the groups repository, by default "groups"
+        permissions_repository_name
+            Name of the permissions repository, by default "permissions"
         user_model
             User model class, by default User
         group_model
             Group model class, by default Group
+        permission_model
+            Permission model class, by default Permission
         password_support
             Whether password support is enabled, by default False
         password_factory
@@ -55,8 +65,10 @@ class UserLifecycleManagement(UserLifecycleMixin, GroupLifecycleMixin):
         self.uow = uow
         self._users_repository_name = users_repository_name
         self._groups_repository_name = groups_repository_name
+        self._permissions_repository_name = permissions_repository_name
         self._user_model = user_model
         self._group_model = group_model
+        self._permission_model = permission_model
         self._password_support = password_support
         self._password_factory = password_factory or PasswordFactory()
         self._user_username_attribute = user_username_attribute

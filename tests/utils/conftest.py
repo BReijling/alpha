@@ -1,4 +1,5 @@
 import pytest
+from datetime import datetime, date
 
 from alpha.services.models.cookie import Cookie
 from alpha.utils.request_headers import Headers
@@ -35,3 +36,13 @@ def headers() -> Headers:
         refresh_token="cookie_refresh123",
         api_key="cookie_apikey123",
     )
+
+
+@pytest.fixture
+def datetime_iso():
+    return datetime(2015, 3, 17, 13).isoformat()
+
+
+@pytest.fixture
+def date_iso():
+    return date(2015, 3, 17).isoformat()

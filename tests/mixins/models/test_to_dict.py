@@ -1,7 +1,4 @@
-import pytest
-
-
-def test_base_domain_model_dataclass(native_data_class):
+def test_to_dict_mixin_dataclass(native_data_class):
     assert hasattr(native_data_class, "__dataclass_fields__")
     assert hasattr(native_data_class, "to_dict")
     obj = native_data_class.to_dict()
@@ -10,11 +7,8 @@ def test_base_domain_model_dataclass(native_data_class):
     assert obj["integer"] == native_data_class.integer
     assert obj["optional_float"] == native_data_class.optional_float
 
-    with pytest.raises(NotImplementedError):
-        native_data_class.update(None)
 
-
-def test_base_domain_model_attrs_class(attrs_class):
+def test_to_dict_mixin_attrs_class(attrs_class):
     assert hasattr(attrs_class, "__attrs_attrs__")
     assert hasattr(attrs_class, "to_dict")
     obj = attrs_class.to_dict()
@@ -24,7 +18,7 @@ def test_base_domain_model_attrs_class(attrs_class):
     assert obj["optional_float"] == attrs_class.optional_float
 
 
-def test_base_domain_model_pydantic_data_class(pydantic_data_class):
+def test_to_dict_mixin_pydantic_data_class(pydantic_data_class):
     assert hasattr(pydantic_data_class, "__dataclass_fields__")
     assert hasattr(pydantic_data_class, "to_dict")
     obj = pydantic_data_class.to_dict()
@@ -34,7 +28,7 @@ def test_base_domain_model_pydantic_data_class(pydantic_data_class):
     assert obj["optional_float"] == pydantic_data_class.optional_float
 
 
-def test_base_domain_model_pydantic_model(pydantic_model):
+def test_to_dict_mixin_pydantic_model(pydantic_model):
     assert hasattr(pydantic_model, "__pydantic_fields__")
     assert hasattr(pydantic_model, "to_dict")
     obj = pydantic_model.to_dict()
@@ -44,7 +38,7 @@ def test_base_domain_model_pydantic_model(pydantic_model):
     assert obj["optional_float"] == pydantic_model.optional_float
 
 
-def test_base_domain_model_another_data_model(another_data_model):
+def test_to_dict_mixin_another_data_model(another_data_model):
     assert not hasattr(another_data_model, "__dataclass_fields__")
     assert hasattr(another_data_model, "to_dict")
     obj = another_data_model.to_dict()
@@ -54,7 +48,7 @@ def test_base_domain_model_another_data_model(another_data_model):
     assert obj["optional_float"] == another_data_model.optional_float
 
 
-def test_base_domain_model_another_data_model_with_slots(
+def test_to_dict_mixin_another_data_model_with_slots(
     another_data_model_with_slots,
 ):
     assert hasattr(another_data_model_with_slots, "__slots__")

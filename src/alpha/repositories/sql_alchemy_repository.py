@@ -424,7 +424,7 @@ class SqlAlchemyRepository(Generic[DomainModel]):
         """
         if not hasattr(obj, "patch"):
             raise TypeError("Object does not support patch operation")
-        patched = obj.patch(patches)  # type: ignore[attr-defined]
+        patched = obj.patch(patches)
         self.session.flush()
         return cast(BaseDomainModel, patched)
 
@@ -477,9 +477,11 @@ class SqlAlchemyRepository(Generic[DomainModel]):
         list[DomainModel]
             The list of retrieved domain model instances.
         """
-        return self._query(cursor_result=cursor_result, model=model, **kwargs)  # type: ignore
+        return self._query(cursor_result=cursor_result, model=model, **kwargs)
 
-    def update(self, obj: Updatable, new: DomainModel) -> DomainModel:
+    def update(
+        self, obj: Updatable[DomainModel], new: BaseDomainModel
+    ) -> Updatable[DomainModel]:
         """Update a domain model instance with new data.
 
         Parameters
@@ -491,10 +493,10 @@ class SqlAlchemyRepository(Generic[DomainModel]):
 
         Returns
         -------
-        DomainModel
+        Updatable[DomainModel]
             The updated domain model instance.
         """
-        obj = obj.update(new)
+        obj = obj.update(new)  # type: ignore
         self.session.flush()
         self.session.refresh(obj)
         return obj
@@ -579,7 +581,7 @@ class SqlAlchemyRepository(Generic[DomainModel]):
         if query:
             subquery = query
         else:
-            subquery = self.session.query(model)  # type: ignore
+            subquery = cast(Query[Any], self.session.query(model))  # type: ignore
 
         normalized_filters = list(filters) if filters else []
         if normalized_filters:
@@ -588,7 +590,7 @@ class SqlAlchemyRepository(Generic[DomainModel]):
             )
             subquery = subquery.filter(*filter_statements)  # type: ignore
 
-        for k, value in kwargs.items():
+        for k, value in cast(list[tuple[str, Any]], kwargs.items()):
             if not value:
                 break
 
@@ -596,38 +598,38 @@ class SqlAlchemyRepository(Generic[DomainModel]):
                 subquery = self._query_clause(
                     clause=value,
                     query=subquery,
-                    model=model,  # type: ignore
+                    model=model,
                 )
-            elif isinstance(value, dict):  # type: ignore
-                subquery = getattr(subquery, k)(**value)  # type: ignore
+            elif isinstance(value, dict):
+                subquery = getattr(subquery, k)(**value)
             elif isinstance(value, list):
-                for item in value:  # type: ignore
+                for item in cast(list[Any], value):
                     if isinstance(item, QueryClause):
                         subquery = self._query_clause(
                             clause=item,
                             query=subquery,
-                            model=model,  # type: ignore
+                            model=model,
                         )
                     else:
-                        subquery = getattr(subquery, k)(item)  # type: ignore
+                        subquery = getattr(subquery, k)(item)
             else:
-                subquery = getattr(subquery, k)(value)  # type: ignore
+                subquery = getattr(subquery, k)(value)
 
         for order in order_by:
             if isinstance(order, QueryClause):
                 subquery = self._query_clause(
                     clause=order,
                     query=subquery,
-                    model=model,  # type: ignore
+                    model=model,
                 )
-            elif isinstance(order, InstrumentedAttribute | UnaryExpression):  # type: ignore
-                subquery = getattr(subquery, "order_by")(order)  # type: ignore
+            else:
+                subquery = getattr(subquery, "order_by")(order)
 
         # Process cursor_result parameter
         if cursor_result:
-            return getattr(subquery, cursor_result)()  # type: ignore
+            return getattr(subquery, cursor_result)()
 
-        return subquery  # type: ignore
+        return subquery
 
     def _query_clause(
         self,
@@ -684,7 +686,7 @@ class SqlAlchemyRepository(Generic[DomainModel]):
         self,
         filter_: SearchFilter | FilterOperator,
         model: BaseDomainModel,
-    ) -> ColumnElement[Any] | BinaryExpression[Any] | ColumnOperators:
+    ) -> ColumnElement[bool] | BinaryExpression[Any] | ColumnOperators:
         """Process a filter item. When the item is a SeachFilter object
         the domain model will be set and the filter statement will be returned.
         When the item is a FilterOperator object, all the filters will be
@@ -714,12 +716,11 @@ class SqlAlchemyRepository(Generic[DomainModel]):
                 for filter_item in filter_.search_filters
             ]
             return filter_.filter_operator(*filters)  # type: ignore
-        elif isinstance(filter_, SearchFilter):  # type: ignore
+        if isinstance(filter_, SearchFilter):  # type: ignore
             if not filter_._domain_model:  # type: ignore
-                filter_.set_domain_model(model)  # type: ignore
+                filter_.set_domain_model(model)
             return filter_.filter_statement
-        else:
-            raise TypeError(
-                "Only QueryClause and FilterOperator types are allowed "
-                "as values for the 'filters' argument"
-            )
+        raise TypeError(
+            "Only QueryClause and FilterOperator types are allowed "
+            "as values for the 'filters' argument"
+        )

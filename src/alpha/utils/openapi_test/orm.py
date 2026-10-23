@@ -3,6 +3,7 @@ from typing import ClassVar
 from sqlalchemy.orm import registry
 import sqlalchemy as sa
 
+
 from .models import TestGroup
 from .models import TestUser
 from .models import TestToken
@@ -83,8 +84,10 @@ class TestMapper:
 
     @classmethod
     def start_mapping(cls):
-        cls.mapper_registry.map_imperatively(TestUser, cls.users)
-        cls.mapper_registry.map_imperatively(TestGroup, cls.groups)
-        cls.mapper_registry.map_imperatively(TestToken, cls.refresh_tokens)
+        _map = cls.mapper_registry.map_imperatively
+
+        _map(TestGroup, cls.groups)
+        _map(TestUser, cls.users)
+        _map(TestToken, cls.refresh_tokens)
 
         cls.started = True

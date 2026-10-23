@@ -57,4 +57,5 @@ def test_user_permissions_management(
     # Use the token to access a protected endpoint. Now that the user is part
     # of the group, it should have access to the endpoint.
     users_response = client.get("/permissions", headers=headers)
+    print(f"{users_response.json=}")
     assert users_response.status_code == 200

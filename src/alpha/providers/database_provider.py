@@ -1,5 +1,6 @@
 """Database Identity Provider implementation"""
 
+from datetime import datetime, UTC
 import logging
 
 from alpha.domain.models.user import User
@@ -78,6 +79,10 @@ class DatabaseProvider(JWTProviderMixin):
             user = self._verify_password(
                 credentials=credentials, user_repository=users
             )
+
+            if hasattr(user, "last_login"):
+                user.last_login = datetime.now(tz=UTC)
+                self.uow.commit()
 
             return self._identity_model.from_user(user)
 

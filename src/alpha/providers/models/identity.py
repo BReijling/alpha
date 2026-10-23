@@ -5,12 +5,12 @@ from enum import Enum
 from typing import Mapping, Any, Self, Sequence, TYPE_CHECKING, cast
 from datetime import datetime, timezone
 
-from alpha.domain.models.group import Group
-
 
 if TYPE_CHECKING:
+    from alpha.domain.models.group import Group
     from alpha.domain.models.user import User
 else:
+    Group = Any
     User = Any
 
 DEFAULT_LDAP_MAPPINGS = {

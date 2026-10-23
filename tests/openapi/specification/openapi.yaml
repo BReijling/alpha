@@ -682,10 +682,11 @@ paths:
       operationId: add_user
       requestBody:
         description: 'User object'
+        x-codegen-request-body-name: user
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/User"
+              $ref: "#/components/schemas/UserWithPassword"
       responses:
         '201':
           description: Created
@@ -876,6 +877,7 @@ paths:
         - MANAGE_USERS
       security:
         - bearerAuth: []
+  # Endpoints for authentication service
   /auth/login:
     post:
       description: Authenticate user and generate access token
@@ -1055,6 +1057,24 @@ components:
           type: string
           format: password
           example: welcome123
+    JsonPatch:
+      type: array
+      title: JsonPatch
+      items:
+        type: object
+        properties:
+          op:
+            type: string
+            example: add
+          path:
+            type: string
+            example: /permissions
+          value:
+            description: |-
+              Any JSON value: a string, number, boolean, object, array or null. A `remove`
+              operation does not need a value, except on relation paths such as `/permissions`,
+              where the value is the id to remove.
+            example: VALUE
     LifeCycleBase:
       type: object
       properties:
@@ -1085,10 +1105,6 @@ components:
             username:
               type: string
               example: user1
-            password:
-              type: string
-              format: password
-              writeOnly: true
             role:
               type: string
               example: admin
@@ -1114,6 +1130,15 @@ components:
             admin:
               type: boolean
               example: false
+    UserWithPassword:
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - type: object
+          properties:
+            password:
+              type: string
+              format: password
+              writeOnly: true
     Group:
       allOf:
         - $ref: '#/components/schemas/LifeCycleBase'
@@ -1287,7 +1312,7 @@ components:
         name:
           type: string
     # Response schemas
-    Response:
+    BaseResponse:
       type: object
       properties:
         detail:
@@ -1302,17 +1327,16 @@ components:
         type:
           type: string
           example: 'application/json'
-        data: {}
     StringResponse:
       allOf:
-        - $ref: '#/components/schemas/Response'
+        - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
             data:
               type: string
     StringArrayResponse:
       allOf:
-        - $ref: '#/components/schemas/Response'
+        - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
             data:
@@ -1321,21 +1345,21 @@ components:
                 type: string
     IdentityResponse:
       allOf:
-        - $ref: '#/components/schemas/Response'
+        - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
             data:
               $ref: '#/components/schemas/Identity'
     UserResponse:
       allOf:
-        - $ref: '#/components/schemas/Response'
+        - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
             data:
               $ref: '#/components/schemas/User'
     UsersResponse:
       allOf:
-        - $ref: '#/components/schemas/Response'
+        - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
             data:
@@ -1344,14 +1368,14 @@ components:
                 $ref: '#/components/schemas/User'
     GroupResponse:
       allOf:
-        - $ref: '#/components/schemas/Response'
+        - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
             data:
               $ref: '#/components/schemas/Group'
     GroupsResponse:
       allOf:
-        - $ref: '#/components/schemas/Response'
+        - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
             data:

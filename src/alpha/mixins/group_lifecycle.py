@@ -1,22 +1,31 @@
 """Contains the GroupLifecycleMixin class"""
 
+from datetime import datetime, UTC
+from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
-from alpha.domain.models.group import Group
-from alpha.exceptions import NotFoundException
-from alpha.interfaces.sql_repository import SqlRepository
+from alpha.infra.models.json_patch import JsonPatch, PatchDict
+from alpha.infra.models.search_filter import Operator, SearchFilter
 from alpha.interfaces.unit_of_work import UnitOfWork
+from alpha.mixins.user_group_helper import UserGroupHelperMixin
 from alpha.providers.models.identity import Identity
 
+if TYPE_CHECKING:
+    from alpha.domain.models.group import Group
+    from alpha.domain.models.permission import Permission
+else:
+    Group = object
+    Permission = object
 
-class GroupLifecycleMixin:
+
+class GroupLifecycleMixin(UserGroupHelperMixin):
     """Mixin class providing methods for managing the lifecycle of Group
     objects.
     """
 
     uow: UnitOfWork
-    _groups_repository_name: str
-    _group_model: type[Group]
+    _groups_repository_name: str = "groups"
+    _group_model: type[Group] = Group
 
     def add_group(
         self, group: Group, identity: Identity | None = None
@@ -37,16 +46,14 @@ class GroupLifecycleMixin:
         Group
             Created group object
         """
-        group = self._group_model(**group.to_dict())
+        group = self._group_model.from_dict(group.to_dict())
 
         if identity:
             group.created_by = identity.username
 
         with self.uow:
-            groups: SqlRepository[Group] = getattr(
-                self.uow, self._groups_repository_name
-            )
-            group = groups.add(group, raise_if_exists=True)
+            repository = self._get_groups_repository()
+            group = repository.add(group, raise_if_exists=True)
             self.uow.commit()
             return group
 
@@ -69,31 +76,35 @@ class GroupLifecycleMixin:
             When the object is not found in the repository
         """
         with self.uow:
-            groups: SqlRepository[Group] = getattr(
-                self.uow, self._groups_repository_name
-            )
-            group = groups.get_by_id(group_id)
-
-            if not group:
-                raise NotFoundException(
-                    f"Group with id '{group_id}' is not found"
-                )
+            group = self._get_group_by_id(group_id=group_id)
 
             return group
 
-    def get_groups(self) -> list[Group]:
+    def get_groups(
+        self, group_ids: list[str | int | UUID] | None = None
+    ) -> list[Group]:
         """Gets all group objects from the repository
+
+        Parameters
+        ----------
+        group_ids
+            An optional list of group ids to filter on
 
         Returns
         -------
         list[Group]
             A collection of all the group objects
         """
-        with self.uow:
-            groups: SqlRepository[Group] = getattr(
-                self.uow, self._groups_repository_name
+        filters: list[SearchFilter] = []
+
+        if group_ids:
+            filters.append(
+                SearchFilter(field="id", op=Operator.IN, value=group_ids)
             )
-            result = groups.select()
+
+        with self.uow:
+            repository = self._get_groups_repository()
+            result = repository.select(filters=filters)
 
             return result
 
@@ -107,12 +118,53 @@ class GroupLifecycleMixin:
         """
         group = self.get_group(group_id=group_id)
         with self.uow:
-            groups: SqlRepository[Group] = getattr(
-                self.uow, self._groups_repository_name
-            )
+            repository = self._get_groups_repository()
 
-            groups.remove(group)
+            repository.remove(group)
             self.uow.commit()
+
+    def patch_group(
+        self,
+        group_id: str,
+        json_patch: JsonPatch,
+        identity: Identity | None = None,
+    ) -> Group:
+        """Patch an existing group object in the repository
+
+        Parameters
+        ----------
+        group_id
+            The id of the group object
+        json_patch
+            The JSON patch to apply to the group object
+        identity
+            The identity of the group making the changes, by default None. If
+            provided, the `modified_by` attribute of the group will be updated
+            with the groupname from the identity.
+
+        Returns
+        -------
+        Group
+            The patched group object
+        """
+        with self.uow:
+            group = self._get_group_by_id(group_id)
+            for patch in cast(list[PatchDict], json_patch):
+                path = str(patch["path"]).strip("/")
+
+                if (
+                    path == "permissions"
+                    and "permissions" not in group.__patch_fields__
+                ):
+                    self._patch_permissions(obj=group, patch=patch)
+                else:
+                    group.patch(patch)
+
+            if identity:
+                group.modified_by = identity.username
+            group.modified_at = datetime.now(tz=UTC)
+            self.uow.commit()
+            return group
 
     def update_group(
         self,
@@ -138,20 +190,21 @@ class GroupLifecycleMixin:
         Group
             Updated group object
         """
-        group = self._group_model(**group.to_dict())
+        group = self._group_model.from_dict(group.to_dict())
+        update_fields = group.__update_fields__
 
         with self.uow:
-            groups: SqlRepository[Group] = getattr(
-                self.uow, self._groups_repository_name
-            )
-            original_group = groups.get_by_id(group_id)
-
-            if not original_group:
-                raise NotFoundException(
-                    f"Group with id '{group_id}' is not found"
-                )
-
+            original_group = self._get_group_by_id(group_id)
             updated_group = original_group.update(group)
+
+            if "permissions" not in update_fields:
+                updated_group.permissions = []
+                for permission in cast(list[Permission], group.permissions):
+                    perm = self._get_permission_by_id_or_name(
+                        str(permission.name)
+                    )
+                    updated_group.add_permission(perm)  # type: ignore
+
             if identity:
                 updated_group.modified_by = identity.username
             self.uow.commit()

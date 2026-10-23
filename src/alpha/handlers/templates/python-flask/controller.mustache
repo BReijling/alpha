@@ -218,6 +218,7 @@ def {{operationId}}(
     
     try:
         # Objects used for authorization
+        identity = None
         roles=[{{#vendorExtensions.x-alpha-verify-roles}}"{{.}}",{{/vendorExtensions.x-alpha-verify-roles}}]
         groups=[{{#vendorExtensions.x-alpha-verify-groups}}"{{.}}",{{/vendorExtensions.x-alpha-verify-groups}}]
         permissions=[{{#vendorExtensions.x-alpha-verify-permissions}}"{{.}}",{{/vendorExtensions.x-alpha-verify-permissions}}]

@@ -1,14 +1,22 @@
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import date, datetime
 from enum import Enum, auto
-from typing import ClassVar
+from re import A
+from typing import Any, ClassVar, Self
+from uuid import UUID
 
 import sqlalchemy as sa
-from sqlalchemy.orm import registry
+from sqlalchemy.orm import registry, relationship
+from alpha.domain.models.group import GroupWithObjects
 
 from alpha.domain.models.base_model import BaseDomainModel
 from alpha.domain.models.group import Group
-from alpha.domain.models.user import User
+from alpha.domain.models.life_cycle_base import LifeCycleBase
+from alpha.domain.models.permission import Permission
+from alpha.domain.models.user import User, UserWithObjects
+from alpha.exceptions import AlreadyExistsException, NotFoundException
+from alpha.mixins.models.patchable import PatchableMixin
+from alpha.mixins.models.updatable import UpdatableMixin
 from alpha.providers.models.token import Token
 
 
@@ -151,10 +159,223 @@ class AppMapper:
         sa.Column("expires_at", sa.DateTime(timezone=True), nullable=True),
     )
 
+    # Alt tables for testing alternative user and group structures
+    alt_users = sa.Table(
+        "alt_test_users",
+        metadata,
+        sa.Column(
+            "id",
+            sa.String,
+            primary_key=True,
+            unique=True,
+            server_default=sa.text("gen_random_uuid()"),
+        ),
+        sa.Column("username", sa.VARCHAR(50), nullable=False, unique=True),
+        sa.Column("password", sa.VARCHAR(200), nullable=True),
+        sa.Column("display_name", sa.VARCHAR(255), nullable=True),
+        sa.Column("admin", sa.BOOLEAN, nullable=False, default=False),
+        sa.Column(
+            "last_login",
+            sa.DateTime(timezone=True),
+            nullable=True,
+        ),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=True,
+            server_default=sa.text("now()"),
+        ),
+        sa.Column("created_by", sa.String, nullable=True),
+        sa.Column("modified_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("modified_by", sa.String, nullable=True),
+    )
+
+    alt_groups = sa.Table(
+        "alt_test_groups",
+        metadata,
+        sa.Column(
+            "id",
+            sa.String,
+            primary_key=True,
+            unique=True,
+            server_default=sa.text("gen_random_uuid()"),
+        ),
+        sa.Column("name", sa.VARCHAR(50), nullable=False, unique=True),
+        sa.Column("description", sa.VARCHAR(255), nullable=True),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=True,
+            server_default=sa.text("now()"),
+        ),
+        sa.Column("created_by", sa.String, nullable=True),
+        sa.Column("modified_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("modified_by", sa.String, nullable=True),
+    )
+
+    alt_permissions = sa.Table(
+        "alt_permissions",
+        metadata,
+        sa.Column(
+            "id",
+            sa.String,
+            primary_key=True,
+            unique=True,
+            server_default=sa.text("gen_random_uuid()"),
+        ),
+        sa.Column("name", sa.VARCHAR(50), nullable=False, unique=True),
+        sa.Column("description", sa.VARCHAR(255), nullable=True),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=True,
+            server_default=sa.text("now()"),
+        ),
+        sa.Column("created_by", sa.String, nullable=True),
+        sa.Column("modified_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("modified_by", sa.String, nullable=True),
+    )
+
+    alt_user_group_couplings = sa.Table(
+        "alt_test_user_group_couplings",
+        metadata,
+        sa.Column(
+            "id",
+            sa.String,
+            primary_key=True,
+            server_default=sa.text("gen_random_uuid()"),
+        ),
+        sa.Column(
+            "user_id",
+            sa.String,
+            sa.ForeignKey("alt_test_users.id", ondelete="CASCADE"),
+            index=True,
+            nullable=False,
+        ),
+        sa.Column(
+            "group_id",
+            sa.String,
+            sa.ForeignKey("alt_test_groups.id", ondelete="CASCADE"),
+            index=True,
+            nullable=False,
+        ),
+        sa.UniqueConstraint("user_id", "group_id"),
+    )
+
+    alt_user_permission_couplings = sa.Table(
+        "alt_test_user_permission_couplings",
+        metadata,
+        sa.Column(
+            "id",
+            sa.String,
+            primary_key=True,
+            server_default=sa.text("gen_random_uuid()"),
+        ),
+        sa.Column(
+            "user_id",
+            sa.String,
+            sa.ForeignKey("alt_test_users.id", ondelete="CASCADE"),
+            index=True,
+            nullable=False,
+        ),
+        sa.Column(
+            "permission_id",
+            sa.String,
+            sa.ForeignKey("alt_permissions.id", ondelete="CASCADE"),
+            index=True,
+            nullable=False,
+        ),
+        sa.UniqueConstraint("user_id", "permission_id"),
+    )
+
+    alt_group_permission_couplings = sa.Table(
+        "alt_test_group_permission_couplings",
+        metadata,
+        sa.Column(
+            "id",
+            sa.String,
+            primary_key=True,
+            server_default=sa.text("gen_random_uuid()"),
+        ),
+        sa.Column(
+            "group_id",
+            sa.String,
+            sa.ForeignKey("alt_test_groups.id", ondelete="CASCADE"),
+            index=True,
+            nullable=False,
+        ),
+        sa.Column(
+            "permission_id",
+            sa.String,
+            sa.ForeignKey("alt_permissions.id", ondelete="CASCADE"),
+            index=True,
+            nullable=False,
+        ),
+        sa.UniqueConstraint("group_id", "permission_id"),
+    )
+
     @classmethod
     def start_mapping(cls):
-        cls.mapper_registry.map_imperatively(User, cls.users)
-        cls.mapper_registry.map_imperatively(Group, cls.groups)
-        cls.mapper_registry.map_imperatively(Token, cls.refresh_tokens)
+        _map = cls.mapper_registry.map_imperatively
+
+        _map(User, cls.users)
+        _map(Group, cls.groups)
+        _map(Token, cls.refresh_tokens)
+
+        # Map alternative test group and user models for testing
+        _map(
+            GroupWithObjects,
+            cls.alt_groups,
+            properties={
+                "permissions": relationship(
+                    Permission,
+                    back_populates="groups",
+                    secondary=cls.alt_group_permission_couplings,
+                    lazy="selectin",
+                ),
+                "users": relationship(
+                    UserWithObjects,
+                    back_populates="groups",
+                    secondary=cls.alt_user_group_couplings,
+                    lazy=None,
+                ),
+            },
+        )
+        _map(
+            UserWithObjects,
+            cls.alt_users,
+            properties={
+                "permissions": relationship(
+                    Permission,
+                    back_populates="users",
+                    secondary=cls.alt_user_permission_couplings,
+                    lazy="selectin",
+                ),
+                "groups": relationship(
+                    GroupWithObjects,
+                    back_populates="users",
+                    secondary=cls.alt_user_group_couplings,
+                    lazy="selectin",
+                ),
+            },
+        )
+        _map(
+            Permission,
+            cls.alt_permissions,
+            properties={
+                "users": relationship(
+                    UserWithObjects,
+                    back_populates="permissions",
+                    secondary=cls.alt_user_permission_couplings,
+                    lazy=None,
+                ),
+                "groups": relationship(
+                    GroupWithObjects,
+                    back_populates="permissions",
+                    secondary=cls.alt_group_permission_couplings,
+                    lazy=None,
+                ),
+            },
+        )
 
         cls.started = True

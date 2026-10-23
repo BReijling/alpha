@@ -6,8 +6,12 @@ from alpha.adapters.sqla_unit_of_work import SqlAlchemyUnitOfWork
 from alpha.factories.jwt_factory import JWTFactory
 from alpha.factories.logging_handler_factory import LoggingHandlerFactory
 from alpha.factories.model_class_factory import ModelClassFactory
-from alpha.domain.models.user import User
-from alpha.domain.models.group import Group
+from alpha.domain.models.user import (
+    User,
+    UserWithGroupObjects,
+    UserWithObjects,
+)
+from alpha.domain.models.group import Group, GroupWithObjects
 from alpha.domain.models.permission import Permission
 from alpha.domain.models.role import Role
 from alpha.domain.models.base_model import (
@@ -50,6 +54,10 @@ from alpha.interfaces.token_factory import TokenFactory
 from alpha.mixins.jwt_provider import JWTProviderMixin
 from alpha.mixins.user_lifecycle import UserLifecycleMixin
 from alpha.mixins.group_lifecycle import GroupLifecycleMixin
+from alpha.mixins.permission_lifecycle import PermissionLifecycleMixin
+from alpha.mixins.models.updatable import UpdatableMixin
+from alpha.mixins.models.from_dict import FromDictMixin
+from alpha.mixins.models.patchable import PatchableMixin
 from alpha.providers.models.identity import (
     Identity,
     DEFAULT_LDAP_MAPPINGS,
@@ -127,7 +135,10 @@ __all__ = [
     "DomainModelContravariant",
     "LifeCycleBase",
     "User",
+    "UserWithGroupObjects",
+    "UserWithObjects",
     "Group",
+    "GroupWithObjects",
     "Permission",
     "Role",
     "OIDCConnector",
@@ -164,6 +175,10 @@ __all__ = [
     "JWTProviderMixin",
     "UserLifecycleMixin",
     "GroupLifecycleMixin",
+    "PermissionLifecycleMixin",
+    "UpdatableMixin",
+    "FromDictMixin",
+    "PatchableMixin",
     "Identity",
     "DEFAULT_LDAP_MAPPINGS",
     "DEFAULT_AD_MAPPINGS",

@@ -1,4 +1,6 @@
 # Models
+from typing import Any
+
 from alpha.providers.models.identity import (
     Identity,
     DEFAULT_LDAP_MAPPINGS,
@@ -12,7 +14,7 @@ from alpha.providers.models.credentials import (
 from alpha.providers.models.token import Token
 
 # Providers
-from alpha.providers.oidc_provider import OIDCProvider, KeyCloakProvider
+
 
 # Optional LDAP support - only import if ldap3 is available
 try:
@@ -42,3 +44,20 @@ if _LDAP_AVAILABLE:
             "ADProvider",
         ]
     )
+
+
+def __getattr__(name: str) -> Any:
+    if name in {"OIDCProvider", "KeyCloakProvider"}:
+        from alpha.providers.oidc_provider import (
+            OIDCProvider,
+            KeyCloakProvider,
+        )
+
+        globals().update(
+            OIDCProvider=OIDCProvider,
+            KeyCloakProvider=KeyCloakProvider,
+        )
+
+        return globals()[name]
+
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

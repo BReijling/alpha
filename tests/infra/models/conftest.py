@@ -10,7 +10,7 @@ from alpha.infra.models.query_clause import QueryClause
 def fake_query():
     class FakeQuery:
         def filter(self, *args, **kwargs):
-            return 'fake_query_filtered'
+            return "fake_query_filtered"
 
     return FakeQuery()
 
@@ -19,15 +19,25 @@ def fake_query():
 def patch_with_date() -> list[dict[str, Any]]:
     return [
         {"op": "replace", "path": "/", "value": "string"},
+        {"op": "replace", "path": "/", "value": "2015-03-17"},
+    ]
+
+
+@pytest.fixture
+def patch_with_datetime() -> list[dict[str, Any]]:
+    return [
+        {"op": "replace", "path": "/", "value": "string"},
         {"op": "replace", "path": "/", "value": "2015-03-17T13:00:00.000"},
     ]
 
 
 @pytest.fixture
-def patch_without_date() -> list[dict[str, Any]]:
+def patch_without_string() -> list[dict[str, Any]]:
     return [
-        {"op": "replace", "path": "/", "value": 1},
-        {"op": "replace", "path": "/", "value": {}},
+        {"op": "add", "path": "/", "value": 1},
+        {"op": "add", "path": "/", "value": 0.5},
+        {"op": "add", "path": "/", "value": {"key": "value"}},
+        {"op": "add", "path": "/", "value": ["test"]},
     ]
 
 
