@@ -319,7 +319,11 @@ class User(
 
 @dataclass(kw_only=True)
 class UserWithGroupObjects(User):
-    """User class with related objects included, such as groups."""
+    """User class with related objects included, such as groups.
+
+    This class extends the User class and overrides the groups attribute to
+    include related Group objects.
+    """
 
     groups: list[Group] = field(  # type: ignore
         default_factory=list[Group]
@@ -395,7 +399,14 @@ class UserWithGroupObjects(User):
 
 @dataclass(kw_only=True)
 class UserWithObjects(User):
-    """User class with related objects included, such as permissions and groups."""
+    """User class with related objects included, such as permissions and
+    groups.
+
+    This class extends the User class and overrides the groups and permissions
+    attributes to include related Group and Permission objects. Use this class
+    in combination with the GroupWithObjects class when you need to work with
+    related objects.
+    """
 
     permissions: list[Permission] = field(default_factory=list[Permission])  # type: ignore
     groups: list[GroupWithObjects] = field(  # type: ignore

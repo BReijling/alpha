@@ -183,7 +183,11 @@ class Group(
 
 @dataclass(kw_only=True)
 class GroupWithObjects(Group):
-    """Group class with related objects included, such as permissions."""
+    """Group class with related objects included, such as permissions.
+
+    This class extends the Group class and overrides the permissions attribute
+    to include related Permission objects.
+    """
 
     permissions: list[Permission] = field(default_factory=list[Permission])  # type: ignore
 
