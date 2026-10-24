@@ -201,6 +201,34 @@ class UserGroupHelperMixin:
 
         return group
 
+    def _get_permission_by_name(self, name: str) -> Permission:
+        """Retrieve a permission by its name from the specified repository.
+
+        Parameters
+        ----------
+        name
+            The name of the permission to retrieve
+
+        Returns
+        -------
+        Permission
+            The permission object if found
+
+        Raises
+        ------
+        NotFoundException
+            If the permission with the specified name is not found
+        """
+        repository = self._get_permissions_repository()
+        permission = repository.get_one_or_none(attr="name", value=name)
+
+        if not permission:
+            raise NotFoundException(
+                f"Permission with name '{name}' is not found"
+            )
+
+        return permission
+
     def _get_permission_by_id_or_name(
         self, identifier: str | UUID
     ) -> Permission:
@@ -223,7 +251,9 @@ class UserGroupHelperMixin:
             If the permission with the specified ID or name is not found
         """
         repository = self._get_permissions_repository()
-        permission = repository.get_by_id(identifier)
+        permission = None
+        if self._is_valid_uuid(identifier):
+            permission = repository.get_by_id(identifier)
 
         if not permission:
             permission = repository.get_one_or_none(
@@ -236,6 +266,32 @@ class UserGroupHelperMixin:
             )
 
         return permission
+
+    def _get_group_by_name(self, name: str) -> Group:
+        """Retrieve a group by its name from the specified repository.
+
+        Parameters
+        ----------
+        name
+            The name of the group to retrieve
+
+        Returns
+        -------
+        Group
+            The group object if found
+
+        Raises
+        ------
+        NotFoundException
+            If the group with the specified name is not found
+        """
+        repository = self._get_groups_repository()
+        group = repository.get_one_or_none(attr="name", value=name)
+
+        if not group:
+            raise NotFoundException(f"Group with name '{name}' is not found")
+
+        return group
 
     def _get_group_by_id_or_name(self, identifier: str | UUID) -> Group:
         """Retrieve a group by its ID or name from the specified repository.
@@ -256,7 +312,9 @@ class UserGroupHelperMixin:
             If the group with the specified ID or name is not found
         """
         repository = self._get_groups_repository()
-        group = repository.get_by_id(identifier)
+        group = None
+        if self._is_valid_uuid(identifier):
+            group = repository.get_by_id(identifier)
 
         if not group:
             group = repository.get_one_or_none(attr="name", value=identifier)
@@ -381,19 +439,21 @@ class UserGroupHelperMixin:
 
         return op, path, value
 
-    def _is_valid_uuid(self, value: str) -> bool:
+    def _is_valid_uuid(self, value: str | UUID) -> bool:
         """Check if the value contains a valid UUID.
 
         Parameters
         ----------
         value
-            String to check
+            String or UUID to check
 
         Returns
         -------
         bool
             True if the value is a valid UUID, False if not.
         """
+        if isinstance(value, UUID):
+            return True
         try:
             UUID(value)
             return True

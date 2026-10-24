@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.1] - 2026-10-24
+
+### Fixed
+
+- The `UserLifecycleMixin` class now correctly handles the retrieval of group and permission objects by their name.
+- The `GroupLifecycleMixin` class now correctly handles the retrieval of permission objects by their name.
+- The `UserWithGroupObjects`, `UserWithObjects`, and `GroupWithObjects` classes now correctly create their associated objects from the provided data when using the `from_dict` class method.
+
 ## [0.8.0] - 2026-10-23
 
 ### Added
