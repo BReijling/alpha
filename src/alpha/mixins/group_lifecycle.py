@@ -57,7 +57,7 @@ class GroupLifecycleMixin(UserGroupHelperMixin):
 
             if "permissions" not in update_fields:
                 permissions = [
-                    self._get_permission_by_id_or_name(str(permission.name))
+                    self._get_permission_by_name(str(permission.name))
                     for permission in cast(list[Permission], group.permissions)
                 ]
                 # The default Group model expects list[str] for permissions.
@@ -128,9 +128,9 @@ class GroupLifecycleMixin(UserGroupHelperMixin):
         group_id
             The id of the group object
         """
-        group = self.get_group(group_id=group_id)
         with self.uow:
             repository = self._get_groups_repository()
+            group = self._get_group_by_id(group_id)
 
             repository.remove(group)
             self.uow.commit()
@@ -212,9 +212,7 @@ class GroupLifecycleMixin(UserGroupHelperMixin):
             if "permissions" not in update_fields:
                 updated_group.permissions = []
                 for permission in cast(list[Permission], group.permissions):
-                    perm = self._get_permission_by_id_or_name(
-                        str(permission.name)
-                    )
+                    perm = self._get_permission_by_name(str(permission.name))
                     # The default Group model expects list[str] for
                     # permissions. When using the extended model with
                     # Permission objects, the typing is incorrect. We can

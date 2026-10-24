@@ -84,7 +84,7 @@ class UserLifecycleMixin(UserGroupHelperMixin):
 
             if "permissions" not in update_fields:
                 permissions = [
-                    self._get_permission_by_id_or_name(str(permission.name))
+                    self._get_permission_by_name(str(permission.name))
                     for permission in cast(list[Permission], user.permissions)
                 ]
                 # The default User model expects list[str] for permissions.
@@ -94,7 +94,7 @@ class UserLifecycleMixin(UserGroupHelperMixin):
 
             if "groups" not in update_fields:
                 groups = [
-                    self._get_group_by_id_or_name(str(group.name))
+                    self._get_group_by_name(str(group.name))
                     for group in cast(list[Group], user.groups)
                 ]
                 # The default User model expects list[str] for groups.
@@ -256,14 +256,14 @@ class UserLifecycleMixin(UserGroupHelperMixin):
             if "permissions" not in update_fields:
                 updated_user.permissions = []
                 for permission in cast(list[Permission], user.permissions):
-                    _permission = self._get_permission_by_id_or_name(
+                    _permission = self._get_permission_by_name(
                         str(permission.name)
                     )
                     updated_user.add_permission(_permission)  # type: ignore
             if "groups" not in update_fields:
                 updated_user.groups = []
                 for group in cast(list[Group], user.groups):
-                    _group = self._get_group_by_id_or_name(str(group.name))
+                    _group = self._get_group_by_name(str(group.name))
                     updated_user.add_group(_group)  # type: ignore
 
             if identity:

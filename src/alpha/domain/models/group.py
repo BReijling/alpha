@@ -213,13 +213,14 @@ class GroupWithObjects(Group):
         Self
             A new Group instance created from the dictionary.
         """
+        permissions: list[dict[str, Any]] = data.get("permissions", [])
+        if not permissions:
+            permissions = []
         return cls(
             id=data.get("id"),
             name=data.get("name"),
             description=data.get("description"),
-            permissions=[
-                Permission.from_dict(p) for p in data.get("permissions", [])
-            ],
+            permissions=[Permission.from_dict(p) for p in permissions],
             is_active=data.get("is_active", True),
             created_by=data.get("created_by"),
             created_at=to_datetime(

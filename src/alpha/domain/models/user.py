@@ -367,6 +367,9 @@ class UserWithGroupObjects(User):
         Self
             A new User instance created from the dictionary.
         """
+        groups: list[dict[str, Any]] = data.get("groups", [])
+        if not groups:
+            groups = []
         return cls(
             id=data.get("id"),
             username=data.get("username"),
@@ -376,7 +379,7 @@ class UserWithGroupObjects(User):
             display_name=data.get("display_name"),
             role=data.get("role"),
             permissions=data.get("permissions", []),
-            groups=[Group.from_dict(g) for g in data.get("groups", [])],
+            groups=[Group.from_dict(g) for g in groups],
             is_active=data.get("is_active", True),
             admin=data.get("admin", False),
             created_by=data.get("created_by"),
@@ -457,6 +460,12 @@ class UserWithObjects(User):
         Self
             A new User instance created from the dictionary.
         """
+        groups: list[dict[str, Any]] = data.get("groups", [])
+        if not groups:
+            groups = []
+        permissions: list[dict[str, Any]] = data.get("permissions", [])
+        if not permissions:
+            permissions = []
         return cls(
             id=data.get("id"),
             username=data.get("username"),
@@ -465,12 +474,8 @@ class UserWithObjects(User):
             phone=data.get("phone"),
             display_name=data.get("display_name"),
             role=data.get("role"),
-            groups=[
-                GroupWithObjects.from_dict(g) for g in data.get("groups", [])
-            ],
-            permissions=[
-                Permission.from_dict(p) for p in data.get("permissions", [])
-            ],
+            groups=[GroupWithObjects.from_dict(g) for g in groups],
+            permissions=[Permission.from_dict(p) for p in permissions],
             is_active=data.get("is_active", True),
             admin=data.get("admin", False),
             created_by=data.get("created_by"),
