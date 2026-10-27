@@ -3,7 +3,7 @@
 import json
 from dataclasses import MISSING, is_dataclass
 from enum import Enum
-from typing import Any, Sequence, get_args, get_origin
+from typing import Any, Sequence, get_args, get_origin, Iterable
 
 from alpha import exceptions
 from alpha.encoder import JSONEncoder
@@ -61,7 +61,7 @@ class ResponseFactory:
 
         # When the source instance and target class are of an iterable type
         if cls_origin in [list, tuple, set]:
-            if isinstance(response, Sequence):
+            if isinstance(response, (Sequence, Iterable)):
                 arg = get_args(cls)[0]
                 return [
                     self.process(response=obj, cls=arg) for obj in response

@@ -6,6 +6,7 @@ from alpha.adapters.sqla_unit_of_work import SqlAlchemyUnitOfWork
 from alpha.factories.jwt_factory import JWTFactory
 from alpha.factories.logging_handler_factory import LoggingHandlerFactory
 from alpha.factories.model_class_factory import ModelClassFactory
+from alpha.factories.password_factory import PasswordFactory
 from alpha.domain.models.user import (
     User,
     UserWithGroupObjects,
@@ -75,6 +76,7 @@ from alpha.providers.oidc_provider import (
     DEFAULT_OIDC_MAPPINGS,
     DEFAULT_KEYCLOAK_MAPPINGS,
 )
+from alpha.providers.static_provider import StaticConfigProvider
 from alpha.repositories.models.repository_model import RepositoryModel
 from alpha.repositories.rest_api_repository import RestApiRepository
 from alpha.repositories.sql_alchemy_repository import SqlAlchemyRepository
@@ -129,6 +131,7 @@ __all__ = [
     "JWTFactory",
     "LoggingHandlerFactory",
     "ModelClassFactory",
+    "PasswordFactory",
     "BaseDomainModel",
     "DomainModel",
     "DomainModelCovariant",
@@ -190,6 +193,7 @@ __all__ = [
     "KeyCloakProvider",
     "DEFAULT_OIDC_MAPPINGS",
     "DEFAULT_KEYCLOAK_MAPPINGS",
+    "StaticConfigProvider",
     "RepositoryModel",
     "RestApiRepository",
     "SqlAlchemyRepository",
