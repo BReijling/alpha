@@ -175,7 +175,7 @@ class StaticConfigProvider(JWTProviderMixin):
             If no user with the provided ID exists.
         """
         for user in self._static_users_store.values():
-            if user.id == user_id:
+            if (str(user.id) if user.id else user.username) == user_id:
                 return user
 
         raise exceptions.InvalidCredentialsException(
