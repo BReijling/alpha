@@ -1,7 +1,7 @@
 """Authentication service module."""
 
 from datetime import datetime, timezone
-from typing import NoReturn
+from typing import NoReturn, Sequence
 
 from alpha.domain.models.group import Group
 from alpha.domain.models.user import User
@@ -83,7 +83,7 @@ class AuthenticationService:
         refresh_repository: RefreshRepository | None = None,
         refresh_identity_on_refresh: bool = False,
         static_user: User | None = None,
-        static_users: list[User] | None = None,
+        static_users: Sequence[User] | None = None,
     ) -> None:
         """Initialize the AuthenticationService with the provided
         configuration.
@@ -185,14 +185,13 @@ class AuthenticationService:
             If provided, this user will be authenticated if the credentials
             match, bypassing the identity provider. This can be used for
             development/testing or as a fallback user and should not be used in
-            production environments. This parameter is deprecated in favor of
-            static_users and will be removed in a future release.
-        static_users
-            List of static users to use for authentication, by default None.
-            If provided, these users will be authenticated if the credentials
-            match, bypassing the identity provider. This can be used for
-            development/testing or as fallback users and should not be used in
             production environments.
+        static_users
+            Collection of static users to use for authentication, by default
+            None. If provided, these users will be authenticated if the
+            credentials match, bypassing the identity provider. This can be
+            used for development/testing or as fallback users and should not be
+            used in production environments.
 
         Raises
         ------

@@ -4,14 +4,12 @@ from alpha.exceptions import NotSupportedException
 from alpha.providers.models.identity import Identity
 
 
-def test_oidc_provider(oidc_provider, credentials):
-
+def test_oidc_provider(oidc_provider):
     assert oidc_provider._connector is not None
     assert oidc_provider.protocol == "oidc"
 
 
 def test_oidc_provider_authenticate(oidc_provider, credentials):
-
     result = oidc_provider.authenticate(credentials)
 
     assert isinstance(result, Identity)
@@ -23,7 +21,6 @@ def test_oidc_provider_authenticate(oidc_provider, credentials):
 
 
 def test_oidc_provider_get_user(oidc_provider):
-
     result = oidc_provider.get_user("test_subject")
 
     assert isinstance(result, Identity)
@@ -34,13 +31,11 @@ def test_oidc_provider_get_user(oidc_provider):
 
 
 def test_oidc_provider_change_password(oidc_provider):
-
     with pytest.raises(NotSupportedException):
         oidc_provider.change_password("credentials", "new_password")
 
 
 def test_oidc_provider_validate(oidc_provider, token):
-
     result = oidc_provider.validate(token)
 
     assert isinstance(result, Identity)
@@ -51,7 +46,6 @@ def test_oidc_provider_validate(oidc_provider, token):
 
 
 def test_oidc_provider_get_claims(oidc_provider):
-
     test_claims = {
         "sub": "test_subject",
         "name": "Test User",

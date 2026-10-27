@@ -6,6 +6,7 @@
 - JsonPatchTypeFactory
 """
 
+from collections import abc
 import datetime
 from typing import Any, Iterable, get_origin
 
@@ -14,6 +15,18 @@ import pandas as pd
 from alpha import exceptions
 from alpha.factories._type_conversion_matrix import TYPE_CONVERSION_MATRIX
 from alpha.interfaces.openapi_model import OpenAPIModel
+
+
+COLLECTION_TYPES: dict[type, type] = {
+    abc.Sequence: list,
+    abc.MutableSequence: list,
+    abc.Collection: list,
+    abc.Iterable: list,
+    abc.Set: set,
+    abc.MutableSet: set,
+    abc.Mapping: dict,
+    abc.MutableMapping: dict,
+}
 
 
 class GenericTypeFactory:
@@ -50,17 +63,13 @@ class GenericTypeFactory:
         exceptions.ObjectConversionNotAllowed
             When conversion of the value is not allowed
         """
-        from_type: Any = type(value)
+        from_type: Any = type(value)  # type: ignore
 
-        # Handle the case where cls is a Sequence or Mapping, since these are
-        # not real types and cannot be used for lookup in the conversion matrix
-        cls_origin = get_origin(cls)
-        if cls_origin is not None:
-            cls = cls_origin
-        if cls.__name__ == "Sequence":
-            cls = list
-        if cls.__name__ == "Mapping":
-            cls = dict
+        # Handle the case where cls is a type from the collections.abc module,
+        # since these are abstract base classes and not real types, and cannot
+        # be used for lookup in the conversion matrix.
+        cls = get_origin(cls) or cls
+        cls = COLLECTION_TYPES.get(cls, cls)
 
         try:
             allowed: bool = TYPE_CONVERSION_MATRIX[from_type][cls]
