@@ -76,6 +76,7 @@ from alpha.providers.oidc_provider import (
     DEFAULT_OIDC_MAPPINGS,
     DEFAULT_KEYCLOAK_MAPPINGS,
 )
+from alpha.providers.database_provider import DatabaseProvider
 from alpha.providers.static_provider import StaticConfigProvider
 from alpha.repositories.models.repository_model import RepositoryModel
 from alpha.repositories.rest_api_repository import RestApiRepository
@@ -193,6 +194,7 @@ __all__ = [
     "KeyCloakProvider",
     "DEFAULT_OIDC_MAPPINGS",
     "DEFAULT_KEYCLOAK_MAPPINGS",
+    "DatabaseProvider",
     "StaticConfigProvider",
     "RepositoryModel",
     "RestApiRepository",
