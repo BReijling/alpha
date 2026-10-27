@@ -61,7 +61,7 @@ class StaticConfigProvider(JWTProviderMixin):
         """
         self._static_users_store = self._build_user_store(static_users)
 
-        self._token_factory = token_factory
+        self.token_factory = token_factory
         self._password_factory = password_factory or PasswordFactory()
         self._identity_model = identity_model
 
