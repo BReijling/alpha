@@ -13,6 +13,7 @@ All documentation is auto-generated from docstrings in the source code.
 | [LDAPProvider](ldap_provider.md) | LDAP / Active Directory authentication provider |
 | [ADProvider](ad_provider.md) | Active Directory authentication provider |
 | [DatabaseProvider](database_provider.md) | Database connection and session provider |
+| [StaticConfigProvider](static_provider.md) | Static configuration provider |
 <!-- | [ApiKeyProvider](api_key_provider.md) | API key authentication provider | -->
 
 ## Models
