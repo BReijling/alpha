@@ -14,10 +14,13 @@ RUN mkdir -p /usr/src/app && chown -R root:root /usr/src/app
 
 WORKDIR /usr/src/app
 
-COPY --chown=${UID}:${GID} . .
+COPY --chown=${UID}:${GID} *.whl .
+COPY --chown=${UID}:${GID} requirements.txt .
 
 RUN pip install --no-cache-dir *.whl
 RUN pip install --no-cache-dir -r requirements.txt
+
+COPY --chown=${UID}:${GID} . .
 
 ENV HOME=/home/app
 RUN mkdir -p "${HOME}" && chown ${UID}:${GID} "${HOME}"
