@@ -28,3 +28,5 @@ All documentation is auto-generated from docstrings in the source code.
 | [verify_identity](verify_identity.md) | Verify an Identity object |
 | [generate_secret](generate_secret.md) | Generate a random secret string |
 | [minor_version_gte](minor_version_gte.md) | To compare the python minor version |
+| [to_datetime](parse_to_datetime.md) | Parse a string to a datetime object |
+| [to_date](parse_to_datetime.md) | Parse a string to a date object |
