@@ -12,8 +12,10 @@ class UpdatableMixin:
 
     Example
     -------
+    ```python
     class MyModel(BaseDomainModel, UpdatableMixin):
         __update_fields__ = ["name", "description"]
+    ```
     """
 
     @property

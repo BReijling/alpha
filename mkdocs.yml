@@ -134,6 +134,11 @@ nav:
       - UserLifecycleMixin: reference/mixins/user_lifecycle.md
       - GroupLifecycleMixin: reference/mixins/group_lifecycle.md
       - JWTProviderMixin: reference/mixins/jwt_provider.md
+      - Models:
+        - Updatable: reference/mixins/models/updatable.md
+        - Patchable: reference/mixins/models/patchable.md
+        - ToDict: reference/mixins/models/to_dict.md
+        - FromDict: reference/mixins/models/from_dict.md
     - Providers:
       - Overview: reference/providers/index.md
       - OIDC Provider: reference/providers/oidc_provider.md
@@ -141,6 +146,7 @@ nav:
       - LDAP Provider: reference/providers/ldap_provider.md
       - AD Provider: reference/providers/ad_provider.md
       - Database Provider: reference/providers/database_provider.md
+      - Static Config Provider: reference/providers/static_provider.md
       - Models:
         - Identity Model: reference/providers/models/identity.md
         - Credentials Model: reference/providers/models/credentials.md
@@ -166,6 +172,7 @@ nav:
       - Request Headers: reference/utils/headers.md
       - Response Object: reference/utils/create_response_object.md
       - Cookie: reference/utils/cookie.md
+      - Parse to Date or Datetime: reference/utils/parse_to_datetime.md
       - Secret Generator: reference/utils/generate_secret.md
       - Attrs Instance Checker: reference/utils/is_attrs.md
       - Pydantic Instance Checker: reference/utils/is_pydantic.md

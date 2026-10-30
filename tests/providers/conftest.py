@@ -1,8 +1,10 @@
 from typing import Any
 import pytest
 
+from alpha.domain.models.user import User
 from alpha.infra.connectors.oidc_connector import OIDCConnector
 from alpha.interfaces.unit_of_work import UnitOfWork
+from alpha.providers.static_provider import StaticConfigProvider
 from alpha.providers.database_provider import DatabaseProvider
 from alpha.providers.ldap_provider import LDAPProvider, ADProvider
 from alpha.providers.models.credentials import PasswordCredentials
@@ -160,6 +162,13 @@ class FakeOIDCConnector:
         }
 
 
+class FakePasswordFactory:
+    def verify_password(
+        self, plain_password: str, hashed_password: str
+    ) -> bool:
+        return plain_password == hashed_password
+
+
 @pytest.fixture
 def search_base():
     return "ou=users,dc=example,dc=com"
@@ -267,3 +276,34 @@ def wrong_credentials():
 @pytest.fixture
 def token():
     return Token("fake_access_token")
+
+
+@pytest.fixture
+def static_users() -> list[dict[str, Any]]:
+    return [
+        {
+            "id": "1",
+            "username": "static_user_1",
+            "password": "test_password_1",
+            "display_name": "Static User 1",
+            "email": "static_user_1@example.com",
+            "groups": ["group1", "group2"],
+            "permissions": ["read", "write"],
+        },
+        {
+            "id": "2",
+            "username": "static_user_2",
+            "password": "test_password_2",
+            "display_name": "Static User 2",
+            "email": "static_user_2@example.com",
+            "groups": ["group1", "group2"],
+            "permissions": ["read", "write"],
+        },
+    ]
+
+
+@pytest.fixture
+def static_provider(static_users: list[dict[str, Any]]):
+    return StaticConfigProvider(
+        static_users=static_users, password_factory=FakePasswordFactory()
+    )

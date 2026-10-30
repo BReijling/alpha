@@ -6,6 +6,7 @@ from alpha.adapters.sqla_unit_of_work import SqlAlchemyUnitOfWork
 from alpha.factories.jwt_factory import JWTFactory
 from alpha.factories.logging_handler_factory import LoggingHandlerFactory
 from alpha.factories.model_class_factory import ModelClassFactory
+from alpha.factories.password_factory import PasswordFactory
 from alpha.domain.models.user import (
     User,
     UserWithGroupObjects,
@@ -27,7 +28,7 @@ from alpha.infra.connectors.oidc_connector import (
 )
 from alpha.infra.connectors.sql_alchemy import SqlAlchemyDatabase
 from alpha.infra.models.filter_operators import And, Or, FilterOperator
-from alpha.infra.models.json_patch import JsonPatch
+from alpha.infra.models.json_patch import JsonPatch, PatchDict, PatchOp
 from alpha.infra.models.order_by import OrderBy, Order
 from alpha.infra.models.search_filter import SearchFilter, Operator
 from alpha.interfaces.attrs_instance import AttrsInstance
@@ -75,6 +76,8 @@ from alpha.providers.oidc_provider import (
     DEFAULT_OIDC_MAPPINGS,
     DEFAULT_KEYCLOAK_MAPPINGS,
 )
+from alpha.providers.database_provider import DatabaseProvider
+from alpha.providers.static_provider import StaticConfigProvider
 from alpha.repositories.models.repository_model import RepositoryModel
 from alpha.repositories.rest_api_repository import RestApiRepository
 from alpha.repositories.sql_alchemy_repository import SqlAlchemyRepository
@@ -129,6 +132,7 @@ __all__ = [
     "JWTFactory",
     "LoggingHandlerFactory",
     "ModelClassFactory",
+    "PasswordFactory",
     "BaseDomainModel",
     "DomainModel",
     "DomainModelCovariant",
@@ -148,6 +152,8 @@ __all__ = [
     "Or",
     "FilterOperator",
     "JsonPatch",
+    "PatchDict",
+    "PatchOp",
     "OrderBy",
     "Order",
     "SearchFilter",
@@ -190,6 +196,8 @@ __all__ = [
     "KeyCloakProvider",
     "DEFAULT_OIDC_MAPPINGS",
     "DEFAULT_KEYCLOAK_MAPPINGS",
+    "DatabaseProvider",
+    "StaticConfigProvider",
     "RepositoryModel",
     "RestApiRepository",
     "SqlAlchemyRepository",

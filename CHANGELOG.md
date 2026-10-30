@@ -11,6 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The `JsonPatch` model now correctly parses boolean values from string representations.
 
+## [0.8.2] - 2026-10-29
+
+### Added
+
+- An additional implementation for the `IdentityProvider` interface has been added for the static user store. This `StaticConfigProvider` allows authentication and management of users based on a predefined set of static user data.
+
+### Changed
+
+- The `GenericTypeFactory` now correctly handles additional abstract base classes from the `collections.abc` module, mapping them to their concrete counterparts for type conversion.
+- The Dockerfile template now generates a Dockerfile which builds the application image with the appropriate user and home directory setup. Therefore, the application runs with the correct non-root permissions.
+
 ## [0.8.1] - 2026-10-24
 
 ### Fixed

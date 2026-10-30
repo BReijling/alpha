@@ -12,8 +12,10 @@ class PatchableMixin:
 
     Example
     -------
+    ```python
     class MyModel(BaseDomainModel, PatchableMixin):
         __patch_fields__ = ["name", "description"]
+    ```
     """
 
     @property
