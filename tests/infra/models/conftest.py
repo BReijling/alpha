@@ -42,6 +42,17 @@ def patch_without_string() -> list[dict[str, Any]]:
 
 
 @pytest.fixture
+def patch_with_boolean() -> list[dict[str, Any]]:
+    return [
+        {"op": "replace", "path": "/", "value": "string"},
+        {"op": "replace", "path": "/", "value": "true"},
+        {"op": "replace", "path": "/", "value": "false"},
+        {"op": "replace", "path": "/", "value": "True"},
+        {"op": "replace", "path": "/", "value": "FALSE"},
+    ]
+
+
+@pytest.fixture
 def query_clause() -> QueryClause:
     return QueryClause(field="test")
 

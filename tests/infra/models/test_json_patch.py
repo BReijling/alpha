@@ -37,3 +37,17 @@ def test_json_patch_without_string(patch_without_string):
     json_patch = JsonPatch(patch_without_string)
     patch = [patch for patch in json_patch]
     assert patch == patch_without_string
+
+
+def test_json_patch_with_boolean(patch_with_boolean):
+    json_patch = JsonPatch(patch_with_boolean)
+    patch = [patch for patch in json_patch]
+    correct_patch = [
+        {"op": "replace", "path": "/", "value": "string"},
+        {"op": "replace", "path": "/", "value": True},
+        {"op": "replace", "path": "/", "value": False},
+        {"op": "replace", "path": "/", "value": True},
+        {"op": "replace", "path": "/", "value": False},
+    ]
+
+    assert patch == correct_patch

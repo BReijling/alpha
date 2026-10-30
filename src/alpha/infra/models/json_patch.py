@@ -40,6 +40,7 @@ class JsonPatch(jsonpatch.JsonPatch):
         self.patch: list[PatchDict] = patch
         super().__init__(patch=patch, *args, **kwargs)
         self.parse_dates()
+        self.parse_booleans()
 
     def parse_dates(self) -> None:
         """Convert ISO format date strings to datetime objects in the patch"""
@@ -54,3 +55,15 @@ class JsonPatch(jsonpatch.JsonPatch):
                     continue
                 with suppress(ValueError):
                     patch["value"] = datetime.fromisoformat(value)
+
+    def parse_booleans(self) -> None:
+        """Convert string representations of booleans to actual boolean objects
+        in the patch
+        """
+        for patch in self.patch:
+            value = patch.get("value", None)
+            if isinstance(value, str):
+                if value.lower() == "true":
+                    patch["value"] = True
+                elif value.lower() == "false":
+                    patch["value"] = False
