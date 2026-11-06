@@ -42,6 +42,8 @@ from {{packageName}} import models as api_models
 {{#imports}}{{import}}  # noqa: E501
 {{/imports}}
 
+file = bytes
+
 {{#operations}}
 {{#operation}}
 {{#authMethods}}{{#-first}}@inject{{/-first}}{{/authMethods}}{{^authMethods}}{{#vendorExtensions.x-alpha-service-name}}@inject{{/vendorExtensions.x-alpha-service-name}}{{/authMethods}}
