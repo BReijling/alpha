@@ -25,4 +25,4 @@ openapi-generator-cli generate \
     --additional-properties servicePackage=${SERVICE_PACKAGE} \
     --additional-properties containerImport="${CONTAINER_IMPORT}" \
     --additional-properties initContainerFrom="${INIT_CONTAINER_FROM}" \
-    --additional-properties initContainerFunction="${INIT_CONTAINER_FUNCTION}" \
+    --additional-properties initContainerFunction="${INIT_CONTAINER_FUNCTION}"
