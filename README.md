@@ -68,8 +68,13 @@ The library contains many components. Below are a few practical examples that ma
 ### 1) API code generation using OpenAPI spec
 
 ```shell
+# Generate API code from OpenAPI specification
 alpha api gen --spec-file specification/openapi.yaml --service-package my_app
 
+# Install the generated API package in editable mode
+pip install -e ./api
+
+# Run the API server
 alpha api run --port 8080
 ```
 
